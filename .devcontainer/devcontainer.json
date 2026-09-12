@@ -1,0 +1,89 @@
+{
+  "name": "HMS Development Workspace",
+
+  "dockerComposeFile": "../docker-compose.dev.yml",
+
+  "service": "app",
+
+  "workspaceFolder": "/workspace",
+
+  "shutdownAction": "stopCompose",
+
+  "remoteUser": "vscode",
+
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "none",
+      "installMaven": true,
+      "installGradle": false
+    },
+
+    "ghcr.io/devcontainers/features/node:2": {
+      "version": "24"
+    },
+
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "version": "latest",
+      "dockerDashComposeVersion": "v2"
+    }
+  },
+
+  "forwardPorts": [
+    3000,
+    8080,
+    5432,
+    6379,
+    5672,
+    15672
+  ],
+
+  "portsAttributes": {
+    "3000": {
+      "label": "Next.js Frontend"
+    },
+
+    "8080": {
+      "label": "Spring Boot API"
+    },
+
+    "5432": {
+      "label": "PostgreSQL"
+    },
+
+    "6379": {
+      "label": "Redis"
+    },
+
+    "5672": {
+      "label": "RabbitMQ"
+    },
+
+    "15672": {
+      "label": "RabbitMQ Management"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot",
+        "redhat.vscode-xml",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "ms-azuretools.vscode-docker",
+        "mtxr.sqltools",
+        "mtxr.sqltools-driver-pg",
+        "streetsidesoftware.code-spell-checker",
+        "usernamehw.errorlens"
+      ],
+
+      "settings": {
+        "editor.formatOnSave": true,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "java.configuration.updateBuildConfiguration": "automatic"
+      }
+    }
+  }
+}

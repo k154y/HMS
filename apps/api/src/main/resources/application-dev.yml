@@ -1,0 +1,32 @@
+spring:
+
+  datasource:
+    url: jdbc:postgresql://${HMS_DB_HOST:postgres}:${HMS_DB_PORT:5432}/${HMS_DB_NAME:hotel_hms}
+    username: ${HMS_DB_USER:hotel_hms_user}
+    password: ${HMS_DB_PASSWORD:hotel_hms_password}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+    show-sql: false
+
+    properties:
+      hibernate:
+        format_sql: true
+
+  data:
+    redis:
+      host: ${HMS_REDIS_HOST:redis}
+      port: ${HMS_REDIS_PORT:6379}
+
+  rabbitmq:
+    host: ${HMS_RABBITMQ_HOST:rabbitmq}
+    port: ${HMS_RABBITMQ_PORT:5672}
+    username: ${HMS_RABBITMQ_USERNAME:hotel_hms_user}
+    password: ${HMS_RABBITMQ_PASSWORD:hotel_hms_password}
+
+logging:
+  level:
+    com.hotelmanagement.hms: DEBUG

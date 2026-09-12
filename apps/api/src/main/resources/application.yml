@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: hotel-management-api
+
+  profiles:
+    default: dev
+
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+server:
+  port: ${HMS_BACKEND_PORT:8080}
+
+hms:
+  security:
+    authentication:
+      max-failed-attempts: ${HMS_AUTH_MAX_FAILED_ATTEMPTS:5}
+      lock-minutes: ${HMS_AUTH_LOCK_MINUTES:15}
+
+    jwt:
+      secret: ${HMS_JWT_SECRET}
+      issuer: ${HMS_JWT_ISSUER:hotel-management-api}
+      access-token-minutes: ${HMS_JWT_ACCESS_TOKEN_MINUTES:15}
+      refresh-token-days: ${HMS_JWT_REFRESH_TOKEN_DAYS:30}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - metrics
+          - prometheus
+
+  endpoint:
+    health:
+      show-details: when_authorized
+
+  metrics:
+    tags:
+      application: ${spring.application.name}

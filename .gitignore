@@ -1,0 +1,68 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.iml
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+build/
+coverage/
+.turbo/
+
+# Java / Spring Boot
+target/
+.gradle/
+build/
+*.class
+
+# Maven wrapper generated files
+.mvn/wrapper/maven-wrapper.jar
+
+# Docker
+docker-data/
+*.pid
+
+# Database local files
+postgres-data/
+redis-data/
+rabbitmq-data/
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Uploaded files during local development
+uploads/
+
+# Test outputs
+test-results/
+playwright-report/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Generated reports
+reports/generated/

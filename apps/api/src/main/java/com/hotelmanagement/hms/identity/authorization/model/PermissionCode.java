@@ -1,0 +1,102 @@
+package com.hotelmanagement.hms.identity.authorization.model;
+
+/**
+ * Stable application permission codes.
+ *
+ * Every value in this enum must have a matching row in the
+ * permissions catalog created by Flyway.
+ *
+ * Permission names are security identifiers. They should not be
+ * casually renamed after deployment.
+ */
+public enum PermissionCode {
+
+    HOTEL_SETTINGS_VIEW,
+    HOTEL_SETTINGS_MANAGE,
+
+    BRANCH_VIEW,
+    BRANCH_MANAGE,
+
+    USER_VIEW,
+    USER_MANAGE,
+
+    ROLE_VIEW,
+    ROLE_MANAGE,
+
+    ROOM_VIEW,
+    ROOM_MANAGE,
+    ROOM_RATE_MANAGE,
+
+    RESERVATION_VIEW,
+    RESERVATION_CREATE,
+    RESERVATION_MODIFY,
+    RESERVATION_CANCEL,
+
+    CHECKIN_PERFORM,
+    CHECKOUT_PERFORM,
+
+    CUSTOMER_VIEW,
+    CUSTOMER_MANAGE,
+
+    FOLIO_VIEW,
+    FOLIO_MANAGE,
+    FOLIO_TRANSFER,
+
+    ORDER_VIEW,
+    ORDER_CREATE,
+    ORDER_MODIFY,
+    ORDER_SEND,
+    ORDER_VOID,
+
+    KITCHEN_VIEW,
+    KITCHEN_UPDATE,
+
+    BAR_VIEW,
+    BAR_UPDATE,
+
+    PAYMENT_VIEW,
+    PAYMENT_RECORD,
+    PAYMENT_REFUND,
+    PAYMENT_VOID,
+
+    CASHIER_SHIFT_OPEN,
+    CASHIER_SHIFT_CLOSE,
+    CASHIER_RECONCILE,
+
+    EXCHANGE_RATE_VIEW,
+    EXCHANGE_RATE_MANAGE,
+
+    DISCOUNT_APPLY,
+    DISCOUNT_APPROVE,
+    COMPLIMENTARY_APPROVE,
+
+    CREDIT_VIEW,
+    CREDIT_MANAGE,
+    CREDIT_APPROVE,
+
+    PRODUCT_VIEW,
+    PRODUCT_MANAGE,
+
+    INVENTORY_VIEW,
+    INVENTORY_ADJUST,
+    INVENTORY_TRANSFER,
+
+    PURCHASE_VIEW,
+    PURCHASE_CREATE,
+    PURCHASE_APPROVE,
+    PURCHASE_RECEIVE,
+
+    VENDOR_VIEW,
+    VENDOR_MANAGE,
+
+    HOUSEKEEPING_VIEW,
+    HOUSEKEEPING_UPDATE,
+
+    MAINTENANCE_VIEW,
+    MAINTENANCE_MANAGE,
+
+    REPORT_VIEW,
+    FINANCIAL_REPORT_VIEW,
+
+    AUDIT_VIEW
+}
