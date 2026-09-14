@@ -2,7 +2,7 @@ $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot
 $accounts=Get-Content (Join-Path $root '.env.test-accounts.json') -Raw|ConvertFrom-Json
 $run=(Get-Content (Join-Path $root 'docs/testing/operational-test-results.json') -Raw|ConvertFrom-Json).run
-$base='http://localhost:18081/api/v1'
+$base='http://localhost:8081/api/v1'
 function Request($method,$path,$token,$body){$p=@{Uri="$base$path";Method=$method;ContentType='application/json';TimeoutSec=30};if($token){$p.Headers=@{Authorization="Bearer $token"}};if($null-ne$body){$p.Body=$body|ConvertTo-Json -Depth 8};Invoke-RestMethod @p}
 function Token($role){$a=$accounts.accounts|Where-Object role -eq $role;(Request POST /auth/login $null @{email=$a.email;password=$a.password}).accessToken}
 $owner=Token OWNER;$bar=Token BARTENDER;$waiter=Token WAITER
