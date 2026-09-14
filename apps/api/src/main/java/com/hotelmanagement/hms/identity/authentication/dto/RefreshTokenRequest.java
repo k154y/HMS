@@ -9,4 +9,5 @@ public record RefreshTokenRequest(
         @Size(max = 500)
         String refreshToken
 ) {
+    @Override public String toString() { return "RefreshTokenRequest[REDACTED]"; }
 }

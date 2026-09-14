@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.OffsetDateTime;
+import java.util.Locale;
 import java.util.UUID;
 
 @Entity
@@ -66,7 +67,7 @@ public class UserAccount {
     @Column(
             name = "status",
             nullable = false,
-            length = 30
+            length = 20
     )
     private UserStatus status;
 
@@ -106,38 +107,65 @@ public class UserAccount {
     }
 
     /**
-     * Creates an active HMS identity.
+     * Creates an active user account.
      *
-     * The supplied password must already be securely hashed by the
-     * identity service before reaching this persistence model.
+     * passwordHash must already have been produced by the
+     * application's PasswordEncoder.
+     *
+     * Plaintext passwords must never reach this entity.
      */
     public static UserAccount create(
             String email,
-            String normalizedEmail,
             String passwordHash,
             String fullName,
             String phone,
             String preferredLanguage,
             OffsetDateTime createdAt) {
 
-        UserAccount user = new UserAccount();
+        if (createdAt == null) {
+            throw new IllegalArgumentException(
+                    "Account creation time is required.");
+        }
 
-        user.email = email;
-        user.normalizedEmail = normalizedEmail;
-        user.passwordHash = passwordHash;
-        user.fullName = fullName;
-        user.phone = phone;
-        user.preferredLanguage = preferredLanguage;
+        UserAccount user =
+                new UserAccount();
 
-        user.status = UserStatus.ACTIVE;
+        user.setInitialEmail(email);
+
+        user.passwordHash =
+                requireText(
+                        passwordHash,
+                        "Password hash is required.");
+
+        user.fullName =
+                requireText(
+                        fullName,
+                        "Full name is required.");
+
+        user.phone =
+                trimToNull(phone);
+
+        user.preferredLanguage =
+                requireText(
+                        preferredLanguage,
+                        "Preferred language is required.")
+                        .toLowerCase(Locale.ROOT);
+
+        user.status =
+                UserStatus.ACTIVE;
 
         user.failedLoginAttempts = 0;
         user.lockedUntil = null;
         user.lastLoginAt = null;
 
-        user.passwordChangedAt = createdAt;
-        user.createdAt = createdAt;
-        user.updatedAt = createdAt;
+        user.passwordChangedAt =
+                createdAt;
+
+        user.createdAt =
+                createdAt;
+
+        user.updatedAt =
+                createdAt;
 
         return user;
     }
@@ -200,105 +228,241 @@ public class UserAccount {
 
     public void setEmail(
             String email,
-            String normalizedEmail,
             OffsetDateTime updatedAt) {
 
-        this.email = email;
-        this.normalizedEmail = normalizedEmail;
-        this.updatedAt = updatedAt;
+        this.email =
+                normalizeEmail(email);
+
+        this.normalizedEmail =
+                normalizeEmail(email);
+
+        touch(updatedAt);
     }
 
     public void setFullName(
             String fullName,
             OffsetDateTime updatedAt) {
 
-        this.fullName = fullName;
-        this.updatedAt = updatedAt;
+        this.fullName =
+                requireText(
+                        fullName,
+                        "Full name is required.");
+
+        touch(updatedAt);
     }
 
     public void setPhone(
             String phone,
             OffsetDateTime updatedAt) {
 
-        this.phone = phone;
-        this.updatedAt = updatedAt;
+        this.phone =
+                trimToNull(phone);
+
+        touch(updatedAt);
     }
 
     public void setPreferredLanguage(
             String preferredLanguage,
             OffsetDateTime updatedAt) {
 
-        this.preferredLanguage = preferredLanguage;
-        this.updatedAt = updatedAt;
+        this.preferredLanguage =
+                requireText(
+                        preferredLanguage,
+                        "Preferred language is required.")
+                        .toLowerCase(Locale.ROOT);
+
+        touch(updatedAt);
     }
 
     /**
-     * Replaces the password hash after a successful password change
-     * or administrative reset.
+     * Changes the encoded password.
+     *
+     * A password reset also clears temporary failed-login locking.
+     * It does not reactivate an administratively DISABLED account.
      */
     public void changePassword(
             String passwordHash,
             OffsetDateTime changedAt) {
 
-        this.passwordHash = passwordHash;
-        this.passwordChangedAt = changedAt;
-        this.updatedAt = changedAt;
+        this.passwordHash =
+                requireText(
+                        passwordHash,
+                        "Password hash is required.");
 
-        /*
-         * A successful password reset also clears temporary
-         * failed-login lock state.
-         */
+        this.passwordChangedAt =
+                requireTimestamp(
+                        changedAt,
+                        "Password change time is required.");
+
         this.failedLoginAttempts = 0;
         this.lockedUntil = null;
 
-        if (this.status == UserStatus.LOCKED) {
-            this.status = UserStatus.ACTIVE;
+        if (status == UserStatus.LOCKED) {
+            status = UserStatus.ACTIVE;
         }
+
+        touch(changedAt);
     }
 
     public void recordSuccessfulLogin(
             OffsetDateTime loginAt) {
 
-        this.lastLoginAt = loginAt;
+        this.lastLoginAt =
+                requireTimestamp(
+                        loginAt,
+                        "Login time is required.");
+
         this.failedLoginAttempts = 0;
         this.lockedUntil = null;
 
-        if (this.status == UserStatus.LOCKED) {
-            this.status = UserStatus.ACTIVE;
-        }
-
-        this.updatedAt = loginAt;
+        touch(loginAt);
     }
 
     public void recordFailedLogin(
-            OffsetDateTime updatedAt) {
+            OffsetDateTime attemptedAt) {
+
+        requireTimestamp(
+                attemptedAt,
+                "Login attempt time is required.");
 
         this.failedLoginAttempts++;
-        this.updatedAt = updatedAt;
+
+        touch(attemptedAt);
     }
 
     public void lockUntil(
             OffsetDateTime lockedUntil,
             OffsetDateTime updatedAt) {
 
-        this.status = UserStatus.LOCKED;
-        this.lockedUntil = lockedUntil;
-        this.updatedAt = updatedAt;
+        OffsetDateTime normalizedUpdatedAt =
+                requireTimestamp(
+                        updatedAt,
+                        "Update time is required.");
+
+        OffsetDateTime normalizedLockedUntil =
+                requireTimestamp(
+                        lockedUntil,
+                        "Lock expiration time is required.");
+
+        if (!normalizedLockedUntil
+                .isAfter(normalizedUpdatedAt)) {
+
+            throw new IllegalArgumentException(
+                    "Lock expiration must be "
+                            + "after the current time.");
+        }
+
+        this.status =
+                UserStatus.LOCKED;
+
+        this.lockedUntil =
+                normalizedLockedUntil;
+
+        touch(normalizedUpdatedAt);
     }
 
+    /**
+     * Administrative/security disable.
+     *
+     * Disabled accounts remain disabled until explicitly activated.
+     */
     public void disable(
             OffsetDateTime updatedAt) {
 
-        this.status = UserStatus.DISABLED;
-        this.updatedAt = updatedAt;
+        this.status =
+                UserStatus.DISABLED;
+
+        this.lockedUntil = null;
+
+        touch(updatedAt);
     }
 
+    /**
+     * Activates or reactivates the account.
+     *
+     * Also resets login lock counters.
+     */
     public void activate(
             OffsetDateTime updatedAt) {
 
-        this.status = UserStatus.ACTIVE;
+        this.status =
+                UserStatus.ACTIVE;
+
         this.failedLoginAttempts = 0;
         this.lockedUntil = null;
-        this.updatedAt = updatedAt;
+
+        touch(updatedAt);
+    }
+
+    private void setInitialEmail(
+            String email) {
+
+        String normalized =
+                normalizeEmail(email);
+
+        this.email =
+                normalized;
+
+        this.normalizedEmail =
+                normalized;
+    }
+
+    private void touch(
+            OffsetDateTime updatedAt) {
+
+        this.updatedAt =
+                requireTimestamp(
+                        updatedAt,
+                        "Update time is required.");
+    }
+
+    private static String normalizeEmail(
+            String email) {
+
+        return requireText(
+                email,
+                "Email is required.")
+                .toLowerCase(Locale.ROOT);
+    }
+
+    private static String requireText(
+            String value,
+            String errorMessage) {
+
+        if (value == null
+                || value.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    errorMessage);
+        }
+
+        return value.trim();
+    }
+
+    private static OffsetDateTime requireTimestamp(
+            OffsetDateTime value,
+            String errorMessage) {
+
+        if (value == null) {
+            throw new IllegalArgumentException(
+                    errorMessage);
+        }
+
+        return value;
+    }
+
+    private static String trimToNull(
+            String value) {
+
+        if (value == null) {
+            return null;
+        }
+
+        String trimmed =
+                value.trim();
+
+        return trimmed.isEmpty()
+                ? null
+                : trimmed;
     }
 }

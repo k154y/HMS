@@ -1,0 +1,1 @@
+package com.hotelmanagement.hms.maintenance.dto; import com.hotelmanagement.hms.maintenance.model.*; import jakarta.validation.constraints.*; import java.util.*; public record MaintenanceRequest(UUID roomId,@NotBlank @Size(max=2000) String issue,@NotNull MaintenancePriority priority) {}

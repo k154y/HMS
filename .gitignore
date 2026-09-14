@@ -23,6 +23,7 @@ pnpm-debug.log*
 # Node / Next.js
 node_modules/
 .next/
+.next-before-css-fix/
 out/
 dist/
 build/
@@ -66,3 +67,13 @@ playwright-report/
 
 # Generated reports
 reports/generated/
+
+# Recoverable local cleanup archive and IDE outputs
+.local/
+apps/api/bin/
+*.tsbuildinfo
+# Share examples, never local credentials
+!.env.*.example
+.env
+.run/
+apps/web/.env.local

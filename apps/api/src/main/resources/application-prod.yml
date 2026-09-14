@@ -29,7 +29,12 @@ spring:
     password: ${HMS_RABBITMQ_PASSWORD}
 
 server:
-  forward-headers-strategy: framework
+  forward-headers-strategy: none
+
+hms:
+  security:
+    api:
+      allowed-origins: ${HMS_ALLOWED_ORIGINS}
 
 logging:
   level:

@@ -1,0 +1,1 @@
+package com.hotelmanagement.hms.credit.dto; import jakarta.validation.constraints.*; import java.math.*; import java.util.*; public record CreditRequest(@NotNull UUID customerId,@NotNull @DecimalMin("0.0001") BigDecimal amount,@NotBlank String description,UUID sourceId){}

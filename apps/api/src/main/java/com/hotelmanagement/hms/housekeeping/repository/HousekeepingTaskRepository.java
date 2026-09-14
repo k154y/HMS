@@ -1,0 +1,1 @@
+package com.hotelmanagement.hms.housekeeping.repository; import com.hotelmanagement.hms.housekeeping.model.*; import org.springframework.data.jpa.repository.*; import java.util.*; public interface HousekeepingTaskRepository extends JpaRepository<HousekeepingTask,UUID>{Optional<HousekeepingTask> findByIdAndHotelIdAndBranchId(UUID id,UUID h,UUID b);}

@@ -1,0 +1,1 @@
+package com.hotelmanagement.hms.order.repository; import com.hotelmanagement.hms.order.model.*; import org.springframework.data.jpa.repository.*; import java.util.*; public interface OrderItemRepository extends JpaRepository<OrderItem,UUID>{List<OrderItem> findByOrderIdAndHotelIdAndBranchId(UUID o,UUID h,UUID b);}

@@ -1,0 +1,62 @@
+[
+  {
+    "path": "apps/web-legacy",
+    "files": 27,
+    "bytes": 66637.0
+  },
+  {
+    "path": "apps/web/app/generated",
+    "files": 39,
+    "bytes": 3371198.0
+  },
+  {
+    "path": "apps/web/.next-before-css-fix",
+    "files": 98,
+    "bytes": 233753604.0
+  },
+  {
+    "path": "apps/web/messages",
+    "files": 3,
+    "bytes": 1542.0
+  },
+  {
+    "path": "apps/web/lib/api.ts",
+    "files": 1,
+    "bytes": 965.0
+  },
+  {
+    "path": "apps/web/lib/spring.ts",
+    "files": 1,
+    "bytes": 578.0
+  },
+  {
+    "path": "apps/web/lib/translate.ts",
+    "files": 1,
+    "bytes": 278.0
+  },
+  {
+    "path": "apps/api/bin",
+    "files": 5,
+    "bytes": 9504.0
+  },
+  {
+    "path": "infra/docker",
+    "files": 0,
+    "bytes": null
+  },
+  {
+    "path": "infra/monitoring",
+    "files": 0,
+    "bytes": null
+  },
+  {
+    "path": "infra/nginx",
+    "files": 0,
+    "bytes": null
+  },
+  {
+    "path": ".github",
+    "files": 0,
+    "bytes": null
+  }
+]

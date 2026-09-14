@@ -13,7 +13,9 @@ public record HotelMembershipResponse(
         HotelMembershipStatus status,
         boolean allBranches,
         OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        OffsetDateTime updatedAt,
+        String fullName,
+        String email
 ) {
 
     public static HotelMembershipResponse from(
@@ -26,7 +28,7 @@ public record HotelMembershipResponse(
                 membership.getStatus(),
                 membership.hasAllBranches(),
                 membership.getCreatedAt(),
-                membership.getUpdatedAt()
+                membership.getUpdatedAt(),membership.getUser().getFullName(),membership.getUser().getEmail()
         );
     }
 }

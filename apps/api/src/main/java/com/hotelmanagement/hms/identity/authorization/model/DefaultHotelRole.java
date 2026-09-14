@@ -14,6 +14,8 @@ public enum DefaultHotelRole {
     MANAGER(
             "Manager",
             "Hotel manager responsible for broad operational control.",
+            PermissionCode.CASHIER_SHIFT_OPEN,
+            PermissionCode.CASHIER_SHIFT_CLOSE,
             PermissionCode.HOTEL_SETTINGS_VIEW,
             PermissionCode.HOTEL_SETTINGS_MANAGE,
 
@@ -102,6 +104,8 @@ public enum DefaultHotelRole {
     ACCOUNTANT(
             "Accountant",
             "Accounting and financial operations role.",
+            PermissionCode.CASHIER_SHIFT_OPEN,
+            PermissionCode.CASHIER_SHIFT_CLOSE,
             PermissionCode.HOTEL_SETTINGS_VIEW,
             PermissionCode.BRANCH_VIEW,
             PermissionCode.USER_VIEW,
@@ -130,6 +134,8 @@ public enum DefaultHotelRole {
             PermissionCode.CREDIT_APPROVE,
 
             PermissionCode.PRODUCT_VIEW,
+            PermissionCode.PRODUCT_MANAGE,
+            PermissionCode.INVENTORY_ADJUST,
             PermissionCode.INVENTORY_VIEW,
 
             PermissionCode.PURCHASE_VIEW,
@@ -201,6 +207,11 @@ public enum DefaultHotelRole {
             "Waiter",
             "Food and beverage service role responsible for customer orders.",
             PermissionCode.BRANCH_VIEW,
+            PermissionCode.CUSTOMER_VIEW,
+            PermissionCode.CUSTOMER_MANAGE,
+            PermissionCode.FOLIO_VIEW,
+            PermissionCode.PRODUCT_VIEW,
+            PermissionCode.PAYMENT_RECORD,
 
             PermissionCode.ORDER_VIEW,
             PermissionCode.ORDER_CREATE,
@@ -309,6 +320,8 @@ public enum DefaultHotelRole {
     SUPERVISOR(
             "Supervisor",
             "Operational supervisory role with elevated day-to-day controls.",
+            PermissionCode.CASHIER_SHIFT_OPEN,
+            PermissionCode.CASHIER_SHIFT_CLOSE,
             PermissionCode.BRANCH_VIEW,
 
             PermissionCode.ROOM_VIEW,
@@ -400,3 +413,5 @@ public enum DefaultHotelRole {
         return permissions;
     }
 }
+
+

@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@layer base {
+  *, ::before, ::after { border-color: #e2e8f0; }
+  button, input, select, textarea { font: inherit; }
+  :focus-visible { outline: 2px solid #2563eb; outline-offset: 3px; }
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button:not(:disabled), a, select { cursor: pointer; }
+input[type="checkbox"] { accent-color: #2563eb; width: 1rem; height: 1rem; }
+table { font-variant-numeric: tabular-nums; }
+::selection { background: #dbeafe; color: #1e3a8a; }
+
+@media print {
+  aside, body > div > header, main ~ header { display: none !important; }
+  header[role="banner"], body header:has(select[aria-label]) { display: none !important; }
+  html, body, main { height: auto !important; overflow: visible !important; background: white !important; }
+  body .h-screen { height: auto !important; overflow: visible !important; }
+  body .overflow-hidden, body .overflow-y-auto { overflow: visible !important; }
+  table { font-size: 10pt; }
+  tr { break-inside: avoid; }
+  thead { display: table-header-group; }
+  a { color: inherit; text-decoration: none; }
+}

@@ -1,0 +1,26 @@
+{
+  "translations": {
+    "keys": 389,
+    "status": "PASS",
+    "literalUiKeys": 215,
+    "languages": [
+      "en",
+      "fr",
+      "rw"
+    ]
+  },
+  "roomContract": {
+    "errors": 0,
+    "failures": 0,
+    "tests": 1
+  },
+  "checkedAt": "2026-09-13T20:39:30.9745637Z",
+  "frontendTypecheck": "PASS after cleanup",
+  "backendSuite": {
+    "errors": 0,
+    "failures": 0,
+    "tests": 29,
+    "source": "apps/api/target/latest-tests.log"
+  },
+  "frontendProductionBuild": "PASS: Next.js production compilation, type validation and 30 generated pages"
+}

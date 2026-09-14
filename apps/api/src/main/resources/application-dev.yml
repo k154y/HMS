@@ -1,5 +1,4 @@
 spring:
-
   datasource:
     url: jdbc:postgresql://${HMS_DB_HOST:postgres}:${HMS_DB_PORT:5432}/${HMS_DB_NAME:hotel_hms}
     username: ${HMS_DB_USER:hotel_hms_user}
@@ -26,6 +25,7 @@ spring:
     port: ${HMS_RABBITMQ_PORT:5672}
     username: ${HMS_RABBITMQ_USERNAME:hotel_hms_user}
     password: ${HMS_RABBITMQ_PASSWORD:hotel_hms_password}
+
 
 logging:
   level:

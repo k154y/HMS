@@ -1,0 +1,100 @@
+[
+  {
+    "role": "SUPER_ADMIN",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "OWNER",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "AUDITOR",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "CASHIER",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "RECEPTIONIST",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "ACCOUNTANT",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "MANAGER",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "STOREKEEPER",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "MAINTENANCE",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "WAITER",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "SUPERVISOR",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "HOUSEKEEPER",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "BARTENDER",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "KITCHEN_STAFF",
+    "webLogin": "PASS",
+    "session": "PASS",
+    "pageHttpStatus": 200,
+    "platformBoundary": "PASS"
+  }
+]

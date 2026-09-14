@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface RoleRepository
         extends JpaRepository<Role, UUID> {
 
+    org.springframework.data.domain.Page<Role> findByHotel_Id(UUID hotelId, org.springframework.data.domain.Pageable pageable);
+
     Optional<Role> findByIdAndHotel_Id(
             UUID roleId,
             UUID hotelId

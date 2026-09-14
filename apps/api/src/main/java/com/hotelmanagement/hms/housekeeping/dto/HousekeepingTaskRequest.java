@@ -1,0 +1,1 @@
+package com.hotelmanagement.hms.housekeeping.dto; import jakarta.validation.constraints.*; import java.time.*; import java.util.*; public record HousekeepingTaskRequest(@NotNull UUID roomId,UUID assignedUserId,@NotNull LocalDate taskDate,String notes){}

@@ -1,0 +1,86 @@
+[
+  {
+    "role": "SUPER_ADMIN",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "OWNER",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "AUDITOR",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "CASHIER",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "RECEPTIONIST",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "ACCOUNTANT",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "MANAGER",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "STOREKEEPER",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "MAINTENANCE",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "WAITER",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "SUPERVISOR",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "HOUSEKEEPER",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "BARTENDER",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  },
+  {
+    "role": "KITCHEN_STAFF",
+    "login": "PASS",
+    "profile": "PASS",
+    "platformBoundary": "PASS"
+  }
+]

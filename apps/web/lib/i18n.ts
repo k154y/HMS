@@ -1,0 +1,457 @@
+export const locales=["en","fr","rw"] as const;
+export type Locale=(typeof locales)[number];
+const rows=`
+HotelPro — Hotel Management System|HotelPro — Système de gestion hôtelière|HotelPro — Sisitemu yo gucunga hoteli
+Dashboard|Tableau de bord|Incamake
+Overview|Vue d'ensemble|Incamake rusange
+Rooms & Guests|Chambres et clients|Ibyumba n'abashyitsi
+Food & Beverage|Restauration|Ibiribwa n'ibinyobwa
+Inventory|Inventaire|Ububiko
+Finance|Finances|Imari
+Operations|Opérations|Ibikorwa
+Administration|Administration|Ubuyobozi
+Management System|Système de gestion|Sisitemu y'imicungire
+Rooms|Chambres|Ibyumba
+Room|Chambre|Icyumba
+Room types|Types de chambres|Ubwoko bw'ibyumba
+Room type|Type de chambre|Ubwoko bw'icyumba
+Room number|Numéro de chambre|Nimero y'icyumba
+Manage rooms|Gérer les chambres|Gucunga ibyumba
+Manage room types|Gérer les types de chambres|Gucunga ubwoko bw'ibyumba
+Reservations|Réservations|Kubika ibyumba
+New reservation|Nouvelle réservation|Kubika icyumba
+Choose dates first|Choisir les dates d'abord|Banza uhitemo amatariki
+Check-in date|Date d'arrivée|Itariki yo kwinjira
+Check-out date|Date de départ|Itariki yo gusohoka
+Check availability|Vérifier la disponibilité|Reba ibyumba biboneka
+Person or company|Personne ou entreprise|Umuntu cyangwa ikigo
+Create customer or company|Créer un client ou une entreprise|Andika umukiriya cyangwa ikigo
+Capacity|Capacité|Umubare w'abantu
+Adults|Adultes|Abakuru
+Children|Enfants|Abana
+Preview reservation|Aperçu de la réservation|Reba amakuru yo kubika
+Confirm reservation|Confirmer la réservation|Emeza kubika icyumba
+Reservation confirmed|Réservation confirmée|Kubika icyumba byemejwe
+No rooms available for these dates|Aucune chambre disponible à ces dates|Nta byumba biboneka kuri ayo matariki
+Calendar start|Début du calendrier|Intangiriro y'ingengabihe
+Select an available day to start a reservation|Choisissez un jour disponible pour réserver|Hitamo umunsi icyumba kiboneka kugira ngo ubike
+Available|Disponible|Kiraboneka
+Reserved|Réservée|Cyabitswe
+Unavailable|Indisponible|Ntikiboneka
+Dates|Dates|Amatariki
+Cancel reservation|Annuler la réservation|Hagarika kubika icyumba
+Check In|Arrivée|Kwinjira
+Check Out|Départ|Gusohoka
+Confirm check-in|Confirmer l'arrivée|Emeza kwinjira
+Confirm check-out|Confirmer le départ|Emeza gusohoka
+Guest Folios|Comptes clients|Konti z'abakiriya
+Open customer folio|Ouvrir le compte client|Fungura konti y'umukiriya
+Folio|Compte client|Konti y'umukiriya
+Customer|Client|Umukiriya
+Customers|Clients|Abakiriya
+Customer type|Type de client|Ubwoko bw'umukiriya
+Select customer|Choisir un client|Hitamo umukiriya
+POS / Orders|Caisse / Commandes|Kugurisha / Ibyatumijwe
+Product|Produit|Igicuruzwa
+Select product|Choisir un produit|Hitamo igicuruzwa
+Quantity|Quantité|Ingano
+Item total|Total de l'article|Igiteranyo cy'igicuruzwa
+Confirm item|Confirmer l'article|Emeza igicuruzwa
+Cart|Panier|Ibyatoranyijwe
+Grand total|Total général|Igiteranyo rusange
+Remove|Retirer|Kuramo
+Preview order|Aperçu de la commande|Reba ibyatumijwe
+Confirm order for|Confirmer la commande pour|Emeza ibyo umukiriya atumije
+Confirm and send|Confirmer et envoyer|Emeza wohereze
+Order history|Historique des commandes|Amateka y'ibyatumijwe
+Mark served|Marquer comme servi|Emeza ko byatanzwe
+Void order|Annuler la commande|Hagarika ibyatumijwe
+Order sent|Commande envoyée|Ibyatumijwe byoherejwe
+Preparation queue|File de préparation|Ibyategurwa
+Kitchen|Cuisine|Igikoni
+Start preparation|Commencer la préparation|Tangira gutegura
+Mark ready|Marquer comme prêt|Emeza ko byateguwe
+Stock|Stock|Ububiko
+Products and stock|Produits et stock|Ibicuruzwa n'ububiko
+Stock movements|Mouvements de stock|Impinduka mu bubiko
+Movement type|Type de mouvement|Ubwoko bw'impinduka
+Confirm stock movement|Confirmer le mouvement|Emeza impinduka mu bubiko
+Reason|Motif|Impamvu
+Purchasing|Achats|Kugura
+Vendor|Fournisseur|Umutanga w'ibicuruzwa
+Vendors|Fournisseurs|Abatanga ibicuruzwa
+Select vendor|Choisir un fournisseur|Hitamo utanga ibicuruzwa
+Reference|Référence|Inomero iranga
+Purchase unit price|Prix unitaire d'achat|Igiciro cyo kugura kimwe
+Add item|Ajouter un article|Ongeramo igicuruzwa
+Create purchase|Créer un achat|Andika igurwa
+Receive goods|Réceptionner les marchandises|Akira ibicuruzwa
+Pay vendor|Payer le fournisseur|Ishyura uwatanze ibicuruzwa
+Total|Total|Igiteranyo
+Paid|Payé|Byishyuwe
+Balance|Solde|Asigaye
+Actions|Actions|Ibikorwa
+Amount|Montant|Amafaranga
+Payment method|Mode de paiement|Uburyo bwo kwishyura
+Confirm payment|Confirmer le paiement|Emeza ubwishyu
+Cashier|Caissier|Umubitsi
+Payment approvals|Approbations des paiements|Kwemeza ubwishyu
+Approve|Approuver|Emeza
+Reject|Rejeter|Wange
+Transactions by payment method|Transactions par mode de paiement|Ubwishyu hakurikijwe uburyo
+From|Du|Kuva
+To|Au|Kugeza
+Search|Rechercher|Shakisha
+Refund|Rembourser|Subiza amafaranga
+Payment covers|Objet du paiement|Ubwishyu bureba
+Food and services|Restauration et services|Ibiribwa na serivisi
+Room charges|Frais de chambre|Amafaranga y'icyumba
+Split payment|Paiement fractionné|Kwishyura mu buryo butandukanye
+Add payment method|Ajouter un mode de paiement|Ongeramo uburyo bwo kwishyura
+Payment total|Total du paiement|Igiteranyo cy'ubwishyu
+Remaining after approval|Solde après approbation|Asigaye nyuma yo kwemeza
+Confirm payment for approval|Soumettre le paiement à approbation|Ohereza ubwishyu kugira ngo bwemezwe
+Payment pending approval|Paiement en attente d'approbation|Ubwishyu butegereje kwemezwa
+Credit Customers|Clients à crédit|Abakiriya bafite amadeni
+View ledger|Voir le grand livre|Reba inyandiko z'imari
+Approve credit|Approuver le crédit|Emeza ideni
+Settle balance|Régler le solde|Ishyura asigaye
+Credit ledger|Grand livre des crédits|Inyandiko z'amadeni
+Reports|Rapports|Raporo
+Report|Rapport|Raporo
+Sales|Ventes|Ibyagurishijwe
+Financial|Financier|Imari
+Generate report|Générer le rapport|Kora raporo
+Housekeeping|Entretien des chambres|Isuku y'ibyumba
+Select room|Choisir une chambre|Hitamo icyumba
+Assigned to|Assigné à|Ushinzwe
+Unassigned|Non assigné|Ntawe uragenerwa
+Date|Date|Itariki
+Notes|Notes|Ibisobanuro
+Create task|Créer une tâche|Tanga umurimo
+Start task|Commencer la tâche|Tangira umurimo
+Mark complete|Marquer comme terminé|Emeza ko byarangiye
+Code|Code|Kode
+Name|Nom|Izina
+Full name|Nom complet|Amazina yose
+Email|E-mail|Imeyili
+Phone|Téléphone|Telefoni
+Address|Adresse|Aderesi
+Tax number|Numéro fiscal|Nimero y'imisoro
+Active|Actif|Irakora
+Payment terms (days)|Délai de paiement (jours)|Igihe cyo kwishyura (iminsi)
+SKU|Référence produit|Kode y'igicuruzwa
+Category|Catégorie|Icyiciro
+Purchase unit|Unité d'achat|Igipimo cyo kugura
+Selling unit|Unité de vente|Igipimo cyo kugurisha
+Stock unit|Unité de stock|Igipimo cyo kubika
+Stock units per purchase unit|Unités de stock par unité d'achat|Ibipimo byo kubika muri kimwe kiguzwe
+Stock units per selling unit|Unités de stock par unité vendue|Ibipimo byo kubika muri kimwe kigurishijwe
+Purchase price|Prix d'achat|Igiciro cyo kugura
+Selling price|Prix de vente|Igiciro cyo kugurisha
+Tax rate (0–1)|Taux de taxe (0–1)|Igipimo cy'umusoro (0–1)
+Reorder level|Seuil de réapprovisionnement|Ingano yo kongera kugura
+Destination|Destination|Aho bijya
+Track stock|Suivre le stock|Kurikirana ububiko
+Sellable|Vendable|Kiragurishwa
+Purchasable|Achetable|Kiragurwa
+Description|Description|Ibisobanuro
+Standard occupancy|Occupation standard|Umubare usanzwe w'abantu
+Maximum adults|Maximum d'adultes|Abakuru ntarengwa
+Maximum children|Maximum d'enfants|Abana ntarengwa
+Nightly rate|Tarif par nuit|Igiciro cy'ijoro
+Floor|Étage|Igorofa
+Beds|Lits|Ibitanda
+Bed type|Type de lit|Ubwoko bw'igitanda
+Bed dimensions|Dimensions du lit|Ingano y'igitanda
+Create record|Créer une fiche|Andika amakuru
+Select|Choisir|Hitamo
+Save|Enregistrer|Bika
+Saving|Enregistrement|Birabikwa
+Saved|Enregistré|Byabitswe
+Yes|Oui|Yego
+No|Non|Oya
+Details|Détails|Amakuru arambuye
+No records found|Aucun enregistrement|Nta makuru yabonetse
+Loading|Chargement|Birimo gufunguka
+Status|Statut|Imiterere
+Currency|Devise|Ifaranga
+Type|Type|Ubwoko
+Maintenance|Maintenance|Gusana
+Issue|Problème|Ikibazo
+Priority|Priorité|Icyihutirwa
+Cancel|Annuler|Hagarika
+Staff|Personnel|Abakozi
+Initial password|Mot de passe initial|Ijambo ry'ibanga rya mbere
+Language|Langue|Ururimi
+All branches|Toutes les agences|Amashami yose
+Role|Rôle|Inshingano
+Assign role|Attribuer le rôle|Tanga inshingano
+Remove role|Retirer le rôle|Kuraho inshingano
+Suspend account|Suspendre le compte|Hagarika konti
+Activate account|Activer le compte|Fungura konti
+Audit Trail|Journal d'audit|Inyandiko z'igenzura
+Action|Action|Igikorwa
+Entity|Entité|Ikirebwa
+User|Utilisateur|Umukoresha
+Request|Requête|Icyifuzo
+Settings|Paramètres|Igenamiterere
+Legal name|Raison sociale|Izina ryemewe
+Hotel name|Nom de l'hôtel|Izina rya hoteli
+Time zone|Fuseau horaire|Igihe cy'akarere
+Save settings|Enregistrer les paramètres|Bika igenamiterere
+Expenses|Dépenses|Ibyasohotse
+Record expense|Enregistrer la dépense|Andika amafaranga yasohotse
+Expense ledger|Grand livre des dépenses|Inyandiko z'ibyashowe
+Cashier shifts|Services de caisse|Ibihe by'akazi k'umubitsi
+Opening float|Fonds de caisse initial|Amafaranga yo gutangirana
+Open shift|Ouvrir le service|Tangira igihe cy'akazi
+Counted cash|Espèces comptées|Amafaranga yabazwe
+Close shift|Clôturer le service|Soza igihe cy'akazi
+Expected cash|Espèces attendues|Amafaranga ateganyijwe
+Difference|Écart|Ikinyuranyo
+Reconcile|Rapprocher|Huza inyandiko z'imari
+Rooms ready|Chambres prêtes|Ibyumba biteguye
+Expected arrivals|Arrivées attendues|Abategerejwe kwinjira
+Expected departures|Départs attendus|Abategerejwe gusohoka
+Open orders|Commandes en cours|Ibyatumijwe bitararangira
+Outstanding balance|Solde impayé|Amafaranga atarishyurwa
+Pending payment approvals|Paiements à approuver|Ubwishyu bwo kwemeza
+Sign out|Se déconnecter|Sohoka
+Welcome back|Bon retour|Murakaza neza
+Sign in to your staff account|Connectez-vous à votre compte|Injira muri konti yawe
+Password|Mot de passe|Ijambo ry'ibanga
+Enter your email|Saisissez votre e-mail|Andika imeyili yawe
+Enter your password|Saisissez votre mot de passe|Andika ijambo ry'ibanga
+Signing in...|Connexion...|Birimo kwinjira...
+Sign In|Se connecter|Injira
+Use the email and password provided by your administrator.|Utilisez les identifiants fournis par votre administrateur.|Koresha imeyili n'ijambo ry'ibanga wahawe n'umuyobozi.
+Invalid email or password.|E-mail ou mot de passe incorrect.|Imeyili cyangwa ijambo ry'ibanga si byo.
+An error occurred. Please try again.|Une erreur est survenue. Réessayez.|Habaye ikibazo. Ongera ugerageze.
+Show password|Afficher le mot de passe|Erekana ijambo ry'ibanga
+Hide password|Masquer le mot de passe|Hisha ijambo ry'ibanga
+Platform administration|Administration de la plateforme|Ubuyobozi bwa sisitemu
+Hotels and owners|Hôtels et propriétaires|Hoteli na ba nyirazo
+Create a hotel and owner account|Créer un hôtel et son propriétaire|Andika hoteli na konti ya nyirayo
+Unique hotel code|Code unique de l'hôtel|Kode yihariye ya hoteli
+Owner full name|Nom complet du propriétaire|Amazina yose ya nyiri hoteli
+Owner email|E-mail du propriétaire|Imeyili ya nyiri hoteli
+Initial password (at least 12 characters)|Mot de passe initial (12 caractères minimum)|Ijambo ry'ibanga rya mbere (nibura inyuguti 12)
+Create hotel and owner|Créer l'hôtel et le propriétaire|Andika hoteli na nyirayo
+Creating…|Création…|Birimo gukorwa…
+Registered hotels|Hôtels enregistrés|Hoteli zanditswe
+No hotels registered.|Aucun hôtel enregistré.|Nta hoteli yanditswe.
+Hotel|Hôtel|Hoteli
+Unable to load hotels|Impossible de charger les hôtels|Ntibyashobotse gufungura hoteli
+Unable to create hotel|Impossible de créer l'hôtel|Ntibyashobotse kwandika hoteli
+Hotel, owner account, trial and main branch created. The owner can now sign in with the email and password you entered.|L'hôtel, le compte propriétaire, l'essai et l'agence principale sont créés. Le propriétaire peut se connecter avec les identifiants saisis.|Hoteli, konti ya nyirayo, igerageza n'ishami rikuru byakozwe. Nyiri hoteli ashobora kwinjira akoresheje imeyili n'ijambo ry'ibanga wanditse.
+The request is invalid.|La demande est invalide.|Icyifuzo nticyemewe.
+The operation conflicts with current state.|L'opération est incompatible avec l'état actuel.|Iki gikorwa ntigihuje n'imiterere iriho.
+Access denied.|Accès refusé.|Ntiwemerewe.
+An unexpected error occurred.|Une erreur inattendue est survenue.|Habaye ikibazo kitari giteganyijwe.
+One or more fields are invalid.|Un ou plusieurs champs sont invalides.|Hari amakuru atanditswe neza.
+The hotel API is unavailable. Please retry.|Le service hôtelier est indisponible. Réessayez.|Serivisi ya hoteli ntiboneka. Ongera ugerageze.
+Session expired. Please sign in again.|Session expirée. Reconnectez-vous.|Igihe cyo gukoresha konti cyarangiye. Ongera winjire.
+Sign in required|Connexion requise|Banza winjire
+summary|Résumé|Incamake
+subtotal|Sous-total|Igiteranyo mbere y'umusoro
+tax|Taxe|Umusoro
+total|Total|Igiteranyo
+orders|Commandes|Ibyatumijwe
+daily|Ventes quotidiennes|Ibyagurishijwe buri munsi
+report_date|Date|Itariki
+creditSales|Ventes à crédit|Ibyagurishijwe ku ideni
+paymentsByMethod|Paiements par méthode|Ubwishyu hakurikijwe uburyo
+ledgerActivity|Mouvements comptables|Impinduka mu nyandiko z'imari
+vendorPayments|Paiements fournisseurs|Ubwishyu bw'abatanga ibicuruzwa
+outstandingPurchases|Achats impayés|Ibyaguzwe bitarishyurwa
+expenses|Dépenses|Ibyasohotse
+method|Méthode|Uburyo
+status|Statut|Imiterere
+amount|Montant|Amafaranga
+transactions|Transactions|Ubwishyu
+kind|Type|Ubwoko
+customer|Client|Umukiriya
+vendor|Fournisseur|Utanga ibicuruzwa
+reference|Référence|Inomero iranga
+paid|Payé|Byishyuwe
+balance|Solde|Asigaye
+category|Catégorie|Icyiciro
+created_at|Créé le|Byakozwe
+housekeeping|Propreté|Isuku
+operational|État opérationnel|Imiterere y'icyumba
+id|Identifiant|Nimero iranga
+KITCHEN|Cuisine|Igikoni
+BAR|Bar|Akabari
+SERVICE|Service|Serivisi
+CASH|Espèces|Amafaranga mu ntoki
+MOBILE_MONEY|Mobile money|Amafaranga kuri telefoni
+CARD|Carte|Ikarita
+BANK_TRANSFER|Virement bancaire|Kohereza kuri banki
+CREDIT|Crédit|Ideni
+INDIVIDUAL|Particulier|Umuntu ku giti cye
+COMPANY|Entreprise|Ikigo
+TOUR_AGENCY|Agence de voyage|Ikigo cy'ubukerarugendo
+NGO|ONG|Umuryango utari uwa leta
+GOVERNMENT|Administration publique|Ikigo cya leta
+WALK_IN|Client de passage|Umukiriya utabanje kubika
+DRAFT|Brouillon|Bitaremezwa
+PENDING|En attente|Birategereje
+CONFIRMED|Confirmé|Byemejwe
+CHECKED_IN|Arrivé|Yarinjiye
+CHECKED_OUT|Parti|Yarasohotse
+CANCELLED|Annulé|Byahagaritswe
+NO_SHOW|Absent|Ntiyaje
+SENT|Envoyé|Byoherejwe
+PREPARING|En préparation|Birategurwa
+READY|Prêt|Byateguwe
+SERVED|Servi|Byatanzwe
+VOIDED|Annulé|Byateshejwe agaciro
+POSTED|Comptabilisé|Byanditswe mu mari
+REFUNDED|Remboursé|Amafaranga yasubijwe
+APPROVED|Approuvé|Byemejwe
+REJECTED|Rejeté|Byanzwe
+RECEIVED|Réceptionné|Byakiriwe
+OPEN|Ouvert|Birafunguye
+CLOSED|Clôturé|Byarafunzwe
+RECONCILED|Rapproché|Byahujwe
+IN_PROGRESS|En cours|Birimo gukorwa
+DONE|Terminé|Byarangiye
+RESOLVED|Résolu|Byakemutse
+ACTIVE|Actif|Irakora
+SUSPENDED|Suspendu|Yahagaritswe
+REVOKED|Révoqué|Yambuwe uburenganzira
+LOW|Faible|Buto
+MEDIUM|Moyenne|Buringaniye
+HIGH|Élevée|Bukuru
+URGENT|Urgente|Byihutirwa
+CLEAN|Propre|Gisukuye
+DIRTY|Sale|Kiranduye
+INSPECTED|Inspecté|Cyagenzuwe
+AVAILABLE|Disponible|Kiraboneka
+OUT_OF_ORDER|Hors service|Ntigikora
+OUT_OF_SERVICE|Indisponible|Ntigikoreshwa
+OPENING|Stock initial|Ububiko bwo gutangira
+ADJUSTMENT|Ajustement|Ikosora
+WASTE|Perte|Ibyangiritse
+RECEIPT|Réception|Ibyakiriwe
+SALE|Vente|Ibyagurishijwe
+REVERSAL|Contrepassation|Gusubiza inyuma
+TRANSFER_IN|Transfert entrant|Ibyinjijwe bivuye ahandi
+TRANSFER_OUT|Transfert sortant|Ibyoherejwe ahandi
+CHARGE|Frais|Amafaranga asabwa
+ACCOMMODATION|Hébergement|Icumbi
+ORDER|Commande|Ibyatumijwe
+PAYMENT|Paiement|Ubwishyu
+REFUND|Remboursement|Gusubiza amafaranga
+SUPER_ADMIN|Administrateur de plateforme|Umuyobozi mukuru wa sisitemu
+OWNER|Propriétaire|Nyiri hoteli
+MANAGER|Gérant|Umuyobozi
+ACCOUNTANT|Comptable|Umubaruramari
+RECEPTIONIST|Réceptionniste|Uwakira abashyitsi
+CASHIER|Caissier|Umubitsi
+WAITER|Serveur|Uhereza abakiriya
+BARTENDER|Barman|Ushinzwe akabari
+KITCHEN_STAFF|Personnel de cuisine|Umukozi w'igikoni
+STOREKEEPER|Magasinier|Ushinzwe ububiko
+HOUSEKEEPER|Agent d'entretien|Ushinzwe isuku
+MAINTENANCE|Technicien|Ushinzwe gusana
+AUDITOR|Auditeur|Umugenzuzi
+SUPERVISOR|Superviseur|Umugenzuzi w'akazi
+en|Anglais|Icyongereza
+fr|Français|Igifaransa
+rw|Kinyarwanda|Ikinyarwanda
+Property management|Gestion de l’établissement|Gucunga hoteli
+Rooms and room types|Chambres et catégories|Ibyumba n'ubwoko bwabyo
+Manage room details, bed configurations and nightly prices.|Gérez les chambres, les lits et les tarifs par nuit.|Cunga ibyumba, ibitanda n'ibiciro by'ijoro.
+Add room|Ajouter une chambre|Ongeramo icyumba
+Add room type|Ajouter une catégorie|Ongeramo ubwoko bw'icyumba
+Edit room|Modifier la chambre|Hindura icyumba
+Delete room|Supprimer la chambre|Kuraho icyumba
+Edit room type|Modifier la catégorie|Hindura ubwoko bw'icyumba
+Delete room type|Supprimer la catégorie|Kuraho ubwoko bw'icyumba
+Room details|Détails de la chambre|Amakuru y'icyumba
+Room type details|Détails de la catégorie|Amakuru y'ubwoko bw'icyumba
+Edit|Modifier|Hindura
+Close|Fermer|Funga
+The room type supplies the default price and bed details. Change the price for a room-specific rate.|La catégorie fournit le tarif et les détails des lits par défaut. Vous pouvez adapter le tarif de cette chambre.|Ubwoko bw'icyumba butanga igiciro n'amakuru y'ibitanda. Ushobora guhindura igiciro cy'iki cyumba.
+Remove record|Supprimer la fiche|Kuraho amakuru
+The record will be removed from active lists. Existing history will be preserved.|La fiche sera retirée des listes actives. Son historique sera conservé.|Aya makuru azava ku rutonde rukoreshwa. Amateka yayo azagumaho.
+Select all roles this account needs. Permissions are combined.|Sélectionnez tous les rôles nécessaires. Les autorisations sont cumulées.|Hitamo inshingano zose iyi konti ikeneye. Uburenganzira burahuzwa.
+Product details|Détails du produit|Amakuru y'igicuruzwa
+Stock corrections are recorded as movements to preserve history.|Les corrections de stock sont enregistrées comme mouvements pour conserver l’historique.|Gukosora ububiko byandikwa nk'impinduka kugira ngo amateka abikwe.
+One portfolio per customer, with all orders, stays and outstanding bills.|Un dossier par client, regroupant commandes, séjours et factures impayées.|Dosiye imwe kuri buri mukiriya, irimo ibyo yatumije, amacumbi n'amafaranga atarishyurwa.
+Billing history|Historique de facturation|Amateka y'ibyishyuzwa
+Menu and drinks|Carte et boissons|Amafunguro n'ibinyobwa
+Manage menu items|Gérer les articles de la carte|Cunga amafunguro n'ibinyobwa
+Finance and reports|Finances et rapports|Imari na raporo
+Review payments, manage your shift and reconcile collections.|Vérifiez les paiements, gérez votre caisse et rapprochez les encaissements.|Suzuma ubwishyu, cunga igihe cyawe cy'akazi kandi ugenzure amafaranga yakiriwe.
+Owner self-approval requires a reason.|Le propriétaire doit justifier l’approbation de son propre paiement.|Nyiri hoteli agomba gutanga impamvu yo kwemeza ubwishyu yanditse.
+A different user must approve this payment.|Un autre utilisateur doit approuver ce paiement.|Undi mukozi agomba kwemeza ubu bwishyu.
+Payment decision|Décision de paiement|Icyemezo ku bwishyu
+Approve payment|Approuver le paiement|Emeza ubwishyu
+Reject payment|Rejeter le paiement|Anga ubwishyu
+Payment decisions are recorded in the audit trail.|Les décisions sont enregistrées dans le journal d’audit.|Ibyemezo ku bwishyu byandikwa mu mateka y'igenzura.
+Confirm|Confirmer|Emeza
+Menu management|Gestion de la carte|Gucunga amafunguro n'ibinyobwa
+Create dishes, drinks and services for the POS menu.|Ajoutez des plats, boissons et services à la carte de vente.|Ongeramo amafunguro, ibinyobwa na serivisi ku rutonde rwo kugurisha.
+Add menu item|Ajouter un article à la carte|Ongeramo ifunguro cyangwa ikinyobwa
+Tax percent|Taxe en pourcentage|Ijanisha ry'umusoro
+Track finished-item stock|Suivre le stock des articles finis|Kurikirana ububiko bw'ibicuruzwa byuzuye
+Non-stock item|Article sans suivi de stock|Igicuruzwa kidakurikiranwa mu bubiko
+Daily sales|Ventes quotidiennes|Ibyagurishijwe buri munsi
+Payment methods|Modes de paiement|Uburyo bwo kwishyura
+Operating expenses|Charges d’exploitation|Amafaranga akoreshwa mu mirimo
+Purchase register|Registre des achats|Urutonde rw'ibyaguzwe
+Supplier payments|Paiements fournisseurs|Ubwishyu bw'abatanga ibicuruzwa
+Customer balances|Soldes clients|Amafaranga abakiriya basigaje kwishyura
+Supplier balances|Soldes fournisseurs|Amafaranga abatanga ibicuruzwa basigaje kwishyurwa
+All bill activity|Toutes les opérations de facturation|Ibyakozwe byose ku byishyuzwa
+Cashier reconciliation|Rapprochement de caisse|Kugenzura amafaranga yo mu isanduku
+Report period|Période du rapport|Igihe cya raporo
+Summary|Synthèse|Incamake
+Understand sales, cash movement and outstanding balances.|Consultez les ventes, les flux de trésorerie et les soldes impayés.|Reba ibyagurishijwe, uko amafaranga yinjiye n'ayasohotse, hamwe n'atarishyurwa.
+Export CSV|Exporter en CSV|Sohora CSV
+Print / Save PDF|Imprimer / Enregistrer en PDF|Capa / Bika nka PDF
+Net cash movement is receipts minus refunds, supplier payments and expense payments. It is not profit or a bank balance.|Le flux net correspond aux encaissements moins remboursements, paiements fournisseurs et dépenses payées. Ce n’est ni un bénéfice ni un solde bancaire.|Impinduka y'amafaranga ni ayakiriwe ukuyemo ayasubijwe, ayishyuwe abatanga ibicuruzwa n'ayakoreshejwe. Si inyungu cyangwa amafaranga ari kuri banki.
+Current outstanding balances at report generation time.|Soldes impayés au moment de la génération du rapport.|Amafaranga atarishyurwa igihe raporo yakozwe.
+Billed revenue|Montant facturé|Amafaranga yishyujwe
+Customer receipts|Encaissements clients|Amafaranga yakiriwe ku bakiriya
+Refunds|Remboursements|Amafaranga yasubijwe
+Net cash movement|Flux net de trésorerie|Impinduka y'amafaranga
+Net receipts|Encaissements nets|Amafaranga yakiriwe asigaye
+Awaiting approval amount|Montant en attente d’approbation|Amafaranga ategereje kwemezwa
+Approved payments|Paiements approuvés|Ubwishyu bwemejwe
+Folio status|Statut du compte client|Uko konti y'umukiriya ihagaze
+Opened|Ouvert le|Igihe yafunguriwe
+Closed|Fermé le|Igihe yafungiwe
+Customer credit|Crédit clients|Amadeni y'abakiriya
+Bills|Factures et additions|Ibyishyuzwa
+Open your cashier shift before approving a payment.|Ouvrez votre caisse avant d’approuver un paiement.|Banza ufungure igihe cyawe cyo kwakira amafaranga mbere yo kwemeza ubwishyu.
+Owner approval of their own payment requires a reason.|Le propriétaire doit justifier l’approbation de son propre paiement.|Nyiri hoteli agomba gutanga impamvu yo kwemeza ubwishyu yanditse.
+billedRevenue|Montant facturé|Amafaranga yishyujwe
+receipts|Encaissements clients|Amafaranga yakiriwe
+refunds|Remboursements|Amafaranga yasubijwe
+supplierPayments|Paiements fournisseurs|Ubwishyu bw'abatanga ibicuruzwa
+expensePayments|Dépenses payées|Amafaranga yishyuwe mu mirimo
+operatingExpenses|Charges d’exploitation|Amafaranga akoreshwa mu mirimo
+netCashMovement|Flux net de trésorerie|Impinduka y'amafaranga
+Expense payments|Dépenses payées|Amafaranga yishyuwe mu mirimo
+Approval status|Statut d'approbation|Uko kwemeza bihagaze
+Device|Appareil|Igikoresho
+These are outstanding purchase orders, not matched supplier invoices.|Ces soldes concernent les commandes, pas des factures fournisseurs rapprochées.|Aya ni amafaranga asigaye ku byatumijwe, si fagitire zagenzuwe z'abatanga ibicuruzwa.
+balancesAt|Soldes calculés le|Igihe amafaranga asigaye yabariwe
+from|Du|Kuva
+to|Au|Kugeza
+`;
+export const messages:Record<Locale,Record<string,string>>={en:{},fr:{},rw:{}};
+for(const line of rows.trim().split("\n")){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}
+for(const [old,key] of Object.entries({reservations:"Reservations",availability:"Check availability",adults:"Adults",children:"Children",preview:"Preview order",confirm:"Approve"}))for(const locale of locales)messages[locale][old]=messages[locale][key];
+
+
+
+
+
+
+
+

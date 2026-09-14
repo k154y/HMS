@@ -1,0 +1,1 @@
+package com.hotelmanagement.hms.payment.dto; import jakarta.validation.constraints.*; import java.math.*; public record CashierShiftRequest(@NotNull @DecimalMin("0") BigDecimal openingFloat,String notes,BigDecimal countedAmount){}

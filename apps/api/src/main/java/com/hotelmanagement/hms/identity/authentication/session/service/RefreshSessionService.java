@@ -10,6 +10,8 @@ import com.hotelmanagement.hms.identity.authentication.session.security.RefreshT
 import com.hotelmanagement.hms.identity.model.UserAccount;
 import com.hotelmanagement.hms.identity.model.UserStatus;
 import com.hotelmanagement.hms.identity.repository.UserRepository;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +23,17 @@ import java.util.UUID;
 @Service
 public class RefreshSessionService {
 
-    private static final String REASON_LOGOUT = "LOGOUT";
-    private static final String REASON_ROTATED = "TOKEN_ROTATED";
-    private static final String REASON_SECURITY = "SECURITY_REVOCATION";
+    private static final String REASON_LOGOUT =
+            "LOGOUT";
+
+    private static final String REASON_ROTATED =
+            "TOKEN_ROTATED";
+
+    private static final String REASON_SECURITY =
+            "SECURITY_REVOCATION";
+
+    private static final String INVALID_REFRESH_TOKEN =
+            "Invalid refresh token.";
 
     private final RefreshSessionRepository sessionRepository;
     private final RefreshTokenGenerator tokenGenerator;
@@ -48,8 +58,8 @@ public class RefreshSessionService {
     /**
      * Creates a new refresh session after successful authentication.
      *
-     * The returned raw token must be sent to the client once.
-     * Only its hash is persisted.
+     * Only the hash is persisted.
+     * The raw refresh credential is returned once to the caller.
      */
     @Transactional
     public CreatedRefreshSession createSession(
@@ -60,18 +70,24 @@ public class RefreshSessionService {
                     "A persisted user is required.");
         }
 
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new IllegalStateException(
-                    "Refresh sessions cannot be created "
-                            + "for inactive accounts.");
+        user = userRepository.findLockedById(user.getId())
+                .orElseThrow(RefreshSessionService::invalidRefreshToken);
+
+        if (user.getStatus()
+                != UserStatus.ACTIVE) {
+
+            throw new DisabledException(
+                    "User account is not active.");
         }
 
         OffsetDateTime now =
-                OffsetDateTime.now(ZoneOffset.UTC);
+                OffsetDateTime.now(
+                        ZoneOffset.UTC);
 
         OffsetDateTime expiresAt =
                 now.plusDays(
-                        jwtProperties.refreshTokenDays());
+                        jwtProperties
+                                .refreshTokenDays());
 
         RefreshTokenMaterial material =
                 tokenGenerator.generate();
@@ -85,8 +101,9 @@ public class RefreshSessionService {
                 );
 
         RefreshSession savedSession =
-                sessionRepository.saveAndFlush(
-                        session);
+                sessionRepository
+                        .saveAndFlush(
+                                session);
 
         return new CreatedRefreshSession(
                 savedSession.getId(),
@@ -96,42 +113,40 @@ public class RefreshSessionService {
     }
 
     /**
-     * Rotates a valid refresh token.
+     * Rotates one valid refresh session.
      *
-     * Old refresh token:
-     *     becomes revoked.
-     *
-     * New refresh token:
-     *     becomes the only usable successor token.
-     *
-     * A new JWT access token is also issued.
+     * The old token becomes unusable immediately after successful
+     * transaction commit.
      */
     @Transactional
     public RotatedSession rotate(
             String rawRefreshToken) {
 
         String tokenHash =
-                tokenGenerator.hash(
+                hashRefreshToken(
                         rawRefreshToken);
+
+        lockSessionOwner(tokenHash);
 
         RefreshSession currentSession =
                 sessionRepository
-                        .findByTokenHash(tokenHash)
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "Invalid refresh token."));
+                        .findByTokenHash(
+                                tokenHash)
+                        .orElseThrow(
+                                RefreshSessionService
+                                        ::invalidRefreshToken
+                        );
 
         OffsetDateTime now =
-                OffsetDateTime.now(ZoneOffset.UTC);
+                OffsetDateTime.now(
+                        ZoneOffset.UTC);
 
         if (currentSession.isRevoked()) {
-            throw new IllegalStateException(
-                    "Refresh token has been revoked.");
+            throw invalidRefreshToken();
         }
 
         if (currentSession.isExpired(now)) {
-            throw new IllegalStateException(
-                    "Refresh token has expired.");
+            throw invalidRefreshToken();
         }
 
         UserAccount user =
@@ -140,19 +155,24 @@ public class RefreshSessionService {
                                 currentSession
                                         .getUser()
                                         .getId())
-                        .orElseThrow(() ->
-                                new IllegalStateException(
-                                        "User account no longer exists."));
+                        .orElseThrow(
+                                RefreshSessionService
+                                        ::invalidRefreshToken
+                        );
 
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new IllegalStateException(
+        if (user.getStatus()
+                != UserStatus.ACTIVE) {
+
+            throw new DisabledException(
                     "User account is not active.");
         }
 
-        currentSession.recordUse(now);
+        currentSession.recordUse(
+                now);
 
         CreatedRefreshSession replacement =
-                createSession(user);
+                createSession(
+                        user);
 
         currentSession.revoke(
                 now,
@@ -160,12 +180,14 @@ public class RefreshSessionService {
                 replacement.sessionId()
         );
 
-        sessionRepository.saveAndFlush(
-                currentSession);
+        sessionRepository
+                .saveAndFlush(
+                        currentSession);
 
         AccessToken accessToken =
-                jwtTokenService.issueAccessToken(
-                        user);
+                jwtTokenService
+                        .issueAccessToken(
+                                user);
 
         return new RotatedSession(
                 accessToken,
@@ -175,28 +197,57 @@ public class RefreshSessionService {
     }
 
     /**
-     * Revokes one refresh token during logout.
+     * Revokes one refresh session during logout.
      *
-     * Unknown tokens are rejected instead of silently appearing
-     * successful inside the domain service.
+     * The session must belong to the account represented by the
+     * already validated access JWT.
      */
     @Transactional
     public void revokeForLogout(
+            UUID authenticatedUserId,
             String rawRefreshToken) {
 
+        if (authenticatedUserId == null) {
+            throw invalidRefreshToken();
+        }
+
         String tokenHash =
-                tokenGenerator.hash(
+                hashRefreshToken(
                         rawRefreshToken);
+
+        lockSessionOwner(tokenHash);
 
         RefreshSession session =
                 sessionRepository
-                        .findByTokenHash(tokenHash)
-                        .orElseThrow(() ->
-                                new IllegalArgumentException(
-                                        "Invalid refresh token."));
+                        .findByTokenHash(
+                                tokenHash)
+                        .orElseThrow(
+                                RefreshSessionService
+                                        ::invalidRefreshToken
+                        );
+
+        UUID sessionUserId =
+                session
+                        .getUser()
+                        .getId();
+
+        if (!authenticatedUserId.equals(
+                sessionUserId)) {
+
+            /*
+             * Do not reveal that the supplied refresh credential
+             * belongs to another account.
+             */
+            throw invalidRefreshToken();
+        }
+
+        if (session.isRevoked()) {
+            throw invalidRefreshToken();
+        }
 
         OffsetDateTime now =
-                OffsetDateTime.now(ZoneOffset.UTC);
+                OffsetDateTime.now(
+                        ZoneOffset.UTC);
 
         session.revoke(
                 now,
@@ -204,25 +255,28 @@ public class RefreshSessionService {
                 null
         );
 
-        sessionRepository.saveAndFlush(
-                session);
+        sessionRepository
+                .saveAndFlush(
+                        session);
     }
 
     /**
-     * Revokes every currently active refresh session for a user.
+     * Revokes all currently usable refresh sessions belonging
+     * to one user.
      *
-     * Useful after:
-     *
-     * - password change;
-     * - administrator security action;
-     * - suspected account compromise.
+     * Intended for security-sensitive events such as password
+     * changes or administrator account intervention.
      */
     @Transactional
     public void revokeAllForUser(
             UUID userId) {
 
+        userRepository.findLockedById(userId)
+                .orElseThrow(RefreshSessionService::invalidRefreshToken);
+
         OffsetDateTime now =
-                OffsetDateTime.now(ZoneOffset.UTC);
+                OffsetDateTime.now(
+                        ZoneOffset.UTC);
 
         List<RefreshSession> activeSessions =
                 sessionRepository
@@ -241,8 +295,36 @@ public class RefreshSessionService {
             );
         }
 
-        sessionRepository.saveAll(
-                activeSessions);
+        sessionRepository
+                .saveAll(
+                        activeSessions);
+    }
+
+    // All session mutations lock the user first, so password changes, login,
+    // rotation and logout serialize without session/user lock-order inversion.
+    private void lockSessionOwner(String tokenHash) {
+        UUID userId = sessionRepository.findUserIdByTokenHash(tokenHash)
+                .orElseThrow(RefreshSessionService::invalidRefreshToken);
+        userRepository.findLockedById(userId)
+                .orElseThrow(RefreshSessionService::invalidRefreshToken);
+    }
+
+    private String hashRefreshToken(
+            String rawRefreshToken) {
+
+        try {
+            return tokenGenerator.hash(
+                    rawRefreshToken);
+        } catch (IllegalArgumentException exception) {
+            throw invalidRefreshToken();
+        }
+    }
+
+    private static BadCredentialsException
+    invalidRefreshToken() {
+
+        return new BadCredentialsException(
+                INVALID_REFRESH_TOKEN);
     }
 
     public record CreatedRefreshSession(

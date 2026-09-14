@@ -11,6 +11,8 @@ import java.util.UUID;
 public interface HotelExchangeRateRepository
         extends JpaRepository<HotelExchangeRate, UUID> {
 
+    org.springframework.data.domain.Page<HotelExchangeRate> findByHotel_Id(UUID hotelId, org.springframework.data.domain.Pageable pageable);
+
     Optional<HotelExchangeRate>
     findFirstByHotel_IdAndCurrencyCodeAndEffectiveFromLessThanEqualOrderByEffectiveFromDesc(
             UUID hotelId,

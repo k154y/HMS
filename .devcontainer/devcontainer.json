@@ -7,9 +7,13 @@
 
   "workspaceFolder": "/workspace",
 
-  "shutdownAction": "stopCompose",
+  "shutdownAction": "none",
 
   "remoteUser": "vscode",
+
+  "containerEnv": {
+    "JAVA_HOME": "/usr/lib/jvm/msopenjdk-current"
+  },
 
   "features": {
     "ghcr.io/devcontainers/features/java:1": {
@@ -20,46 +24,6 @@
 
     "ghcr.io/devcontainers/features/node:2": {
       "version": "24"
-    },
-
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-      "version": "latest",
-      "dockerDashComposeVersion": "v2"
-    }
-  },
-
-  "forwardPorts": [
-    3000,
-    8080,
-    5432,
-    6379,
-    5672,
-    15672
-  ],
-
-  "portsAttributes": {
-    "3000": {
-      "label": "Next.js Frontend"
-    },
-
-    "8080": {
-      "label": "Spring Boot API"
-    },
-
-    "5432": {
-      "label": "PostgreSQL"
-    },
-
-    "6379": {
-      "label": "Redis"
-    },
-
-    "5672": {
-      "label": "RabbitMQ"
-    },
-
-    "15672": {
-      "label": "RabbitMQ Management"
     }
   },
 
@@ -82,7 +46,8 @@
       "settings": {
         "editor.formatOnSave": true,
         "terminal.integrated.defaultProfile.linux": "bash",
-        "java.configuration.updateBuildConfiguration": "automatic"
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.jdt.ls.java.home": "/usr/lib/jvm/msopenjdk-current"
       }
     }
   }

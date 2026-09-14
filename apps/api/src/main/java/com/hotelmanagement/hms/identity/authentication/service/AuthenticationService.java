@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Locale;
+import java.util.UUID;
 
 @Service
 public class AuthenticationService {
@@ -34,17 +35,11 @@ public class AuthenticationService {
     private final JwtTokenService jwtTokenService;
     private final RefreshSessionService refreshSessionService;
     private final AuthenticationProperties authenticationProperties;
+    private final com.hotelmanagement.hms.audit.service.AuditService audit;
+    private final io.micrometer.core.instrument.Counter failures;
 
     /*
-     * Used when an email does not exist so password verification still
-     * performs expensive password-hashing work.
-     *
-     * This helps reduce obvious timing differences between:
-     *
-     *     existing email
-     *     non-existing email
-     *
-     * and therefore makes account enumeration more difficult.
+     * Used for timing protection when an email is not found.
      */
     private final String dummyPasswordHash;
 
@@ -53,7 +48,9 @@ public class AuthenticationService {
             PasswordEncoder passwordEncoder,
             JwtTokenService jwtTokenService,
             RefreshSessionService refreshSessionService,
-            AuthenticationProperties authenticationProperties) {
+            AuthenticationProperties authenticationProperties,
+            com.hotelmanagement.hms.audit.service.AuditService audit,
+            io.micrometer.core.instrument.MeterRegistry metrics) {
 
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -61,6 +58,8 @@ public class AuthenticationService {
         this.refreshSessionService = refreshSessionService;
         this.authenticationProperties =
                 authenticationProperties;
+        this.audit = audit;
+        this.failures = metrics.counter("hms.authentication.failures");
 
         this.dummyPasswordHash =
                 passwordEncoder.encode(
@@ -71,7 +70,8 @@ public class AuthenticationService {
      * Authenticates a user and creates an access-token +
      * refresh-session pair.
      */
-    @Transactional
+    // Failed-attempt state must commit even when credentials are rejected.
+    @Transactional(noRollbackFor = BadCredentialsException.class)
     public AuthenticationResponse login(
             LoginRequest request) {
 
@@ -81,16 +81,15 @@ public class AuthenticationService {
 
         UserAccount user =
                 userRepository
-                        .findByNormalizedEmail(
+                        .findLockedByEmail(
                                 normalizedEmail)
                         .orElse(null);
 
         /*
-         * Always perform a password verification operation.
+         * Always execute password verification.
          *
-         * For an unknown user we verify against a dummy hash instead
-         * of immediately returning. This reduces obvious timing-based
-         * email enumeration.
+         * For a nonexistent account, verify against a dummy hash
+         * to reduce obvious account-enumeration timing differences.
          */
         String encodedPassword =
                 user == null
@@ -103,6 +102,7 @@ public class AuthenticationService {
                         encodedPassword);
 
         if (user == null) {
+            failures.increment();
             throw new BadCredentialsException(
                     GENERIC_BAD_CREDENTIALS);
         }
@@ -116,10 +116,12 @@ public class AuthenticationService {
                 now);
 
         if (!passwordMatches) {
+            failures.increment();
 
             handleFailedLogin(
                     user,
                     now);
+            audit.record(null, null, user.getId(), "LOGIN_FAILED", "USER", user.getId());
 
             throw new BadCredentialsException(
                     GENERIC_BAD_CREDENTIALS);
@@ -131,6 +133,7 @@ public class AuthenticationService {
         UserAccount savedUser =
                 userRepository.saveAndFlush(
                         user);
+        audit.record(null, null, user.getId(), "LOGIN_SUCCEEDED", "USER", user.getId());
 
         AccessToken accessToken =
                 jwtTokenService
@@ -149,8 +152,7 @@ public class AuthenticationService {
     }
 
     /**
-     * Rotates an existing refresh session and issues a new
-     * short-lived access token.
+     * Rotates a refresh token and returns a fresh token pair.
      */
     @Transactional
     public AuthenticationResponse refresh(
@@ -165,20 +167,27 @@ public class AuthenticationService {
     }
 
     /**
-     * Revokes the supplied refresh session.
+     * Revokes one refresh session owned by the currently
+     * authenticated account.
      */
     @Transactional
     public void logout(
+            UUID authenticatedUserId,
             RefreshTokenRequest request) {
+
+        if (authenticatedUserId == null) {
+            throw new BadCredentialsException(
+                    "Authentication is required.");
+        }
 
         refreshSessionService
                 .revokeForLogout(
-                        request.refreshToken());
+                        authenticatedUserId,
+                        request.refreshToken()
+                );
+        audit.record(null, null, authenticatedUserId, "LOGOUT", "USER", authenticatedUserId);
     }
 
-    /**
-     * Evaluates global account state before credentials are accepted.
-     */
     private void handleAccountState(
             UserAccount user,
             OffsetDateTime now) {
@@ -200,8 +209,8 @@ public class AuthenticationService {
                 user.getLockedUntil();
 
         /*
-         * LOCKED with no end timestamp is treated as locked until
-         * an administrative/security action changes the account.
+         * LOCKED without an expiry is considered an indefinite
+         * security/administrative lock.
          */
         if (lockedUntil == null) {
             throw new LockedException(
@@ -214,9 +223,7 @@ public class AuthenticationService {
         }
 
         /*
-         * Temporary lock period has expired.
-         *
-         * Reset counters before processing the new login attempt.
+         * Temporary lock has expired.
          */
         user.activate(now);
 
@@ -224,10 +231,6 @@ public class AuthenticationService {
                 user);
     }
 
-    /**
-     * Records one invalid password attempt and applies a temporary
-     * account lock when the configured threshold is reached.
-     */
     private void handleFailedLogin(
             UserAccount user,
             OffsetDateTime now) {

@@ -12,6 +12,9 @@ import java.util.UUID;
 public interface RolePermissionRepository
         extends JpaRepository<RolePermission, RolePermissionId> {
 
+    @org.springframework.data.jpa.repository.Query("select rp.permission.code from RolePermission rp where rp.role.id = :roleId order by rp.permission.code")
+    java.util.List<String> findCodesForRole(java.util.UUID roleId);
+
     boolean existsByRole_IdAndPermission_Id(
             UUID roleId,
             UUID permissionId
