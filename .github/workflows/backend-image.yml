@@ -11,6 +11,8 @@ on:
       - "deployment/docker/backend.Dockerfile"
       - ".dockerignore"
       - ".github/workflows/backend-image.yml"
+      - "deployment/production/**"
+      - "deployment/staging/**"
 
   pull_request:
     branches:
@@ -21,6 +23,8 @@ on:
       - "deployment/docker/backend.Dockerfile"
       - ".dockerignore"
       - ".github/workflows/backend-image.yml"
+      - "deployment/production/**"
+      - "deployment/staging/**"
 
   workflow_dispatch:
 

@@ -2,9 +2,9 @@ name: hms-production
 
 services:
 
-  # =======================================================
-  # HMS Production API
-  # =======================================================
+  # ========================================================
+  # HMS Backend API
+  # ========================================================
 
   api:
     image: ghcr.io/k154y/hms-api:${HMS_IMAGE_TAG:?HMS_IMAGE_TAG is required}
@@ -52,9 +52,9 @@ services:
         max-file: "5"
 
 
-  # =======================================================
+  # ========================================================
   # Redis
-  # =======================================================
+  # ========================================================
 
   redis:
     image: redis:7-alpine
@@ -107,9 +107,9 @@ services:
         max-file: "3"
 
 
-  # =======================================================
+  # ========================================================
   # RabbitMQ
-  # =======================================================
+  # ========================================================
 
   rabbitmq:
     image: rabbitmq:4.3.5-alpine
@@ -122,11 +122,9 @@ services:
       RABBITMQ_DEFAULT_USER: ${HMS_RABBITMQ_USERNAME:?HMS_RABBITMQ_USERNAME is required}
       RABBITMQ_DEFAULT_PASS: ${HMS_RABBITMQ_PASSWORD:?HMS_RABBITMQ_PASSWORD is required}
 
-      # Conservative limit for this 2 GB pilot VPS.
-      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "0.60"
-
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
 
     mem_limit: 320m
     pids_limit: 200
@@ -157,9 +155,9 @@ services:
         max-file: "3"
 
 
-# =========================================================
-# Persistent production volumes
-# =========================================================
+# ==========================================================
+# Persistent volumes
+# ==========================================================
 
 volumes:
 
@@ -170,19 +168,16 @@ volumes:
     name: hms_production_rabbitmq_data
 
 
-# =========================================================
+# ==========================================================
 # Networks
-# =========================================================
+# ==========================================================
 
 networks:
 
-  # HMS-only private network.
-  # Redis and RabbitMQ are never exposed publicly.
   internal:
     name: hms_production_internal
     internal: true
 
-  # Existing VPS network used by Caddy.
   kivu_proxy:
     name: kivu_proxy
     external: true
