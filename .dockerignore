@@ -1,0 +1,50 @@
+# =========================================================
+# HMS Docker Build Context
+# =========================================================
+
+# Git
+.git
+.gitignore
+
+# IDE / development containers
+.vscode
+.idea
+.devcontainer
+
+# Local runtime state
+.run
+*.log
+*.pid
+
+# Local environment / secrets
+.env
+.env.local
+.env.*.local
+
+# Never send real deployment environment files
+deployment/staging/.env
+deployment/production/.env
+
+# Backend generated files
+apps/api/target
+**/target
+
+# Frontend dependencies and generated output
+apps/web/node_modules
+apps/web/.next
+apps/web/.next-build
+**/node_modules
+
+# Test / coverage output
+coverage
+**/coverage
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.swp

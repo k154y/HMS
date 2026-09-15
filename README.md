@@ -49,7 +49,7 @@ npm ci
 npm run dev -- -p 3001
 ```
 
-Frontend: http://localhost:3001/login. Backend health: http://localhost:18081/actuator/health. The Docker development backend connects to the database using internal service names; a backend launched directly on Windows needs the host ports from the Compose file.
+Frontend: http://localhost:3001/login. Backend health: http://localhost:8081/actuator/health. The Docker development backend connects to the database using internal service names; a backend launched directly on Windows needs the host ports from the Compose file.
 
 ## Verify changes
 

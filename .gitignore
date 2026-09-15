@@ -77,3 +77,16 @@ apps/api/bin/
 .env
 .run/
 apps/web/.env.local
+
+# =========================================================
+# Deployment secrets
+# =========================================================
+
+deployment/staging/.env
+deployment/production/.env
+
+# Backup credentials / generated backup files
+deployment/backup/.env
+deployment/backup/*.sql
+deployment/backup/*.sql.gz
+deployment/backup/*.dump
