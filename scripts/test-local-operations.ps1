@@ -1,7 +1,7 @@
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot
 $saved=Get-Content (Join-Path $root '.env.test-accounts.json') -Raw | ConvertFrom-Json
-$base='http://localhost:18081/api/v1'
+$base='http://localhost:8081/api/v1'
 function Call($method,$path,$token,$body){
  $p=@{Uri="$base$path";Method=$method;ContentType='application/json';TimeoutSec=60}
  if($token){$p.Headers=@{Authorization="Bearer $token"}}

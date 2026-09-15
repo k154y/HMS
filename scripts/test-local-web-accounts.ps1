@@ -4,8 +4,8 @@ $saved=Get-Content (Join-Path $root '.env.test-accounts.json') -Raw | ConvertFro
 $results=@()
 foreach($account in $saved.accounts){
  $credentials=@{email=$account.email;password=$account.password}|ConvertTo-Json
- $tokens=Invoke-RestMethod http://localhost:18081/api/v1/auth/login -Method POST -ContentType application/json -Body $credentials -TimeoutSec 30
- $profile=Invoke-RestMethod http://localhost:18081/api/v1/auth/me -Headers @{Authorization="Bearer $($tokens.accessToken)"} -TimeoutSec 30
+ $tokens=Invoke-RestMethod http://localhost:8081/api/v1/auth/login -Method POST -ContentType application/json -Body $credentials -TimeoutSec 30
+ $profile=Invoke-RestMethod http://localhost:8081/api/v1/auth/me -Headers @{Authorization="Bearer $($tokens.accessToken)"} -TimeoutSec 30
  $web=New-Object Microsoft.PowerShell.Commands.WebRequestSession
  $csrf=Invoke-RestMethod http://localhost:3001/api/auth/csrf -WebSession $web -TimeoutSec 40
  $response=Invoke-WebRequest http://localhost:3001/api/auth/callback/credentials -Method POST -WebSession $web -ContentType 'application/x-www-form-urlencoded' -Headers @{'X-Auth-Return-Redirect'='1'} -Body @{csrfToken=$csrf.csrfToken;email=$account.email;password=$account.password;callbackUrl='http://localhost:3001/dashboard'} -TimeoutSec 45

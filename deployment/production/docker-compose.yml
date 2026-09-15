@@ -1,0 +1,188 @@
+name: hms-production
+
+services:
+
+  # =======================================================
+  # HMS Production API
+  # =======================================================
+
+  api:
+    image: ghcr.io/k154y/hms-api:${HMS_IMAGE_TAG:?HMS_IMAGE_TAG is required}
+
+    container_name: hms_production_api
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    environment:
+      JAVA_OPTS: >-
+        -Xms128m
+        -Xmx384m
+        -XX:+UseG1GC
+        -XX:+ExitOnOutOfMemoryError
+
+      MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED: "false"
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+    expose:
+      - "8081"
+
+    mem_limit: 640m
+    pids_limit: 256
+
+    networks:
+      - internal
+      - kivu_proxy
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+
+  # =======================================================
+  # Redis
+  # =======================================================
+
+  redis:
+    image: redis:7-alpine
+
+    container_name: hms_production_redis
+
+    restart: unless-stopped
+
+    command:
+      - sh
+      - -c
+      - >
+        exec redis-server
+        --requirepass "$${HMS_REDIS_PASSWORD}"
+        --maxmemory 96mb
+        --maxmemory-policy allkeys-lru
+        --appendonly yes
+        --appendfsync everysec
+
+    environment:
+      HMS_REDIS_PASSWORD: ${HMS_REDIS_PASSWORD:?HMS_REDIS_PASSWORD is required}
+
+    volumes:
+      - redis_data:/data
+
+    mem_limit: 160m
+    pids_limit: 100
+
+    networks:
+      - internal
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a \"$${HMS_REDIS_PASSWORD}\" ping | grep -q PONG"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+  # =======================================================
+  # RabbitMQ
+  # =======================================================
+
+  rabbitmq:
+    image: rabbitmq:4.3.5-alpine
+
+    container_name: hms_production_rabbitmq
+
+    restart: unless-stopped
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${HMS_RABBITMQ_USERNAME:?HMS_RABBITMQ_USERNAME is required}
+      RABBITMQ_DEFAULT_PASS: ${HMS_RABBITMQ_PASSWORD:?HMS_RABBITMQ_PASSWORD is required}
+
+      # Conservative limit for this 2 GB pilot VPS.
+      RABBITMQ_VM_MEMORY_HIGH_WATERMARK: "0.60"
+
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+    mem_limit: 320m
+    pids_limit: 200
+
+    networks:
+      - internal
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "rabbitmq-diagnostics",
+          "-q",
+          "ping"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+# =========================================================
+# Persistent production volumes
+# =========================================================
+
+volumes:
+
+  redis_data:
+    name: hms_production_redis_data
+
+  rabbitmq_data:
+    name: hms_production_rabbitmq_data
+
+
+# =========================================================
+# Networks
+# =========================================================
+
+networks:
+
+  # HMS-only private network.
+  # Redis and RabbitMQ are never exposed publicly.
+  internal:
+    name: hms_production_internal
+    internal: true
+
+  # Existing VPS network used by Caddy.
+  kivu_proxy:
+    name: kivu_proxy
+    external: true

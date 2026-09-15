@@ -1,5 +1,5 @@
 $ErrorActionPreference = 'Stop'
-$base = 'http://localhost:18081/api/v1'
+$base = 'http://localhost:8081/api/v1'
 $root = Split-Path $PSScriptRoot
 $credentialsPath = Join-Path $root '.env.test-accounts.json'
 $bootstrap = @{}

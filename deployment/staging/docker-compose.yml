@@ -1,0 +1,170 @@
+name: hms-staging
+
+
+services:
+
+  # =======================================================
+  # HMS Spring Boot API
+  # =======================================================
+
+  api:
+    image: ghcr.io/k154y/hms-api:${HMS_IMAGE_TAG:?HMS_IMAGE_TAG is required}
+
+    container_name: hms_staging_api
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    ports:
+      - "127.0.0.1:${HMS_API_HOST_PORT:-18082}:8081"
+
+    depends_on:
+      redis:
+        condition: service_healthy
+
+      rabbitmq:
+        condition: service_healthy
+
+    networks:
+      - internal
+      - outbound
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+
+  # =======================================================
+  # Redis
+  # =======================================================
+
+  redis:
+    image: redis:7-alpine
+
+    container_name: hms_staging_redis
+
+    restart: unless-stopped
+
+    env_file:
+      - .env
+
+    command:
+      - sh
+      - -c
+      - >
+        exec redis-server
+        --appendonly yes
+        --requirepass "$${HMS_REDIS_PASSWORD}"
+
+    volumes:
+      - redis_data:/data
+
+    networks:
+      - internal
+
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "redis-cli -a \"$${HMS_REDIS_PASSWORD}\" ping | grep -q PONG"
+        ]
+
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+  # =======================================================
+  # RabbitMQ
+  # =======================================================
+
+  rabbitmq:
+    image: rabbitmq:4.3.5-management-alpine
+
+    container_name: hms_staging_rabbitmq
+
+    restart: unless-stopped
+
+    environment:
+      RABBITMQ_DEFAULT_USER: ${HMS_RABBITMQ_USERNAME:?HMS_RABBITMQ_USERNAME is required}
+      RABBITMQ_DEFAULT_PASS: ${HMS_RABBITMQ_PASSWORD:?HMS_RABBITMQ_PASSWORD is required}
+
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+
+    networks:
+      - internal
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "rabbitmq-diagnostics",
+          "-q",
+          "ping"
+        ]
+
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+    security_opt:
+      - no-new-privileges:true
+
+    logging:
+      driver: json-file
+
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+# =========================================================
+# Persistent storage
+# =========================================================
+
+volumes:
+
+  redis_data:
+    name: hms_staging_redis_data
+
+  rabbitmq_data:
+    name: hms_staging_rabbitmq_data
+
+
+# =========================================================
+# Networks
+# =========================================================
+
+networks:
+
+  # Redis and RabbitMQ live here.
+  # "internal" prevents direct external connectivity.
+  internal:
+    name: hms_staging_internal
+    internal: true
+
+  # Only the API gets this network because it must reach
+  # external services such as Neon PostgreSQL.
+  outbound:
+    name: hms_staging_outbound
