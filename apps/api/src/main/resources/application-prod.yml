@@ -1,7 +1,7 @@
 spring:
 
   datasource:
-    url: jdbc:postgresql://${HMS_DB_HOST}:${HMS_DB_PORT:5432}/${HMS_DB_NAME}
+    url: ${HMS_DB_URL}
     username: ${HMS_DB_USER}
     password: ${HMS_DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
