@@ -236,7 +236,7 @@ Create a hotel and owner account|Créer un hôtel et son propriétaire|Andika ho
 Unique hotel code|Code unique de l'hôtel|Kode yihariye ya hoteli
 Owner full name|Nom complet du propriétaire|Amazina yose ya nyiri hoteli
 Owner email|E-mail du propriétaire|Imeyili ya nyiri hoteli
-Initial password (at least 12 characters)|Mot de passe initial (12 caractères minimum)|Ijambo ry'ibanga rya mbere (nibura inyuguti 12)
+Initial password (at least 15 characters)|Mot de passe initial (15 caractères minimum)|Ijambo ry'ibanga rya mbere (nibura inyuguti 15)
 Create hotel and owner|Créer l'hôtel et le propriétaire|Andika hoteli na nyirayo
 Creating…|Création…|Birimo gukorwa…
 Registered hotels|Hôtels enregistrés|Hoteli zanditswe
@@ -443,6 +443,7 @@ These are outstanding purchase orders, not matched supplier invoices.|Ces soldes
 balancesAt|Soldes calculés le|Igihe amafaranga asigaye yabariwe
 from|Du|Kuva
 to|Au|Kugeza
+Creating the hotel starts its three-month trial and creates the first hotel owner account.|La création de l'hôtel démarre sa période d'essai de trois mois et crée le premier compte propriétaire de l'hôtel.|Kwandikisha hoteli bitangiza igerageza ry'amezi atatu kandi bigakora konti ya mbere ya nyir'hoteli.
 `;
 export const messages:Record<Locale,Record<string,string>>={en:{},fr:{},rw:{}};
 for(const line of rows.trim().split("\n")){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}

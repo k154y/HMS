@@ -7,42 +7,76 @@ import jakarta.validation.constraints.Size;
 
 public record CreateHotelRequest(
 
-        @NotBlank
-        @Size(max = 50)
+        @NotBlank(
+                message = "Hotel code is required."
+        )
+        @Size(
+                max = 50,
+                message = "Hotel code must contain no more than 50 characters."
+        )
         String code,
 
-        @NotBlank
-        @Size(max = 200)
+        @NotBlank(
+                message = "Hotel legal name is required."
+        )
+        @Size(
+                max = 200,
+                message = "Hotel legal name must contain no more than 200 characters."
+        )
         String legalName,
 
-        @NotBlank
-        @Size(max = 200)
+        @NotBlank(
+                message = "Hotel display name is required."
+        )
+        @Size(
+                max = 200,
+                message = "Hotel display name must contain no more than 200 characters."
+        )
         String displayName,
 
-        @Size(max = 100)
+        @Size(
+                max = 100,
+                message = "TIN must contain no more than 100 characters."
+        )
         String tin,
 
-        @Size(max = 50)
+        @Size(
+                max = 50,
+                message = "Hotel phone number must contain no more than 50 characters."
+        )
         String phone,
 
-        @Email
-        @Size(max = 255)
+        @Email(
+                message = "Enter a valid hotel email address."
+        )
+        @Size(
+                max = 255,
+                message = "Hotel email must contain no more than 255 characters."
+        )
         String email,
 
-        @Size(max = 2000)
+        @Size(
+                max = 2000,
+                message = "Hotel address must contain no more than 2000 characters."
+        )
         String address,
 
         @Pattern(
                 regexp = "^[A-Z]{3}$",
-                message = "Currency code must contain exactly three uppercase letters.")
+                message = "Currency code must contain exactly three uppercase letters."
+        )
         String currencyCode,
 
-        @Size(max = 100)
+        @Size(
+                max = 100,
+                message = "Timezone must contain no more than 100 characters."
+        )
         String timezone,
 
         @Pattern(
                 regexp = "^(en|fr|rw)$",
-                message = "Default language must be en, fr, or rw.")
+                message = "Default language must be English, French, or Kinyarwanda."
+        )
         String defaultLanguage
 ) {
 }
