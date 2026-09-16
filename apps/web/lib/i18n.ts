@@ -444,6 +444,38 @@ balancesAt|Soldes calculés le|Igihe amafaranga asigaye yabariwe
 from|Du|Kuva
 to|Au|Kugeza
 Creating the hotel starts its three-month trial and creates the first hotel owner account.|La création de l'hôtel démarre sa période d'essai de trois mois et crée le premier compte propriétaire de l'hôtel.|Kwandikisha hoteli bitangiza igerageza ry'amezi atatu kandi bigakora konti ya mbere ya nyir'hoteli.
+Hotel settings|Paramètres de l'hôtel|Igenamiterere rya hoteli
+Manage the hotel's identity and operating defaults.|Gérez l'identité de l'hôtel et ses paramètres opérationnels par défaut.|Genzura umwirondoro wa hoteli n'igenamiterere ry'ibanze ry'imikorere.
+Accepted currencies and exchange rates|Devises acceptées et taux de change|Amafaranga yemewe n'ibipimo by'ivunjisha
+Exchange rates convert foreign customer payments into the hotel's base currency.|Les taux de change convertissent les paiements des clients en devises étrangères dans la devise de base de l'hôtel.|Ibipimo by'ivunjisha bihindura ubwishyu bw'abakiriya mu mafaranga y'amahanga bukajya mu ifaranga ry'ibanze rya hoteli.
+Hotel base currency|Devise de base de l'hôtel|Ifaranga ry'ibanze rya hoteli
+Add exchange rate|Ajouter un taux de change|Ongeraho igipimo cy'ivunjisha
+Foreign currency|Devise étrangère|Ifaranga ry'amahanga
+Rate to base currency|Taux vers la devise de base|Igipimo kijya mu ifaranga ry'ibanze
+Effective from|Applicable à partir de|Gitangira gukurikizwa
+Payment rate preview|Aperçu du taux de paiement|Igaragaza ry'igipimo cy'ubwishyu
+Save exchange rate|Enregistrer le taux de change|Bika igipimo cy'ivunjisha
+Exchange rate saved successfully.|Taux de change enregistré avec succès.|Igipimo cy'ivunjisha cyabitswe neza.
+Current exchange rates|Taux de change actuels|Ibipimo by'ivunjisha biriho
+Exchange rate|Taux de change|Igipimo cy'ivunjisha
+No foreign exchange rates configured.|Aucun taux de change étranger n'est configuré.|Nta gipimo cy'ivunjisha ry'amahanga cyashyizweho.
+Exchange rate history|Historique des taux de change|Amateka y'ibipimo by'ivunjisha
+Created|Créé|Byakozwe
+Active|Actif|Kirakora
+Inactive|Inactif|Ntigikora
+Payment currency|Devise de paiement|Ifaranga ryo kwishyura
+Foreign-currency payments use the hotel's configured exchange rate.|Les paiements en devises étrangères utilisent le taux de change configuré par l'hôtel.|Ubwishyu mu mafaranga y'amahanga bukoresha igipimo cy'ivunjisha cyashyizweho na hoteli.
+Enter a three-letter currency code.|Saisissez un code de devise à trois lettres.|Andika kode y'ifaranga igizwe n'inyuguti eshatu.
+Calculating exchange rate...|Calcul du taux de change...|Kubara igipimo cy'ivunjisha...
+Payment equivalent|Équivalent du paiement|Agaciro k'ubwishyu mu ifaranga ry'ibanze
+Payment total in base currency|Total du paiement dans la devise de base|Igiteranyo cy'ubwishyu mu ifaranga ry'ibanze
+Unable to calculate exchange rate.|Impossible de calculer le taux de change.|Ntibishobotse kubara igipimo cy'ivunjisha.
+Unable to submit payment.|Impossible de soumettre le paiement.|Ntibishobotse kohereza ubwishyu.
+Unable to load folio.|Impossible de charger le compte client.|Ntibishobotse gufungura konti y'umukiriya.
+Total to apply|Total à appliquer|Igiteranyo kigomba kwishyurwa
+Unable to load payment approvals.|Impossible de charger les approbations de paiement.|Ntibishobotse gufungura ubwishyu butegereje kwemezwa.
+Unable to load transactions.|Impossible de charger les transactions.|Ntibishobotse gufungura ibikorwa by'ubwishyu.
+Unable to complete payment decision.|Impossible de terminer la décision de paiement.|Ntibishobotse kurangiza icyemezo cy'ubwishyu.
 `;
 export const messages:Record<Locale,Record<string,string>>={en:{},fr:{},rw:{}};
 for(const line of rows.trim().split("\n")){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}
