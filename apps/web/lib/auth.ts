@@ -10,7 +10,10 @@ async function refresh(refreshToken:string){
  refreshing.set(refreshToken,pending);pending.finally(()=>setTimeout(()=>refreshing.delete(refreshToken),10000)).catch(()=>{});return pending;
 }
 export const {handlers,signIn,signOut,auth}=NextAuth({
- session:{strategy:"jwt"},pages:{signIn:"/login"},
+session:{
+  strategy:"jwt",
+  maxAge:30*24*60*60,
+},pages:{signIn:"/login"},
  providers:[Credentials({name:"Spring API",credentials:{email:{},password:{}},async authorize(credentials){
   const response=await fetch(`${apiBase}/auth/login`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:credentials?.email,password:credentials?.password}),signal:AbortSignal.timeout(15000)});
   if(!response.ok)return null;const tokens=await response.json();
