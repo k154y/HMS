@@ -54,7 +54,7 @@ const navSections: NavSection[] = [
     items: [
       { label: "Cashier", href: "/cashier", icon: Wallet, roles: ["CASHIER", "SUPER_ADMIN", "OWNER", "MANAGER", "ACCOUNTANT", "SUPERVISOR"] },
       { label: "Credit Customers", href: "/credit", icon: CreditCard, roles: [...FINANCE_ROLES] },
-      { label: "Expenses", href: "/expenses", icon: Receipt, roles: [...FINANCE_ROLES] },
+      { label: "Expenses", href: "/expenses", icon: Receipt, roles: [...FINANCE_ROLES, "CASHIER"] },
       { label: "Reports", href: "/reports", icon: BarChart3, roles: [...FINANCE_ROLES, "SUPERVISOR"] },
     ],
   },
@@ -81,7 +81,7 @@ export default function Sidebar({ role }: { role: string }) {
 
   const {data:session}=useSession();
   const permissions=(session?.user as {permissions?:string[]})?.permissions;
-  const byPage:Record<string,string[]>={"/rooms":["ROOM_VIEW"],"/reservations":["RESERVATION_VIEW"],"/checkin":["CHECKIN_PERFORM"],"/checkout":["CHECKOUT_PERFORM"],"/customers":["CUSTOMER_VIEW"],"/folios":["FOLIO_VIEW"],"/pos":["ORDER_CREATE"],"/menu":["PRODUCT_MANAGE"],"/kitchen":["KITCHEN_VIEW","BAR_VIEW"],"/stock":["PRODUCT_VIEW"],"/vendors":["VENDOR_VIEW"],"/purchasing":["PURCHASE_VIEW"],"/cashier":["PAYMENT_VIEW"],"/credit":["CREDIT_VIEW"],"/expenses":["FINANCIAL_REPORT_VIEW"],"/reports":["REPORT_VIEW","FINANCIAL_REPORT_VIEW"],"/housekeeping":["HOUSEKEEPING_VIEW"],"/maintenance":["MAINTENANCE_VIEW"],"/staff":["USER_VIEW"],"/audit":["AUDIT_VIEW"],"/settings":["HOTEL_SETTINGS_MANAGE"]};
+  const byPage:Record<string,string[]>={"/rooms":["ROOM_VIEW"],"/reservations":["RESERVATION_VIEW"],"/checkin":["CHECKIN_PERFORM"],"/checkout":["CHECKOUT_PERFORM"],"/customers":["CUSTOMER_VIEW"],"/folios":["FOLIO_VIEW"],"/pos":["ORDER_CREATE"],"/menu":["PRODUCT_MANAGE"],"/kitchen":["KITCHEN_VIEW","BAR_VIEW"],"/stock":["PRODUCT_VIEW"],"/vendors":["VENDOR_VIEW"],"/purchasing":["PURCHASE_VIEW"],"/cashier":["PAYMENT_VIEW"],"/credit":["CREDIT_VIEW"],"/expenses":["EXPENSE_VIEW","EXPENSE_RECORD"],"/reports":["REPORT_VIEW","FINANCIAL_REPORT_VIEW"],"/housekeeping":["HOUSEKEEPING_VIEW"],"/maintenance":["MAINTENANCE_VIEW"],"/staff":["USER_VIEW"],"/audit":["AUDIT_VIEW"],"/settings":["HOTEL_SETTINGS_MANAGE"]};
   const canSee=(item:NavItem)=>item.href==="/dashboard"||(permissions?byPage[item.href]?.some(p=>permissions.includes(p)):item.roles.includes(role));
   return (
     <aside className="w-60 bg-slate-900 flex flex-col h-full shrink-0">

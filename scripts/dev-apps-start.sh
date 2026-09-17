@@ -201,7 +201,58 @@ else
     echo "Backend log: $BACKEND_LOG"
 
 fi
+# ---------------------------------------------------------
+# Backend readiness
+# ---------------------------------------------------------
 
+echo ""
+echo "Waiting for Spring Boot backend to become ready..."
+
+BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT}/actuator/health"
+
+for attempt in $(seq 1 240); do
+
+    if curl \
+        --silent \
+        --fail \
+        --max-time 2 \
+        "$BACKEND_HEALTH_URL" \
+        2>/dev/null \
+        | grep -q '"status":"UP"'; then
+
+        echo "Backend is ready."
+        break
+    fi
+
+    if ! process_is_running "$BACKEND_PID_FILE"; then
+
+        echo ""
+        echo "ERROR: Backend process stopped before becoming ready."
+        echo ""
+        echo "Last backend log lines:"
+        echo ""
+
+        tail -n 80 "$BACKEND_LOG" || true
+
+        exit 1
+    fi
+
+    if [ "$attempt" -eq 240 ]; then
+
+        echo ""
+        echo "ERROR: Backend did not become ready within 240 seconds."
+        echo ""
+        echo "Last backend log lines:"
+        echo ""
+
+        tail -n 80 "$BACKEND_LOG" || true
+
+        exit 1
+    fi
+
+    sleep 1
+
+done
 
 # ---------------------------------------------------------
 # Frontend dependencies

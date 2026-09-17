@@ -14,8 +14,10 @@ public enum DefaultHotelRole {
     MANAGER(
             "Manager",
             "Hotel manager responsible for broad operational control.",
+
             PermissionCode.CASHIER_SHIFT_OPEN,
             PermissionCode.CASHIER_SHIFT_CLOSE,
+
             PermissionCode.HOTEL_SETTINGS_VIEW,
             PermissionCode.HOTEL_SETTINGS_MANAGE,
 
@@ -63,6 +65,10 @@ public enum DefaultHotelRole {
 
             PermissionCode.CASHIER_RECONCILE,
 
+            PermissionCode.EXPENSE_VIEW,
+            PermissionCode.EXPENSE_RECORD,
+            PermissionCode.EXPENSE_CATEGORY_MANAGE,
+
             PermissionCode.EXCHANGE_RATE_VIEW,
             PermissionCode.EXCHANGE_RATE_MANAGE,
 
@@ -98,14 +104,24 @@ public enum DefaultHotelRole {
             PermissionCode.REPORT_VIEW,
             PermissionCode.FINANCIAL_REPORT_VIEW,
 
-            PermissionCode.AUDIT_VIEW
+            PermissionCode.AUDIT_VIEW,
+
+
+            PermissionCode.NON_RESIDENT_BILL_VIEW,
+            PermissionCode.NON_RESIDENT_BILL_CREATE,
+            PermissionCode.NON_RESIDENT_BILL_CANCEL,
+            PermissionCode.NON_RESIDENT_BILL_VOID
+
+
     ),
 
     ACCOUNTANT(
             "Accountant",
             "Accounting and financial operations role.",
+
             PermissionCode.CASHIER_SHIFT_OPEN,
             PermissionCode.CASHIER_SHIFT_CLOSE,
+
             PermissionCode.HOTEL_SETTINGS_VIEW,
             PermissionCode.BRANCH_VIEW,
             PermissionCode.USER_VIEW,
@@ -126,6 +142,10 @@ public enum DefaultHotelRole {
 
             PermissionCode.CASHIER_RECONCILE,
 
+            PermissionCode.EXPENSE_VIEW,
+            PermissionCode.EXPENSE_RECORD,
+            PermissionCode.EXPENSE_CATEGORY_MANAGE,
+
             PermissionCode.EXCHANGE_RATE_VIEW,
             PermissionCode.EXCHANGE_RATE_MANAGE,
 
@@ -135,6 +155,7 @@ public enum DefaultHotelRole {
 
             PermissionCode.PRODUCT_VIEW,
             PermissionCode.PRODUCT_MANAGE,
+
             PermissionCode.INVENTORY_ADJUST,
             PermissionCode.INVENTORY_VIEW,
 
@@ -148,12 +169,15 @@ public enum DefaultHotelRole {
             PermissionCode.REPORT_VIEW,
             PermissionCode.FINANCIAL_REPORT_VIEW,
 
+            PermissionCode.NON_RESIDENT_BILL_VIEW,
+
             PermissionCode.AUDIT_VIEW
     ),
 
     RECEPTIONIST(
             "Receptionist",
             "Front-office role for reservations, guests, stays, and permitted collections.",
+
             PermissionCode.BRANCH_VIEW,
 
             PermissionCode.ROOM_VIEW,
@@ -180,12 +204,16 @@ public enum DefaultHotelRole {
 
             PermissionCode.DISCOUNT_APPLY,
 
+            PermissionCode.NON_RESIDENT_BILL_VIEW,
+            PermissionCode.NON_RESIDENT_BILL_CREATE,
+
             PermissionCode.CREDIT_VIEW
     ),
 
     CASHIER(
             "Cashier",
             "Role responsible for collecting, recording, and reconciling permitted payments.",
+
             PermissionCode.BRANCH_VIEW,
 
             PermissionCode.CUSTOMER_VIEW,
@@ -198,7 +226,12 @@ public enum DefaultHotelRole {
             PermissionCode.CASHIER_SHIFT_OPEN,
             PermissionCode.CASHIER_SHIFT_CLOSE,
 
+            PermissionCode.EXPENSE_VIEW,
+            PermissionCode.EXPENSE_RECORD,
+
             PermissionCode.EXCHANGE_RATE_VIEW,
+            PermissionCode.NON_RESIDENT_BILL_VIEW,
+PermissionCode.NON_RESIDENT_BILL_CREATE,
 
             PermissionCode.CREDIT_VIEW
     ),
@@ -206,12 +239,16 @@ public enum DefaultHotelRole {
     WAITER(
             "Waiter",
             "Food and beverage service role responsible for customer orders.",
+
             PermissionCode.BRANCH_VIEW,
             PermissionCode.CUSTOMER_VIEW,
             PermissionCode.CUSTOMER_MANAGE,
             PermissionCode.FOLIO_VIEW,
             PermissionCode.PRODUCT_VIEW,
             PermissionCode.PAYMENT_RECORD,
+
+            PermissionCode.NON_RESIDENT_BILL_VIEW,
+PermissionCode.NON_RESIDENT_BILL_CREATE,
 
             PermissionCode.ORDER_VIEW,
             PermissionCode.ORDER_CREATE,
@@ -224,6 +261,7 @@ public enum DefaultHotelRole {
     BARTENDER(
             "Bartender",
             "Bar operations role responsible for beverage order preparation.",
+
             PermissionCode.BRANCH_VIEW,
 
             PermissionCode.ORDER_VIEW,
@@ -235,6 +273,7 @@ public enum DefaultHotelRole {
     KITCHEN_STAFF(
             "Kitchen Staff",
             "Kitchen operations role responsible for food preparation workflow.",
+
             PermissionCode.BRANCH_VIEW,
 
             PermissionCode.ORDER_VIEW,
@@ -246,6 +285,7 @@ public enum DefaultHotelRole {
     STOREKEEPER(
             "Storekeeper",
             "Inventory and goods-receiving role.",
+
             PermissionCode.BRANCH_VIEW,
 
             PermissionCode.PRODUCT_VIEW,
@@ -262,6 +302,7 @@ public enum DefaultHotelRole {
     HOUSEKEEPER(
             "Housekeeper",
             "Housekeeping role responsible for cleaning and room readiness.",
+
             PermissionCode.BRANCH_VIEW,
             PermissionCode.ROOM_VIEW,
 
@@ -272,6 +313,7 @@ public enum DefaultHotelRole {
     MAINTENANCE(
             "Maintenance",
             "Maintenance role responsible for property maintenance work.",
+
             PermissionCode.BRANCH_VIEW,
             PermissionCode.ROOM_VIEW,
 
@@ -282,6 +324,7 @@ public enum DefaultHotelRole {
     AUDITOR(
             "Auditor",
             "Read-only oversight role for operational, financial, and audit information.",
+
             PermissionCode.HOTEL_SETTINGS_VIEW,
             PermissionCode.BRANCH_VIEW,
 
@@ -293,10 +336,14 @@ public enum DefaultHotelRole {
 
             PermissionCode.CUSTOMER_VIEW,
 
+            PermissionCode.NON_RESIDENT_BILL_VIEW,
+
             PermissionCode.FOLIO_VIEW,
             PermissionCode.ORDER_VIEW,
 
             PermissionCode.PAYMENT_VIEW,
+
+            PermissionCode.EXPENSE_VIEW,
 
             PermissionCode.EXCHANGE_RATE_VIEW,
 
@@ -320,8 +367,10 @@ public enum DefaultHotelRole {
     SUPERVISOR(
             "Supervisor",
             "Operational supervisory role with elevated day-to-day controls.",
+
             PermissionCode.CASHIER_SHIFT_OPEN,
             PermissionCode.CASHIER_SHIFT_CLOSE,
+
             PermissionCode.BRANCH_VIEW,
 
             PermissionCode.ROOM_VIEW,
@@ -376,6 +425,10 @@ public enum DefaultHotelRole {
             PermissionCode.HOUSEKEEPING_UPDATE,
 
             PermissionCode.MAINTENANCE_VIEW,
+            PermissionCode.NON_RESIDENT_BILL_VIEW,
+PermissionCode.NON_RESIDENT_BILL_CREATE,
+PermissionCode.NON_RESIDENT_BILL_CANCEL,
+PermissionCode.NON_RESIDENT_BILL_VOID,
 
             PermissionCode.REPORT_VIEW
     );
@@ -389,12 +442,18 @@ public enum DefaultHotelRole {
             String description,
             PermissionCode... permissions) {
 
-        this.displayName = displayName;
-        this.description = description;
+        this.displayName =
+                displayName;
 
-        this.permissions = Set.copyOf(
-                Arrays.asList(permissions)
-        );
+        this.description =
+                description;
+
+        this.permissions =
+                Set.copyOf(
+                        Arrays.asList(
+                                permissions
+                        )
+                );
     }
 
     public String getCode() {
@@ -413,5 +472,3 @@ public enum DefaultHotelRole {
         return permissions;
     }
 }
-
-

@@ -476,6 +476,111 @@ Total to apply|Total à appliquer|Igiteranyo kigomba kwishyurwa
 Unable to load payment approvals.|Impossible de charger les approbations de paiement.|Ntibishobotse gufungura ubwishyu butegereje kwemezwa.
 Unable to load transactions.|Impossible de charger les transactions.|Ntibishobotse gufungura ibikorwa by'ubwishyu.
 Unable to complete payment decision.|Impossible de terminer la décision de paiement.|Ntibishobotse kurangiza icyemezo cy'ubwishyu.
+Current stock|Stock actuel|Ububiko buriho
+Record stock movement|Enregistrer un mouvement de stock|Andika impinduka y'ububiko
+Movement history|Historique des mouvements|Amateka y'impinduka z'ububiko
+No stock movements yet.|Aucun mouvement de stock pour le moment.|Nta mpinduka y'ububiko irandikwa.
+is required.|est obligatoire.|irasabwa.
+must be a valid number.|doit être un nombre valide.|igomba kuba umubare wemewe.
+must be at least|doit être au moins|igomba nibura kuba
+must be a valid email address.|doit être une adresse e-mail valide.|igomba kuba aderesi ya imeyili yemewe.
+must not be greater than|ne doit pas être supérieur à|ntigomba kurenza
+Edit product|Modifier le produit|Hindura igicuruzwa
+Record operating expense|Enregistrer une dépense d’exploitation|Andika amafaranga yakoreshejwe mu mirimo
+Choose the expense category configured by hotel management.|Choisissez la catégorie de dépense configurée par la direction de l’hôtel.|Hitamo icyiciro cy'amafaranga cyashyizweho n'ubuyobozi bwa hoteli.
+Select expense category|Sélectionner une catégorie de dépense|Hitamo icyiciro cy'amafaranga
+Expense categories|Catégories de dépenses|Ibyiciro by'amafaranga akoreshwa
+Create and maintain the categories cashiers can use when recording expenses.|Créez et gérez les catégories que les caissiers peuvent utiliser pour enregistrer les dépenses.|Kora kandi ucunge ibyiciro abashinzwe kwakira amafaranga bakoresha bandika amafaranga yakoreshejwe.
+New category|Nouvelle catégorie|Icyiciro gishya
+Category name|Nom de la catégorie|Izina ry'icyiciro
+Add category|Ajouter la catégorie|Ongeraho icyiciro
+Edit category|Modifier la catégorie|Hindura icyiciro
+Save changes|Enregistrer les modifications|Bika impinduka
+No active expense categories are available.|Aucune catégorie de dépense active n’est disponible.|Nta cyiciro cy'amafaranga gikora gihari.
+No expense categories configured.|Aucune catégorie de dépense n’est configurée.|Nta cyiciro cy'amafaranga cyashyizweho.
+Inactive categories remain in historical expenses but cannot be selected for new expenses.|Les catégories inactives restent dans l’historique mais ne peuvent pas être utilisées pour de nouvelles dépenses.|Ibyiciro bidakora biguma mu mateka y'amafaranga ariko ntibishobora gukoreshwa ku mafaranga mashya.
+Expense recorded successfully.|Dépense enregistrée avec succès.|Amafaranga yakoreshejwe yanditswe neza.
+Expense category created successfully.|Catégorie de dépense créée avec succès.|Icyiciro cy'amafaranga cyakozwe neza.
+Expense category updated successfully.|Catégorie de dépense mise à jour avec succès.|Icyiciro cy'amafaranga cyahinduwe neza.
+Expense date is required.|La date de la dépense est obligatoire.|Itariki y'amafaranga yakoreshejwe irasabwa.
+Expense category is required.|La catégorie de dépense est obligatoire.|Icyiciro cy'amafaranga kirasabwa.
+Amount must be greater than zero.|Le montant doit être supérieur à zéro.|Amafaranga agomba kuba arenga zeru.
+Amount is required.|Le montant est obligatoire.|Amafaranga arasabwa.
+Description is required.|La description est obligatoire.|Ibisobanuro birasabwa.
+Description must not exceed 1000 characters.|La description ne doit pas dépasser 1 000 caractères.|Ibisobanuro ntibigomba kurenza inyuguti 1000.
+Payment method is required.|Le mode de paiement est obligatoire.|Uburyo bwo kwishyura burasabwa.
+Choose a valid expense payment method.|Choisissez un mode de paiement valide pour la dépense.|Hitamo uburyo bwemewe bwo kwishyura aya mafaranga.
+Request identifier is required.|L’identifiant de la demande est obligatoire.|Nimero iranga iki gikorwa irasabwa.
+Select an expense category.|Sélectionnez une catégorie de dépense.|Hitamo icyiciro cy'amafaranga.
+Select an active expense category.|Sélectionnez une catégorie de dépense active.|Hitamo icyiciro cy'amafaranga gikora.
+Category name is required.|Le nom de la catégorie est obligatoire.|Izina ry'icyiciro rirasabwa.
+Category name must not exceed 100 characters.|Le nom de la catégorie ne doit pas dépasser 100 caractères.|Izina ry'icyiciro ntirigomba kurenza inyuguti 100.
+Category status is required.|Le statut de la catégorie est obligatoire.|Imiterere y'icyiciro irasabwa.
+An expense category with this name already exists.|Une catégorie de dépense portant ce nom existe déjà.|Icyiciro cy'amafaranga gifite iri zina gisanzwe gihari.
+Amount can have at most 15 integer digits and 4 decimal places.|Le montant peut contenir au maximum 15 chiffres entiers et 4 décimales.|Amafaranga ashobora kugira imibare 15 mbere y'akadomo n'imibare 4 nyuma yako.
+Choose what this payment covers.|Choisissez ce que ce paiement couvre.|Hitamo icyo ubu bwishyu bugenewe.
+Checked-in guest folio|Folio du client hébergé|Konti y'umukiriya ucumbitse
+Post charges to a guest staying in the hotel.|Ajouter les frais au compte d'un client hébergé.|Shyira amafaranga kuri konti y'umukiriya ucumbitse.
+Non-resident bill|Facture client non-résident|Fagitire y'umukiriya udacumbitse
+Walk-in and outside customers. No room number required.|Clients de passage et externes. Aucun numéro de chambre requis.|Abakiriya batacumbitse. Nta nimero y'icyumba ikenewe.
+Guest billing|Facturation client hébergé|Kwishyuza umukiriya ucumbitse
+Choose the customer who is currently checked in.|Choisissez le client actuellement enregistré à l'hôtel.|Hitamo umukiriya uri muri hoteli ubu.
+Select checked-in guest|Sélectionner un client hébergé|Hitamo umukiriya ucumbitse
+The backend verifies that the selected customer has an active checked-in stay.|Le système vérifie que le client sélectionné est actuellement hébergé.|Sisitemu igenzura ko umukiriya wahisemo ari muri hoteli.
+Non-resident bill setup|Configuration de la facture non-résident|Gutegura fagitire y'udacumbitse
+Use a walk-in customer or attach the bill to an existing customer or organization.|Utilisez un client de passage ou associez la facture à un client ou une organisation existante.|Koresha umukiriya winjiye ako kanya cyangwa uhuze fagitire n'umukiriya cyangwa ikigo gisanzwe.
+Start new bill|Nouvelle facture|Tangira fagitire nshya
+Active non-resident bill|Facture non-résident active|Fagitire y'udacumbitse iri gukora
+Open bill|Ouvrir la facture|Fungura fagitire
+Bill type|Type de facture|Ubwoko bwa fagitire
+Walk-in customer|Client de passage|Umukiriya winjiye ako kanya
+Table / reference|Table / référence|Ameza / inomero
+Notes|Notes|Ibisobanuro
+Optional notes|Notes facultatives|Ibisobanuro bitari ngombwa
+Menu items|Articles du menu|Ibiri kuri menu
+Tap an item to add it to the order.|Cliquez sur un article pour l'ajouter à la commande.|Kanda ku kintu kugira ngo ugishyire ku itegeko.
+Search menu items|Rechercher dans le menu|Shakisha kuri menu
+No menu items match your search.|Aucun article ne correspond à votre recherche.|Nta kintu kuri menu gihuye n'ishakisha.
+Order summary|Résumé de la commande|Incamake y'itegeko
+items|articles|ibintu
+Non-resident|Non-résident|Udacumbitse
+Guest folio|Folio client|Konti y'umukiriya
+Your order is empty|Votre commande est vide|Itegeko nta kintu ririmo
+Select menu items to begin.|Sélectionnez des articles pour commencer.|Hitamo ibintu kuri menu kugira ngo utangire.
+Subtotal|Sous-total|Igiteranyo mbere y'umusoro
+This bill will use the hotel walk-in customer.|Cette facture utilisera le client de passage de l'hôtel.|Iyi fagitire izakoresha umukiriya usanzwe winjira ako kanya.
+Order sent to the non-resident bill.|Commande ajoutée à la facture non-résident.|Itegeko ryashyizwe kuri fagitire y'udacumbitse.
+Order sent to the guest folio.|Commande ajoutée au folio du client.|Itegeko ryashyizwe kuri konti y'umukiriya.
+Open folio and record payment|Ouvrir le folio et enregistrer le paiement|Fungura konti wandike ubwishyu
+View charges, payments and settle the customer balance.|Consultez les frais et paiements et réglez le solde du client.|Reba amafaranga n'ubwishyu kandi wishyure asigaye.
+Back to folios|Retour aux folios|Subira kuri konti
+The folio has an unpaid balance. Settle or move the approved balance to credit before closing it.|Le folio présente un solde impayé. Réglez-le ou transférez le solde approuvé au crédit avant de le clôturer.|Konti iracyafite umwenda. Wishyure cyangwa amafaranga yemejwe ashyirwe ku ideni mbere yo kuyifunga.
+Total charges|Total des frais|Amafaranga yose yishyuzwa
+Paid amount|Montant payé|Amafaranga yishyuwe
+Remaining amount|Montant restant|Amafaranga asigaye
+Folio status|Statut du folio|Imiterere ya konti
+PARTIAL|Partiel|Igice cyishyuwe
+Folio ledger|Grand livre du folio|Inyandiko za konti
+All charges, payments, refunds and reversals.|Tous les frais, paiements, remboursements et annulations.|Amafaranga yose, ubwishyu, gusubizwa n'ibyasubijwe inyuma.
+Date & time|Date et heure|Itariki n'isaha
+No folio activity yet.|Aucune activité sur le folio.|Nta gikorwa kiraba kuri konti.
+Record payment|Enregistrer un paiement|Andika ubwishyu
+Full or partial settlement|Paiement total ou partiel|Kwishyura byose cyangwa igice
+Currency|Devise|Ifaranga
+Folio settled|Folio soldé|Konti yarishyuwe
+There is no outstanding balance to collect.|Il n'y a aucun solde impayé à encaisser.|Nta mafaranga asigaye kwishyurwa.
+RESTAURANT|Restaurant|Resitora
+LAUNDRY|Blanchisserie|Kumesera
+TRANSPORT|Transport|Ubwikorezi
+SWIMMING_POOL|Piscine|Pisine
+DAY_USE|Utilisation journalière|Serivisi y'umunsi
+EVENT|Événement|Ibirori
+CONFERENCE|Conférence|Inama
+OUTSIDE_CATERING|Service traiteur externe|Serivisi y'ibiryo hanze
+OTHER|Autre|Ibindi
+All|Tous|Byose
+Tax|Taxe|Umusoro
+Choose a checked-in guest folio or open a non-resident bill.|Choisissez le folio d'un client enregistré ou ouvrez une facture pour un client non-résident.|Hitamo konti y'umukiriya ucumbitse cyangwa ufungure fagitire y'umukiriya udacumbitse.
 `;
 export const messages:Record<Locale,Record<string,string>>={en:{},fr:{},rw:{}};
 for(const line of rows.trim().split("\n")){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}
