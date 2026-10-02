@@ -67,6 +67,8 @@ type ApprovalPayload = {
   requestId?: string;
   parts: ApprovalPart[];
   collectionScope?: string;
+  paymentPurpose?: string;
+  reservationId?: string;
   folioCurrency?: string;
 };
 
@@ -215,6 +217,21 @@ function paymentCurrency(
     .trim()
     .toUpperCase();
 }
+
+function paymentPurposeLabel(
+  payload: ApprovalPayload,
+) {
+
+  if (
+    payload.paymentPurpose
+    === "RESERVATION_ADVANCE"
+  ) {
+    return "Reservation advance";
+  }
+
+  return paymentPurposeLabel(payload);
+}
+
 
 type SessionProfile = {
   id?: string;
@@ -1230,10 +1247,7 @@ export default function Cashier() {
               <p className="mt-1 text-sm text-slate-500">
 
                 {t(
-                  selectedPayload.collectionScope
-                  === "ROOM"
-                    ? "Room charges"
-                    : "Food and services"
+                  paymentPurposeLabel(selectedPayload)
                 )}
 
               </p>
