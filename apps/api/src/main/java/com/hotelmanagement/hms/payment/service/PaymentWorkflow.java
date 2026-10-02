@@ -108,6 +108,17 @@ public class PaymentWorkflow {
     }
 
     /**
+     * Dedicated reservation-advance request.
+     *
+     * The client does not choose the folio, collection scope,
+     * payment purpose or reservation relationship.
+     */
+    public record AdvanceRequest(
+            UUID requestId,
+            List<Part> parts) {
+    }
+
+    /**
      * Server-generated immutable monetary snapshot.
      *
      * fxRate and baseAmount are never trusted from the browser.
@@ -133,6 +144,8 @@ public class PaymentWorkflow {
             UUID requestId,
             List<QuotedPart> parts,
             String collectionScope,
+            String paymentPurpose,
+            UUID reservationId,
             String folioCurrency) {
     }
 
@@ -281,9 +294,137 @@ public class PaymentWorkflow {
             UUID branch,
             Request request) {
 
+        return requestInternal(
+                hotel,
+                branch,
+                request,
+                "SETTLEMENT",
+                null
+        );
+    }
+
+    public Map<String, Object> requestReservationAdvance(
+            UUID hotel,
+            UUID branch,
+            UUID reservationId,
+            AdvanceRequest request) {
+
+        if (reservationId == null
+                || request == null
+                || request.requestId() == null
+                || request.parts() == null
+                || request.parts().isEmpty()) {
+
+            throw new IllegalArgumentException(
+                    "Invalid reservation advance."
+            );
+        }
+
+        var rows =
+                db.queryForList(
+                        """
+                        select folio_id, status
+                        from reservations
+                        where id = ?
+                          and hotel_id = ?
+                          and branch_id = ?
+                        """,
+                        reservationId,
+                        hotel,
+                        branch
+                );
+
+        if (rows.isEmpty()) {
+            throw ApiException.notFound();
+        }
+
+        var row =
+                rows.getFirst();
+
+        if (!"CONFIRMED".equals(
+                String.valueOf(
+                        row.get("status")
+                )
+        )) {
+
+            throw new ApiException(
+                    409,
+                    "RESERVATION_ADVANCE_NOT_ALLOWED",
+                    "Advance payments require a confirmed reservation."
+            );
+        }
+
+        UUID folioId =
+                (UUID) row.get(
+                        "folio_id"
+                );
+
+        return requestInternal(
+                hotel,
+                branch,
+                new Request(
+                        folioId,
+                        request.requestId(),
+                        request.parts(),
+                        "ROOM"
+                ),
+                "RESERVATION_ADVANCE",
+                reservationId
+        );
+    }
+
+    private Map<String, Object> requestInternal(
+            UUID hotel,
+            UUID branch,
+            Request request,
+            String paymentPurpose,
+            UUID reservationId) {
+
         validateRequest(
                 request
         );
+
+        String normalizedPaymentPurpose =
+                paymentPurpose == null
+                        || paymentPurpose.isBlank()
+                        ? "SETTLEMENT"
+                        : paymentPurpose
+                                .trim()
+                                .toUpperCase(
+                                        Locale.ROOT
+                                );
+
+        if (!Set.of(
+                "SETTLEMENT",
+                "RESERVATION_ADVANCE"
+        ).contains(
+                normalizedPaymentPurpose
+        )) {
+
+            throw new IllegalArgumentException(
+                    "Invalid payment purpose."
+            );
+        }
+
+        if ("SETTLEMENT".equals(
+                normalizedPaymentPurpose
+        )
+                && reservationId != null) {
+
+            throw new IllegalArgumentException(
+                    "Settlement payments cannot reference a reservation."
+            );
+        }
+
+        if ("RESERVATION_ADVANCE".equals(
+                normalizedPaymentPurpose
+        )
+                && reservationId == null) {
+
+            throw new IllegalArgumentException(
+                    "Reservation advance requires a reservation."
+            );
+        }
 
         UUID actor =
                 scope.branch(
@@ -334,6 +475,18 @@ public class PaymentWorkflow {
 
             throw new IllegalArgumentException(
                     "Invalid collection scope."
+            );
+        }
+
+        if ("RESERVATION_ADVANCE".equals(
+                normalizedPaymentPurpose
+        )
+                && !"ROOM".equals(
+                        collectionScope
+                )) {
+
+            throw new IllegalArgumentException(
+                    "Reservation advances must be allocated to ROOM."
             );
         }
 
@@ -395,7 +548,9 @@ public class PaymentWorkflow {
                     storedPayload,
                     request,
                     folio,
-                    collectionScope
+                    collectionScope,
+                    normalizedPaymentPurpose,
+                    reservationId
             )) {
 
                 throw new IllegalStateException(
@@ -426,6 +581,8 @@ public class PaymentWorkflow {
                         request.requestId(),
                         quotedParts,
                         collectionScope,
+                        normalizedPaymentPurpose,
+                        reservationId,
                         normalizeCurrency(
                                 folio.getCurrency()
                         )
@@ -452,22 +609,27 @@ public class PaymentWorkflow {
                         );
 
         BigDecimal folioBalance =
-                folios.balance(
-                        hotel,
-                        branch,
-                        request.folioId()
-                );
+        folios.balance(
+                hotel,
+                branch,
+                request.folioId()
+        );
 
-        if (totalBase.compareTo(
+if (!"RESERVATION_ADVANCE".equals(
+        normalizedPaymentPurpose
+)
+        && totalBase.compareTo(
                 folioBalance
         ) > 0) {
 
-            throw new IllegalStateException(
-                    "Payment exceeds folio balance."
-            );
-        }
+    throw new IllegalStateException(
+            "Payment exceeds folio balance."
+    );
+}
 
         checkCollection(
+                hotel,
+                branch,
                 payload,
                 totalBase
         );
@@ -726,25 +888,30 @@ public class PaymentWorkflow {
              * payment might have been approved while this one was pending.
              */
             checkCollection(
+                    hotel,
+                    branch,
                     payload,
                     totalBase
             );
 
             BigDecimal currentFolioBalance =
-                    folios.balance(
-                            hotel,
-                            branch,
-                            payload.folioId()
-                    );
+        folios.balance(
+                hotel,
+                branch,
+                payload.folioId()
+        );
 
-            if (totalBase.compareTo(
-                    currentFolioBalance
-            ) > 0) {
+if (!"RESERVATION_ADVANCE".equals(
+        payload.paymentPurpose()
+)
+        && totalBase.compareTo(
+                currentFolioBalance
+        ) > 0) {
 
-                throw new IllegalStateException(
-                        "Payment exceeds the current folio balance."
-                );
-            }
+    throw new IllegalStateException(
+            "Payment exceeds the current folio balance."
+    );
+}
 
             int index = 0;
 
@@ -768,16 +935,23 @@ public class PaymentWorkflow {
                                 null,
                                 id
                                         + "-"
-                                        + index++
+                                        + index++,
+                                payload.collectionScope(),
+                                payload.paymentPurpose(),
+                                payload.reservationId()
                         );
 
                 db.update(
                         """
                         update payments
-                        set collection_scope = ?
+                        set collection_scope = ?,
+                            payment_purpose = ?,
+                            reservation_id = ?
                         where id = ?
                         """,
                         payload.collectionScope(),
+                        payload.paymentPurpose(),
+                        payload.reservationId(),
                         payment.id()
                 );
             }
@@ -1087,6 +1261,46 @@ public class PaymentWorkflow {
             );
         }
 
+        String paymentPurpose =
+                stored.paymentPurpose() == null
+                        || stored.paymentPurpose().isBlank()
+                        ? "SETTLEMENT"
+                        : stored.paymentPurpose()
+                                .trim()
+                                .toUpperCase(
+                                        Locale.ROOT
+                                );
+
+        UUID reservationId =
+                stored.reservationId();
+
+        if (!Set.of(
+                "SETTLEMENT",
+                "RESERVATION_ADVANCE"
+        ).contains(paymentPurpose)) {
+
+            throw new IllegalStateException(
+                    "Stored payment purpose is invalid."
+            );
+        }
+
+        if ("SETTLEMENT".equals(paymentPurpose)
+                && reservationId != null) {
+
+            throw new IllegalStateException(
+                    "Stored settlement payment cannot reference a reservation."
+            );
+        }
+
+        if ("RESERVATION_ADVANCE".equals(paymentPurpose)
+                && (reservationId == null
+                || !"ROOM".equals(collectionScope))) {
+
+            throw new IllegalStateException(
+                    "Stored reservation advance is invalid."
+            );
+        }
+
         /*
          * Legacy payload detection is intentionally strict.
          *
@@ -1159,6 +1373,8 @@ public class PaymentWorkflow {
                     stored.requestId(),
                     converted,
                     collectionScope,
+                    paymentPurpose,
+                    reservationId,
                     folioCurrency
             );
         }
@@ -1216,6 +1432,8 @@ public class PaymentWorkflow {
                 stored.requestId(),
                 normalizedParts,
                 collectionScope,
+                paymentPurpose,
+                reservationId,
                 storedFolioCurrency
         );
     }
@@ -1233,7 +1451,9 @@ public class PaymentWorkflow {
             ApprovalPayload stored,
             Request incoming,
             Folio folio,
-            String collectionScope) {
+            String collectionScope,
+            String paymentPurpose,
+            UUID reservationId) {
 
         if (!Objects.equals(
                 stored.folioId(),
@@ -1246,6 +1466,14 @@ public class PaymentWorkflow {
                 || !Objects.equals(
                         stored.collectionScope(),
                         collectionScope
+                )
+                || !Objects.equals(
+                        stored.paymentPurpose(),
+                        paymentPurpose
+                )
+                || !Objects.equals(
+                        stored.reservationId(),
+                        reservationId
                 )
                 || stored.parts().size()
                         != incoming.parts().size()) {
@@ -1398,11 +1626,130 @@ public class PaymentWorkflow {
      * belonging to the selected collection category.
      */
     private void checkCollection(
+            UUID hotel,
+            UUID branch,
             ApprovalPayload request,
             BigDecimal totalBase) {
 
         String collection =
                 request.collectionScope();
+
+        /*
+         * Reservation advances are received before accommodation
+         * charges normally exist on the folio.
+         *
+         * Validate them against the confirmed reservation value,
+         * not against the current folio balance.
+         */
+        if ("RESERVATION_ADVANCE".equals(
+                request.paymentPurpose()
+        )) {
+
+            var reservationRows =
+                    db.queryForList(
+                            """
+                            select id
+                            from reservations
+                            where id = ?
+                              and hotel_id = ?
+                              and branch_id = ?
+                              and folio_id = ?
+                              and status = 'CONFIRMED'
+                            for update
+                            """,
+                            request.reservationId(),
+                            hotel,
+                            branch,
+                            request.folioId()
+                    );
+
+            if (reservationRows.isEmpty()) {
+
+                throw new ApiException(
+                        409,
+                        "RESERVATION_ADVANCE_NOT_ALLOWED",
+                        "Advance payments require a confirmed reservation."
+                );
+            }
+
+            BigDecimal reservationTotal =
+                    db.queryForObject(
+                            """
+                            select coalesce(
+                                sum(
+                                    nightly_rate
+                                    * (check_out - check_in)
+                                ),
+                                0
+                            )
+                            from reservation_rooms
+                            where hotel_id = ?
+                              and branch_id = ?
+                              and reservation_id = ?
+                              and active = true
+                            """,
+                            BigDecimal.class,
+                            hotel,
+                            branch,
+                            request.reservationId()
+                    );
+
+            if (reservationTotal == null
+                    || reservationTotal.signum() <= 0) {
+
+                throw new IllegalStateException(
+                        "Reservation has no payable accommodation amount."
+                );
+            }
+
+            BigDecimal alreadyPaid =
+                    db.queryForObject(
+                            """
+                            select coalesce(
+                                sum(base_amount),
+                                0
+                            )
+                            from payments
+                            where hotel_id = ?
+                              and branch_id = ?
+                              and reservation_id = ?
+                              and payment_purpose = 'RESERVATION_ADVANCE'
+                              and status = 'POSTED'
+                            """,
+                            BigDecimal.class,
+                            hotel,
+                            branch,
+                            request.reservationId()
+                    );
+
+            if (alreadyPaid == null) {
+                alreadyPaid =
+                        BigDecimal.ZERO;
+            }
+
+            BigDecimal remaining =
+                    reservationTotal.subtract(
+                            alreadyPaid
+                    );
+
+            if (remaining.signum() < 0) {
+                remaining =
+                        BigDecimal.ZERO;
+            }
+
+            if (totalBase.compareTo(
+                    remaining
+            ) > 0) {
+
+                throw new ApiException(
+                        409,
+                        "RESERVATION_ADVANCE_EXCEEDS_BALANCE",
+                        "Advance payment exceeds the remaining reservation amount."
+                );
+            }
+
+            return;
+        }
 
         if (!Set.of(
                 "ROOM",
@@ -1428,10 +1775,18 @@ public class PaymentWorkflow {
                         request.folioId()
                 );
 
+        /*
+         * Reservation advances are stored as ROOM collections.
+         * Therefore normal ROOM outstanding calculations naturally
+         * include money already prepaid before check-in.
+         */
         BigDecimal paid =
                 db.queryForObject(
                         """
-                        select coalesce(sum(base_amount),0)
+                        select coalesce(
+                            sum(base_amount),
+                            0
+                        )
                         from payments
                         where folio_id = ?
                           and collection_scope = ?
@@ -1446,6 +1801,11 @@ public class PaymentWorkflow {
                 charges.subtract(
                         paid
                 );
+
+        if (outstanding.signum() < 0) {
+            outstanding =
+                    BigDecimal.ZERO;
+        }
 
         if (totalBase.compareTo(
                 outstanding
