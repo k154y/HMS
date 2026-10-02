@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Locale;
 import java.util.UUID;
 
 import static com.hotelmanagement.hms.identity.authorization.model.PermissionCode.PAYMENT_RECORD;
@@ -53,16 +54,118 @@ public class PaymentService {
      * amount are stored permanently on the payment.
      */
     public PaymentResponse postApproved(
-            UUID hotel,
-            UUID branch,
-            UUID folioId,
-            PaymentMethod method,
-            String currency,
-            BigDecimal originalAmount,
-            BigDecimal fxRate,
-            BigDecimal expectedBaseAmount,
-            String externalReference,
-            String idempotencyKey) {
+        UUID hotel,
+        UUID branch,
+        UUID folioId,
+        PaymentMethod method,
+        String currency,
+        BigDecimal originalAmount,
+        BigDecimal fxRate,
+        BigDecimal expectedBaseAmount,
+        String externalReference,
+        String idempotencyKey) {
+
+    return postApproved(
+            hotel,
+            branch,
+            folioId,
+            method,
+            currency,
+            originalAmount,
+            fxRate,
+            expectedBaseAmount,
+            externalReference,
+            idempotencyKey,
+            null
+    );
+}
+
+public PaymentResponse postApproved(
+        UUID hotel,
+        UUID branch,
+        UUID folioId,
+        PaymentMethod method,
+        String currency,
+        BigDecimal originalAmount,
+        BigDecimal fxRate,
+        BigDecimal expectedBaseAmount,
+        String externalReference,
+        String idempotencyKey,
+        String collectionScope) {
+
+    return postApproved(
+            hotel,
+            branch,
+            folioId,
+            method,
+            currency,
+            originalAmount,
+            fxRate,
+            expectedBaseAmount,
+            externalReference,
+            idempotencyKey,
+            collectionScope,
+            "SETTLEMENT",
+            null
+    );
+}
+
+public PaymentResponse postApproved(
+        UUID hotel,
+        UUID branch,
+        UUID folioId,
+        PaymentMethod method,
+        String currency,
+        BigDecimal originalAmount,
+        BigDecimal fxRate,
+        BigDecimal expectedBaseAmount,
+        String externalReference,
+        String idempotencyKey,
+        String collectionScope,
+        String paymentPurpose,
+        UUID reservationId) {
+
+        String normalizedPaymentPurpose =
+                paymentPurpose == null
+                        || paymentPurpose.isBlank()
+                        ? "SETTLEMENT"
+                        : paymentPurpose
+                                .trim()
+                                .toUpperCase(
+                                        Locale.ROOT
+                                );
+
+        if (!normalizedPaymentPurpose.equals("SETTLEMENT")
+                && !normalizedPaymentPurpose.equals(
+                        "RESERVATION_ADVANCE"
+                )) {
+
+            throw new IllegalArgumentException(
+                    "Invalid payment purpose."
+            );
+        }
+
+        boolean reservationAdvance =
+                normalizedPaymentPurpose.equals(
+                        "RESERVATION_ADVANCE"
+                );
+
+        if (reservationAdvance
+                && (reservationId == null
+                || !"ROOM".equals(collectionScope))) {
+
+            throw new IllegalArgumentException(
+                    "Reservation advances require a reservation and ROOM collection scope."
+            );
+        }
+
+        if (!reservationAdvance
+                && reservationId != null) {
+
+            throw new IllegalArgumentException(
+                    "Settlement payments cannot reference a reservation advance."
+            );
+        }
 
         UUID actor =
                 scope.branch(
@@ -192,20 +295,21 @@ public class PaymentService {
          * configured FX rate converts into this currency.
          */
         BigDecimal outstandingBalance =
-                folios.balance(
-                        hotel,
-                        branch,
-                        folioId
-                );
+        folios.balance(
+                hotel,
+                branch,
+                folioId
+        );
 
-        if (baseAmount.compareTo(
+if (!reservationAdvance
+        && baseAmount.compareTo(
                 outstandingBalance
         ) > 0) {
 
-            throw new IllegalStateException(
-                    "Payment exceeds folio balance."
-            );
-        }
+    throw new IllegalStateException(
+            "Payment exceeds folio balance."
+    );
+}
 
         Payment payment =
                 payments.saveAndFlush(

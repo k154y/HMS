@@ -8,4 +8,28 @@ public class ReservationRoom {
  public static ReservationRoom create(UUID h,UUID b,UUID r,UUID room,LocalDate in,LocalDate out,java.math.BigDecimal rate,int a,int c){var e=new ReservationRoom();e.hotelId=h;e.branchId=b;e.reservationId=r;e.roomId=room;e.reservationCheckIn=in;e.reservationCheckOut=out;e.roomRate=rate;e.adults=a;e.children=c;return e;}
  public UUID getId(){return id;} public UUID getRoomId(){return roomId;} public java.math.BigDecimal getRoomRate(){return roomRate;} public int getAdults(){return adults;} public int getChildren(){return children;}
  public java.math.BigDecimal getNightlyRate(){return roomRate;} public boolean isActive(){return active;} public void release(){active=false;}
+
+ public void reschedule(
+         LocalDate newCheckIn,
+         LocalDate newCheckOut) {
+
+  if (!active) {
+   throw new IllegalStateException(
+       "Inactive room allocation cannot be rescheduled."
+   );
+  }
+
+  if (newCheckIn == null
+      || newCheckOut == null
+      || !newCheckOut.isAfter(newCheckIn)) {
+
+   throw new IllegalArgumentException(
+       "Check-out must be after check-in."
+   );
+  }
+
+  reservationCheckIn = newCheckIn;
+  reservationCheckOut = newCheckOut;
+ }
+
 }
