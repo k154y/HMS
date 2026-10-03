@@ -1,4 +1,5 @@
 "use client";
+import {CurrencyField} from "./MoneyFields";
 
 import {
   useState,
@@ -271,7 +272,7 @@ export function ProductEditor({
       await api(
         `products/${product.id}`,
         "PUT",
-        body,
+        {...body,purchaseCurrency:body.purchaseCurrency||null,sellingCurrency:body.sellingCurrency||null},
       );
 
       await onSaved?.();
@@ -392,7 +393,7 @@ export function ProductEditor({
                     field.label
                   }
                 >
-                  {field.options ? (
+                  {["purchaseCurrency","sellingCurrency"].includes(field.key) ? <CurrencyField bare label={field.label} optional value={String(values[field.key]??"")} onChange={v=>changeValue(field.key,v)}/> : field.options ? (
                     <select
                       name={`product-${field.key}`}
                       className={

@@ -1,4 +1,5 @@
 "use client";
+import {CurrencyField,PaymentAccountField} from "@/components/operations/MoneyFields";
 
 import {
   useCallback,
@@ -56,6 +57,7 @@ const paymentMethods = [
 ] as const;
 
 export default function Expenses() {
+  const [currency,setCurrency]=useState("");const [paymentAccountId,setPaymentAccountId]=useState("");
   const { t } =
     useLocale();
 
@@ -351,7 +353,7 @@ export default function Expenses() {
           description:
             description.trim(),
           amount,
-          method,
+          method, currency:currency||null,paymentAccountId:paymentAccountId||null,
           requestId:
             requestId.current,
         },
@@ -869,6 +871,8 @@ export default function Expenses() {
               </div>
 
               <div>
+                <CurrencyField optional value={currency} onChange={v=>{setCurrency(v);setPaymentAccountId("");requestId.current="";}}/>
+                <PaymentAccountField method={method} currency={currency} value={paymentAccountId} onChange={v=>{setPaymentAccountId(v);requestId.current="";}}/>
                 <Field label="Payment method">
                   <select
                     name="expense-method"
@@ -1140,6 +1144,7 @@ export default function Expenses() {
         title="Expense ledger"
         resource="expenses"
         columns={{
+          original_currency:"Original currency",original_amount:"Original amount",payment_account_name:"Account",
           expense_date:
             "Date",
           category:

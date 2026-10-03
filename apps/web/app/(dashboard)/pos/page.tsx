@@ -57,6 +57,9 @@ type Product = {
   id: string;
   name: string;
   sellingPrice: number;
+  sellingBasePrice: number|null;
+  sellingCurrency: string;
+  baseCurrency: string;
   taxRate: number;
   active: boolean;
   sellable: boolean;
@@ -127,7 +130,7 @@ function productTotal(
   quantity: number
 ) {
   const subtotal =
-    Number(product.sellingPrice)
+    Number(product.sellingBasePrice)
     * quantity;
 
   const tax =
@@ -323,7 +326,7 @@ export default function POS() {
             );
 
             setProducts(
-              loadedProducts.filter(
+              loadedProducts.filter(p=>p.sellingBasePrice!=null).filter(
                 (
                   product
                 ) =>
@@ -416,7 +419,7 @@ export default function POS() {
         (
           Number(
             line.product
-              .sellingPrice
+              .sellingBasePrice
           )
           *
           line.quantity
@@ -434,7 +437,7 @@ export default function POS() {
         const lineSubtotal =
           Number(
             line.product
-              .sellingPrice
+              .sellingBasePrice
           )
           *
           line.quantity;

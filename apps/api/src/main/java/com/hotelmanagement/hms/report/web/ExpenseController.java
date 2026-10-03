@@ -33,6 +33,8 @@ import static com.hotelmanagement.hms.identity.authorization.model.PermissionCod
 )
 public class ExpenseController {
 
+    private final com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies;
+    private final com.hotelmanagement.hms.payment.service.PaymentAccountService accounts;
     private final JdbcTemplate db;
     private final OperationScope scope;
     private final AuditService audit;
@@ -40,7 +42,8 @@ public class ExpenseController {
     public ExpenseController(
             JdbcTemplate db,
             OperationScope scope,
-            AuditService audit) {
+            AuditService audit, com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies, com.hotelmanagement.hms.payment.service.PaymentAccountService accounts) {
+        this.currencies=currencies;this.accounts=accounts;
 
         this.db = db;
         this.scope = scope;
@@ -111,7 +114,8 @@ public class ExpenseController {
                     message =
                             "Request identifier is required."
             )
-            UUID requestId) {
+            UUID requestId, String currency, UUID paymentAccountId) {
+        public ExpenseRequest(LocalDate date,UUID categoryId,String description,BigDecimal amount,String method,UUID requestId){this(date,categoryId,description,amount,method,requestId,null,null);}
     }
 
     /**
@@ -121,14 +125,7 @@ public class ExpenseController {
      * It is NOT the HTTP request body.
      */
     @Deprecated
-    public record Expense(
-            LocalDate date,
-            String category,
-            String description,
-            BigDecimal amount,
-            PaymentMethod method,
-            UUID requestId) {
-    }
+    public record Expense(LocalDate date,String category,String description,BigDecimal amount,PaymentMethod method,UUID requestId) {}
 
     @GetMapping
     @Transactional(readOnly = true)
@@ -146,6 +143,7 @@ public class ExpenseController {
                 """
                 select
                     id,
+                    original_currency, original_amount, fx_rate, payment_account_name, payment_account_identifier,
                     expense_date,
                     category_id,
                     category,
@@ -166,7 +164,7 @@ public class ExpenseController {
                 """,
                 hotel,
                 branch
-        );
+        ).stream().map(com.hotelmanagement.hms.payment.service.PaymentAccountMasking::snapshotResponse).toList();
     }
 
     @PostMapping
@@ -190,7 +188,7 @@ public class ExpenseController {
                 PaymentMethod.valueOf(
                         request.method()
                 ),
-                request.requestId()
+                request.requestId(), request.currency(), request.paymentAccountId()
         );
     }
 
@@ -223,7 +221,7 @@ public class ExpenseController {
                 request.description(),
                 request.amount(),
                 request.method(),
-                request.requestId()
+                request.requestId(), null, null
         );
     }
 
@@ -235,7 +233,7 @@ public class ExpenseController {
             String description,
             BigDecimal requestedAmount,
             PaymentMethod method,
-            UUID requestId) {
+            UUID requestId, String currency, UUID paymentAccountId) {
 
         UUID actor =
                 scope.branch(
@@ -370,7 +368,9 @@ public class ExpenseController {
                                   and category_id = ?
                                   and category = ?
                                   and description = ?
-                                  and amount = ?
+                                  and coalesce(original_amount,amount) = ?
+                                  and coalesce(original_currency,?) = ?
+                                  and payment_account_id is not distinct from ?
                                   and method = ?
                             )
                             """,
@@ -382,7 +382,7 @@ public class ExpenseController {
                             categoryId,
                             categoryName,
                             cleanDescription,
-                            amount,
+                            amount, currencies.base(hotel), currency==null?currencies.base(hotel):currency, paymentAccountId,
                             method.name()
                     );
 
@@ -394,11 +394,12 @@ public class ExpenseController {
                 );
             }
 
-            return existing.getFirst();
+            return com.hotelmanagement.hms.payment.service.PaymentAccountMasking.snapshotResponse(existing.getFirst());
         }
 
-        UUID id =
-                UUID.randomUUID();
+        var quote=currencies.quote(hotel,currency,amount);
+        var account=accounts.resolve(hotel,paymentAccountId,method,quote.currency());
+        UUID id = UUID.randomUUID();
 
         db.update(
                 """
@@ -413,10 +414,10 @@ public class ExpenseController {
                     amount,
                     method,
                     request_id,
-                    actor_id
+                    actor_id, original_currency, original_amount, fx_rate, payment_account_id, payment_account_name, payment_account_identifier
                 )
                 values(
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
                 )
                 """,
                 id,
@@ -426,10 +427,10 @@ public class ExpenseController {
                 categoryId,
                 categoryName,
                 cleanDescription,
-                amount,
+                quote.baseAmount(),
                 method.name(),
                 requestId,
-                actor
+                actor, quote.currency(), amount, quote.fxRate(), account==null?null:account.id(), account==null?null:account.name(), account==null?null:account.identifier()
         );
 
         audit.record(
