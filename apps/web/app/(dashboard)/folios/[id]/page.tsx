@@ -1,4 +1,5 @@
 "use client";
+import {PaymentAccountField} from "@/components/operations/MoneyFields";
 
 import {
   use,
@@ -64,6 +65,7 @@ type Entry = {
 };
 
 type PaymentPart = {
+  paymentAccountId?: string;
   method: string;
   currency: string;
   amount: number;
@@ -766,6 +768,7 @@ export default function FolioDetail(
               ? {
                   ...part,
                   ...changes,
+                  ...(changes.method!==undefined||changes.currency!==undefined?{paymentAccountId:""}:{}),
                 }
               : part
         )
@@ -865,6 +868,7 @@ export default function FolioDetail(
               (
                 part
               ) => ({
+                paymentAccountId: part.paymentAccountId||null,
                 method:
                   part.method,
 
@@ -1481,6 +1485,7 @@ export default function FolioDetail(
 
                           <div className="space-y-3">
 
+                            <PaymentAccountField method={part.method} currency={part.currency} value={part.paymentAccountId??""} onChange={v=>updatePart(index,{paymentAccountId:v})}/>
                             <Field label="Payment method">
 
                               <select

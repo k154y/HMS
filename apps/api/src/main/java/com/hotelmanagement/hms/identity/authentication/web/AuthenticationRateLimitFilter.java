@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class AuthenticationRateLimitFilter extends OncePerRequestFilter {
     private static final Set<String> PATHS = Set.of("/api/v1/auth/login", "/api/v1/auth/refresh",
-            "/api/v1/auth/password", "/api/v1/onboarding/signup", "/api/v1/onboarding/hotels");
+            "/api/v1/auth/forgot-password", "/api/v1/auth/reset-password", "/api/v1/auth/password", "/api/v1/onboarding/signup", "/api/v1/onboarding/hotels");
     private static final DefaultRedisScript<Long> SCRIPT = new DefaultRedisScript<>(
             "local n = redis.call('INCR', KEYS[1]); if n == 1 then redis.call('EXPIRE', KEYS[1], 60) end; return n", Long.class);
     private final StringRedisTemplate redis;

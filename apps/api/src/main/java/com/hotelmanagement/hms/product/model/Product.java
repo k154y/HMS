@@ -23,6 +23,11 @@ public class Product extends com.hotelmanagement.hms.shared.model.HotelEntity {
     @Column(name="reorder_level",precision=19,scale=4) private BigDecimal reorderLevel;
     @Enumerated(EnumType.STRING)
     @Column(name="destination") private Destination destination;
+    @Column(name="purchase_currency") private String purchaseCurrency;
+    @Column(name="selling_currency") private String sellingCurrency;
+    public String getPurchaseCurrency(){return purchaseCurrency;}
+    public String getSellingCurrency(){return sellingCurrency;}
+    public void currencies(String purchase,String selling){purchaseCurrency=purchase;sellingCurrency=selling;}
     protected Product() {}
     public static Product create(UUID hotelId, String sku, String name, String category, String purchaseUnit, String sellingUnit, String stockUnit, BigDecimal purchaseFactor, BigDecimal sellingFactor, BigDecimal purchasePrice, BigDecimal sellingPrice, BigDecimal taxRate, boolean stockTracked, boolean sellable, boolean purchasable, boolean active, BigDecimal reorderLevel, Destination destination) {
         var e=new Product();

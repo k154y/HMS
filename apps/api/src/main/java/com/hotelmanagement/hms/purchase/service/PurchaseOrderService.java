@@ -18,10 +18,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import java.util.*;import java.math.*;
 @Service @Transactional
 public class PurchaseOrderService {
+ private final com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies;
+ private final com.hotelmanagement.hms.payment.service.PaymentAccountService accounts;
  private final PurchaseOrderRepository orders;private final PurchaseOrderItemRepository items;
  private final VendorRepository vendors;private final ProductRepository products;
  private final InventoryService inventory;private final OperationScope scope;private final AuditService audit;private final JdbcTemplate db;
- public PurchaseOrderService(PurchaseOrderRepository o,PurchaseOrderItemRepository i,VendorRepository v,ProductRepository p,InventoryService n,OperationScope s,AuditService a,JdbcTemplate d){orders=o;items=i;vendors=v;products=p;inventory=n;scope=s;audit=a;db=d;}
+ public PurchaseOrderService(PurchaseOrderRepository o,PurchaseOrderItemRepository i,VendorRepository v,ProductRepository p,InventoryService n,OperationScope s,AuditService a,JdbcTemplate d,com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies,com.hotelmanagement.hms.payment.service.PaymentAccountService accounts){this.currencies=currencies;this.accounts=accounts;orders=o;items=i;vendors=v;products=p;inventory=n;scope=s;audit=a;db=d;}
  public PurchaseOrderResponse create(UUID h,UUID b,PurchaseOrderRequest q){
   UUID actor=scope.branch(h,b,PURCHASE_CREATE);vendors.findByIdAndHotelId(q.vendorId(),h).orElseThrow(ApiException::notFound);
   if(q.items()==null||q.items().isEmpty()||q.items().size()>100)throw new IllegalArgumentException("Items are required.");
@@ -31,8 +33,10 @@ public class PurchaseOrderService {
    products.findByIdAndHotelId(x.productId(),h).filter(p->p.getActive()&&p.getPurchasable()).orElseThrow(ApiException::notFound);
    total=total.add(Money.positive(x.quantity()).multiply(Money.nonnegative(x.unitPrice())).setScale(4,RoundingMode.HALF_UP));
   }
-  var o=orders.saveAndFlush(PurchaseOrder.create(h,b,q.vendorId(),q.reference(),Money.nonnegative(total),actor));
-  q.items().forEach(x->items.save(PurchaseOrderItem.create(h,b,o.getId(),x.productId(),x.quantity(),x.unitPrice())));
+  var quote=currencies.quote(h,q.currency(),total);
+  var o=orders.saveAndFlush(PurchaseOrder.create(h,b,q.vendorId(),q.reference(),quote.baseAmount(),actor));
+  o.currencySnapshot(quote.currency(),total,quote.fxRate());
+  q.items().forEach(x->items.save(PurchaseOrderItem.create(h,b,o.getId(),x.productId(),x.quantity(),x.unitPrice().multiply(quote.fxRate()).setScale(4,RoundingMode.HALF_UP)).currencySnapshot(quote.currency(),x.unitPrice(),quote.fxRate())));
   audit.record(h,b,actor,"PURCHASE_CREATED","PURCHASE_ORDER",o.getId());return PurchaseOrderResponse.from(o);
  }
  public PurchaseOrderResponse approve(UUID h,UUID b,UUID id){UUID actor=scope.branch(h,b,PURCHASE_APPROVE);var o=orders.findByIdAndHotelIdAndBranchId(id,h,b).orElseThrow(ApiException::notFound);o.approve();audit.record(h,b,actor,"PURCHASE_APPROVED","PURCHASE_ORDER",id);return PurchaseOrderResponse.from(o);}
@@ -47,18 +51,24 @@ public class PurchaseOrderService {
   o.receive();audit.record(h,b,actor,"PURCHASE_RECEIVED","PURCHASE_ORDER",id);
  }
  @Transactional(readOnly=true) public List<Map<String,Object>> list(UUID h,UUID b){scope.branch(h,b,PURCHASE_VIEW);return db.queryForList("select p.*,v.name vendor_name,coalesce((select sum(amount) from vendor_payments where purchase_order_id=p.id),0) paid from purchase_orders p join vendors v on v.id=p.vendor_id where p.hotel_id=? and p.branch_id=? order by p.created_at desc limit 100",h,b);}
- @Transactional(readOnly=true) public Map<String,Object> detail(UUID h,UUID b,UUID id){scope.branch(h,b,PURCHASE_VIEW);var rows=db.queryForList("select p.*,coalesce((select sum(amount) from vendor_payments where purchase_order_id=p.id),0) paid from purchase_orders p where p.id=? and p.hotel_id=? and p.branch_id=?",id,h,b);if(rows.isEmpty())throw ApiException.notFound();var result=new LinkedHashMap<>(rows.getFirst());result.put("items",db.queryForList("select i.*,p.name from purchase_order_items i join products p on p.id=i.product_id where i.purchase_order_id=?",id));result.put("payments",db.queryForList("select * from vendor_payments where purchase_order_id=? order by created_at",id));return result;}
- public record VendorPayment(BigDecimal amount,PaymentMethod method,UUID requestId){}
+ @Transactional(readOnly=true) public Map<String,Object> detail(UUID h,UUID b,UUID id){scope.branch(h,b,PURCHASE_VIEW);var rows=db.queryForList("select p.*,coalesce((select sum(amount) from vendor_payments where purchase_order_id=p.id),0) paid from purchase_orders p where p.id=? and p.hotel_id=? and p.branch_id=?",id,h,b);if(rows.isEmpty())throw ApiException.notFound();var result=new LinkedHashMap<>(rows.getFirst());result.put("items",db.queryForList("select i.*,p.name from purchase_order_items i join products p on p.id=i.product_id where i.purchase_order_id=?",id));result.put("payments",db.queryForList("select id,hotel_id,branch_id,purchase_order_id,amount,method,request_id,actor_id,created_at,original_currency,original_amount,fx_rate,actual_base_amount,fx_difference,payment_account_id,payment_account_name,payment_account_identifier from vendor_payments where purchase_order_id=? order by created_at",id).stream().map(com.hotelmanagement.hms.payment.service.PaymentAccountMasking::snapshotResponse).toList());return result;}
+ public record VendorPayment(BigDecimal amount,PaymentMethod method,UUID requestId,String currency,UUID paymentAccountId){public VendorPayment(BigDecimal amount,PaymentMethod method,UUID requestId){this(amount,method,requestId,null,null);}}
  public Map<String,Object> pay(UUID h,UUID b,UUID id,VendorPayment r){
   UUID actor=scope.branch(h,b,PURCHASE_APPROVE);
   if(r.requestId()==null||r.method()==null||r.method()==PaymentMethod.CREDIT)throw new IllegalArgumentException("Payment method and request ID required.");
-  var amount=Money.positive(r.amount());var o=orders.findByIdAndHotelIdAndBranchId(id,h,b).orElseThrow(ApiException::notFound);
+  db.queryForList("select id from purchase_orders where id=? and hotel_id=? and branch_id=? for update",id,h,b);
+  var original=Money.positive(r.amount());var amount=original;var o=orders.findByIdAndHotelIdAndBranchId(id,h,b).orElseThrow(ApiException::notFound);
   var previous=db.queryForList("select * from vendor_payments where hotel_id=? and branch_id=? and request_id=?",h,b,r.requestId());
-  if(!previous.isEmpty()){var old=previous.getFirst();if(!id.equals(old.get("purchase_order_id"))||amount.compareTo((BigDecimal)old.get("amount"))!=0||!r.method().name().equals(old.get("method")))throw new IllegalStateException("Payment key reused.");return old;}
+  if(!previous.isEmpty()){var old=previous.getFirst();if(!id.equals(old.get("purchase_order_id"))||original.compareTo((BigDecimal)(old.get("original_amount")==null?old.get("amount"):old.get("original_amount")))!=0||!r.method().name().equals(old.get("method"))||!Objects.equals(old.get("payment_account_id"),r.paymentAccountId())||!Objects.equals(old.get("original_currency")==null?currencies.base(h):old.get("original_currency"),r.currency()==null?currencies.base(h):r.currency()))throw new IllegalStateException("Payment key reused.");return com.hotelmanagement.hms.payment.service.PaymentAccountMasking.snapshotResponse(old);}
   if(o.getStatus()!=PurchaseOrderStatus.APPROVED&&o.getStatus()!=PurchaseOrderStatus.RECEIVED)throw new IllegalStateException("Approve purchase before payment.");
+  var quote=currencies.quote(h,r.currency(),original);var account=accounts.resolve(h,r.paymentAccountId(),r.method(),quote.currency());
+  String invoiceCurrency=o.getOriginalCurrency()==null?currencies.base(h):o.getOriginalCurrency();
+  BigDecimal invoiceRate=o.getFxRate()==null?BigDecimal.ONE:o.getFxRate();
+  BigDecimal currentInvoiceRate=quote.currency().equals(invoiceCurrency)?quote.fxRate():currencies.quote(h,invoiceCurrency,BigDecimal.ONE).fxRate();
+  amount=quote.baseAmount().divide(currentInvoiceRate,12,RoundingMode.HALF_UP).multiply(invoiceRate).setScale(4,RoundingMode.HALF_UP);
   var paid=db.queryForObject("select coalesce(sum(amount),0) from vendor_payments where purchase_order_id=?",BigDecimal.class,id);
   if(amount.compareTo(o.getTotal().subtract(paid))>0)throw new IllegalStateException("Payment exceeds purchase balance.");
-  UUID payment=UUID.randomUUID();db.update("insert into vendor_payments(id,hotel_id,branch_id,purchase_order_id,amount,method,request_id,actor_id) values(?,?,?,?,?,?,?,?)",payment,h,b,id,amount,r.method().name(),r.requestId(),actor);
+  UUID payment=UUID.randomUUID();db.update("insert into vendor_payments(id,hotel_id,branch_id,purchase_order_id,amount,method,request_id,actor_id,original_currency,original_amount,fx_rate,actual_base_amount,fx_difference,payment_account_id,payment_account_name,payment_account_identifier) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",payment,h,b,id,amount,r.method().name(),r.requestId(),actor,quote.currency(),original,quote.fxRate(),quote.baseAmount(),quote.baseAmount().subtract(amount),account==null?null:account.id(),account==null?null:account.name(),account==null?null:account.identifier());
   audit.record(h,b,actor,"VENDOR_PAYMENT","PURCHASE_ORDER",id);return Map.of("id",payment,"paid",paid.add(amount),"balance",o.getTotal().subtract(paid).subtract(amount));
  }
 }

@@ -53,6 +53,7 @@ type Approval = {
 };
 
 type ApprovalPart = {
+  account?: {name:string;maskedIdentifier:string|null};
   method: string;
   currency?: string;
   amount: number;
@@ -73,6 +74,8 @@ type ApprovalPayload = {
 };
 
 type Transaction = {
+  payment_account_name?:string;
+  payment_account_identifier?:string;
   id: string;
   customer: string;
   method: string;
@@ -142,6 +145,7 @@ function parsePayload(
       parts:
         parsed.parts.map(
           (part) => ({
+            account:part.account,
             method:
               String(
                 part.method
@@ -742,7 +746,7 @@ export default function Cashier() {
                               <span className="font-medium">
                                 {t(
                                   part.method
-                                )}
+                                )}<span className="block">{part.account?.name??"Unspecified account"} {part.account?.maskedIdentifier??""}</span>
                               </span>
 
                               <strong className="tabular-nums">
@@ -1115,6 +1119,7 @@ export default function Cashier() {
                       {
                         transaction.customer
                       }
+                      <small className="block text-slate-500">{transaction.payment_account_name??"Unspecified account"} {transaction.payment_account_identifier??""}</small>
                     </td>
 
                     <td className="px-6 py-4 tabular-nums">
@@ -1287,7 +1292,7 @@ export default function Cashier() {
                         <span>
                           {t(
                             part.method
-                          )}
+                          )}<span className="block">{part.account?.name??"Unspecified account"} {part.account?.maskedIdentifier??""}</span>
                         </span>
 
                         <strong className="tabular-nums">

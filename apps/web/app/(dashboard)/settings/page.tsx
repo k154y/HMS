@@ -1,4 +1,6 @@
 "use client";
+import {FinanceSettings} from "@/components/operations/FinanceSettings";
+import {PasswordForm} from "@/components/operations/PasswordForm";
 
 import {
   FormEvent,
@@ -420,6 +422,8 @@ const canManageRates =
 
       {loaded && (
         <div className="space-y-8">
+          <PasswordForm mode="change"/>
+          <FinanceSettings/>
 
           <form
             className="rounded-xl border bg-white p-5 space-y-5"

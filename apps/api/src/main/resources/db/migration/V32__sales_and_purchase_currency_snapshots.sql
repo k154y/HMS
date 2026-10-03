@@ -1,0 +1,23 @@
+ALTER TABLE products ADD COLUMN purchase_currency VARCHAR(3);
+ALTER TABLE products ADD COLUMN selling_currency VARCHAR(3);
+UPDATE products p SET purchase_currency=h.currency_code,selling_currency=h.currency_code FROM hotels h WHERE h.id=p.hotel_id;
+ALTER TABLE products ADD CHECK(purchase_currency IS NULL OR purchase_currency ~ '^[A-Z]{3}$');
+ALTER TABLE products ADD CHECK(selling_currency IS NULL OR selling_currency ~ '^[A-Z]{3}$');
+-- Existing numeric totals retain their accounting-currency meaning. NULL snapshots identify legacy entries.
+ALTER TABLE order_items ADD COLUMN original_currency VARCHAR(3);
+ALTER TABLE order_items ADD COLUMN original_unit_price NUMERIC(19,4);
+ALTER TABLE order_items ADD COLUMN fx_rate NUMERIC(19,8) CHECK(fx_rate>0);
+ALTER TABLE purchase_orders ADD COLUMN original_currency VARCHAR(3);
+ALTER TABLE purchase_orders ADD COLUMN original_total NUMERIC(19,4);
+ALTER TABLE purchase_orders ADD COLUMN fx_rate NUMERIC(19,8) CHECK(fx_rate>0);
+ALTER TABLE purchase_order_items ADD COLUMN original_currency VARCHAR(3);
+ALTER TABLE purchase_order_items ADD COLUMN original_unit_price NUMERIC(19,4);
+ALTER TABLE purchase_order_items ADD COLUMN fx_rate NUMERIC(19,8) CHECK(fx_rate>0);
+ALTER TABLE vendor_payments ADD COLUMN original_currency VARCHAR(3);
+ALTER TABLE vendor_payments ADD COLUMN original_amount NUMERIC(19,4);
+ALTER TABLE vendor_payments ADD COLUMN fx_rate NUMERIC(19,8) CHECK(fx_rate>0);
+ALTER TABLE vendor_payments ADD COLUMN actual_base_amount NUMERIC(19,4);
+ALTER TABLE vendor_payments ADD COLUMN fx_difference NUMERIC(19,4);
+ALTER TABLE expenses ADD COLUMN original_currency VARCHAR(3);
+ALTER TABLE expenses ADD COLUMN original_amount NUMERIC(19,4);
+ALTER TABLE expenses ADD COLUMN fx_rate NUMERIC(19,8) CHECK(fx_rate>0);

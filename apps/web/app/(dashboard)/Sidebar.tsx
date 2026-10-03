@@ -19,6 +19,7 @@ const navSections: NavSection[] = [
   {
     title: "Overview",
     items: [
+      { label: "Security", href: "/security", icon: Settings, roles: [] },
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: [] },
     ],
   },

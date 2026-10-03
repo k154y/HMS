@@ -1,4 +1,5 @@
 "use client";
+import {PaymentAccountField} from "@/components/operations/MoneyFields";
 
 import {
   useCallback,
@@ -123,6 +124,7 @@ const nightsBetween = (
 
 
 export default function Reservations() {
+  const [paymentAccountId,setPaymentAccountId]=useState("");
 
   const { t } =
     useLocale();
@@ -923,7 +925,7 @@ export default function Reservations() {
 
           parts: [
             {
-              method,
+              method, paymentAccountId: paymentAccountId||null,
               currency:
                 normalizedCurrency,
               amount:
@@ -2067,6 +2069,7 @@ export default function Reservations() {
 
               </div>
 
+              <PaymentAccountField method={method} currency={currency} value={paymentAccountId} onChange={v=>{setPaymentAccountId(v);requestId.current="";}}/>
               <Field label="Payment method">
 
                 <select

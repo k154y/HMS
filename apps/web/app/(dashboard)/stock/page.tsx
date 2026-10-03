@@ -567,6 +567,7 @@ export default function Stock() {
         resource="products"
         fields={productFields}
         columns={[
+          "purchaseCurrency", "sellingCurrency",
           "sku",
           "name",
           "category",

@@ -20,6 +20,7 @@ session:{
   const responseProfile=await fetch(`${apiBase}/auth/me`,{headers:{Authorization:`Bearer ${tokens.accessToken}`},cache:"no-store"});if(!responseProfile.ok)return null;
   const profile=await responseProfile.json();if(!validProfile(profile))return null;return {...profile,...tokens};
  }})],
+ events:{async signOut(message){if("token" in message && message.token){const token=message.token;if(typeof token.accessToken==="string"&&typeof token.refreshToken==="string"){try{await fetch(`${apiBase}/auth/logout`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token.accessToken}`},body:JSON.stringify({refreshToken:token.refreshToken}),signal:AbortSignal.timeout(10000)});}catch{/* Local sign-out must still complete when the API is unavailable. */}}}}},
  callbacks:{
   async jwt({token,user}){if(user){Object.assign(token,user);return token}if(Date.now()<Date.parse(String(token.accessTokenExpiresAt))-30000)return token;if(typeof token.refreshToken!=="string")return token;try{return {...token,...await refresh(token.refreshToken)}}catch{return {...token,accessToken:undefined,refreshToken:undefined}}},
   async session({session,token}){const {refreshToken,accessTokenExpiresAt,accessToken,...profile}=token;Object.assign(session.user,profile);session.accessToken=typeof accessToken==="string"?accessToken:undefined;return session}
