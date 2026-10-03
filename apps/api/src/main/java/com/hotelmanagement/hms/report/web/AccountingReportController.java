@@ -224,7 +224,7 @@ public class AccountingReportController {
         BigDecimal vendorPaid =
                 sum(
                         """
-                        select coalesce(sum(amount),0)
+                        select coalesce(sum(coalesce(actual_base_amount,amount)),0)
                         from vendor_payments
                         where hotel_id = ?
                           and branch_id = ?
@@ -529,7 +529,7 @@ public class AccountingReportController {
                             v.name vendor,
                             p.reference,
                             vp.method,
-                            vp.amount
+                            coalesce(vp.actual_base_amount,vp.amount) amount, vp.amount applied_amount, vp.fx_difference, vp.original_currency, vp.original_amount, vp.payment_account_name
                         from vendor_payments vp
                         join purchase_orders p
                           on p.id = vp.purchase_order_id
@@ -675,6 +675,22 @@ public class AccountingReportController {
                 )
         );
 
+        result.put("paymentAccounts",db.queryForList("""
+            select account, currency, sum(base_amount) base_amount from (
+                select p.payment_account_id account_id, coalesce(p.payment_account_name,p.method || ' (unspecified)') account,
+                       p.currency, -e.amount base_amount
+                from folio_entries e join payments p on p.id=e.source_id and p.hotel_id=e.hotel_id and p.branch_id=e.branch_id
+                where e.hotel_id=? and e.branch_id=? and e.created_at>=? and e.created_at<? and e.kind in ('PAYMENT','REFUND')
+                union all
+                select payment_account_id,coalesce(payment_account_name,method || ' (unspecified)'),
+                       coalesce(original_currency,?),-coalesce(actual_base_amount,amount)
+                from vendor_payments where hotel_id=? and branch_id=? and created_at>=? and created_at<?
+                union all
+                select payment_account_id,coalesce(payment_account_name,method || ' (unspecified)'),
+                       coalesce(original_currency,?),-amount
+                from expenses where hotel_id=? and branch_id=? and expense_date>=? and expense_date<=?
+            ) movements group by account_id,account,currency order by account,currency
+            """,hotel,branch,start,end,info.get("base_currency"),hotel,branch,start,end,info.get("base_currency"),hotel,branch,from,to));
         return result;
     }
 }

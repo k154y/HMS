@@ -14,6 +14,8 @@ const hotelResources = new Set([
   "permissions",
   "branches",
   "exchange-rates",
+  "currencies",
+  "payment-accounts",
   "expense-categories",
   "audit-events",
 ]);
@@ -59,6 +61,20 @@ async function forward(
   },
 ) {
   const { path } = await params;
+
+  if (path.length===2 && path[0]==="account" && ["forgot-password","reset-password","password"].includes(path[1])) {
+    if(req.method!=="POST") return NextResponse.json({message:"Method not allowed"},{status:405});
+    const origin=req.headers.get("origin");
+    if(!origin || new URL(origin).host!==req.headers.get("host")) return NextResponse.json({message:"Invalid request origin"},{status:403});
+    const current=path[1]==="password"?await auth():null;
+    if(path[1]==="password"&&!current?.accessToken)return NextResponse.json({message:"Sign in required"},{status:401});
+    try {
+      const response=await fetch(`${base}/auth/${path[1]}`,{method:"POST",cache:"no-store",headers:{"Content-Type":"application/json",...(current?.accessToken?{Authorization:`Bearer ${current.accessToken}`}:{})},body:await req.text(),signal:AbortSignal.timeout(15000)});
+      if(response.status===204)return new NextResponse(null,{status:204});
+      if(!response.ok)return NextResponse.json({message:response.status===429?"Please wait before trying again.":path[1]==="reset-password"?"The reset link is invalid, expired, or the password does not meet the requirements.":path[1]==="password"?"Unable to change password. Check your current password and try again.":"Unable to send instructions. Please retry later."},{status:response.status,headers:{"Cache-Control":"no-store"}});
+      return new NextResponse(await response.text(),{status:response.status,headers:{"Content-Type":"application/json","Cache-Control":"no-store"}});
+    } catch {return NextResponse.json({message:"The hotel API is unavailable. Please retry."},{status:502});}
+  }
 
   const session =
     await auth();

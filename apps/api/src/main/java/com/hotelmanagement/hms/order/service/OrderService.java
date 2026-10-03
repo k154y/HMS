@@ -43,6 +43,7 @@ import static com.hotelmanagement.hms.identity.authorization.model.PermissionCod
 @Transactional
 public class OrderService {
 
+    private final com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies;
     private final OrderRepository orders;
     private final OrderItemRepository items;
     private final ProductRepository products;
@@ -60,7 +61,8 @@ public class OrderService {
             OperationScope scope,
             AuditService audit,
             FolioService folios,
-            JdbcTemplate db) {
+            JdbcTemplate db, com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies) {
+        this.currencies=currencies;
 
         this.orders =
                 orders;
@@ -188,9 +190,9 @@ public class OrderService {
                                     ApiException::notFound
                             );
 
+            var price=currencies.quote(hotel,product.getSellingCurrency(),product.getSellingPrice());
             BigDecimal line =
-                    product
-                            .getSellingPrice()
+                    price.baseAmount()
                             .multiply(
                                     requestedItem.quantity()
                             )
@@ -224,10 +226,10 @@ public class OrderService {
                             product.getId(),
                             product.getName(),
                             requestedItem.quantity(),
-                            product.getSellingPrice(),
+                            price.baseAmount(),
                             product.getTaxRate(),
                             product.getDestination().name()
-                    )
+                    ).currencySnapshot(price.currency(),product.getSellingPrice(),price.fxRate())
             );
         }
 

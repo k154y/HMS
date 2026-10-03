@@ -24,6 +24,10 @@ server:
 
 hms:
   security:
+    recovery:
+      enabled: ${HMS_PASSWORD_RECOVERY_ENABLED:false}
+      frontend-url: ${HMS_FRONTEND_URL:}
+      from: ${HMS_MAIL_FROM:}
     api:
       allowed-origins: ${HMS_ALLOWED_ORIGINS:http://localhost:3001}
       auth-requests-per-minute: ${HMS_AUTH_REQUESTS_PER_MINUTE:30}

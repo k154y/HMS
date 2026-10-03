@@ -1,6 +1,92 @@
 export const locales=["en","fr","rw"] as const;
 export type Locale=(typeof locales)[number];
 const rows=`
+Account cash movements|Mouvements de trésorerie par compte|Amafaranga yinjiye n'asohotse kuri konti
+Save name|Enregistrer le nom|Bika izina
+Net movement in accounting currency|Mouvement net en devise comptable|Amafaranga yinjiye ukuyemo ayasohotse mu ifaranga ry'ibaruramari
+Applied to purchase|Affecté à l'achat|Ayishyuwe ku igura
+Exchange difference|Écart de change|Ikinyuranyo cy'ivunjisha
+Original currency|Devise d'origine|Ifaranga ry'umwimerere
+Reservation advance activity|Mouvements des avances de réservation|Ibikorwa by'amafaranga yatanzwe mbere ku ibika
+Reservation advances are included in customer receipts when the money is received, but they are not billed revenue until accommodation is charged. Advance refunds are included in refunds.|Les avances de réservation sont incluses dans les encaissements à leur réception, mais deviennent des revenus facturés lorsque le séjour est facturé. Leurs remboursements sont inclus dans les remboursements.|Amafaranga yatanzwe mbere ku ibika abarwa mu yakiriwe igihe yakiriwe, ariko aba amafaranga yacurujwe iyo icumbi ryishyujwe. Ayasubijwe abarwa mu mafaranga yasubijwe.
+Open Cashier|Ouvrir la caisse|Fungura aho bakirira ubwishyu
+All statuses|Tous les statuts|Imimerere yose
+Payment|Paiement|Ubwishyu
+All payments|Tous les paiements|Ubwishyu bwose
+No advance|Aucune avance|Nta mafaranga yatanzwe mbere
+Partially prepaid|Partiellement prépayé|Igice cyishyuwe mbere
+Fully prepaid|Entièrement prépayé|Byose byishyuwe mbere
+Sort by|Trier par|Tondeka ukurikije
+Operational priority|Priorité opérationnelle|Ibyihutirwa mu kazi
+Arrival date - earliest first|Date d'arrivée - croissante|Itariki yo kuhagera - ibanza mbere
+Arrival date - latest first|Date d'arrivée - décroissante|Itariki yo kuhagera - iheruka mbere
+Checkout date - earliest first|Date de départ - croissante|Itariki yo kugenda - ibanza mbere
+Checkout date - latest first|Date de départ - décroissante|Itariki yo kugenda - iheruka mbere
+Customer A-Z|Client A-Z|Umukiriya A-Z
+Customer Z-A|Client Z-A|Umukiriya Z-A
+Reservation reference|Référence de réservation|Nimero y'ibika
+reservations found|réservations trouvées|ibika ryabonetse
+Clear filters|Effacer les filtres|Kuraho ibyatoranyijwe
+Edit reservation|Modifier la réservation|Hindura ibika
+Receive advance|Recevoir une avance|Akira amafaranga atanzwe mbere
+Page|Page|Urupapuro
+of|sur|muri
+Previous|Précédent|Ibanza
+Next|Suivant|Ikurikira
+Assigned rooms|Chambres attribuées|Ibyumba byatanzwe
+The system will verify that these rooms are still available for the new dates before saving.|Le système vérifiera la disponibilité des chambres aux nouvelles dates avant d'enregistrer.|Sisitemu iragenzura ko ibi byumba bikiboneka ku matariki mashya mbere yo kubika.
+Check-in|Arrivée|Kwinjira
+Check-out|Départ|Gusohoka
+Current nights|Nuits actuelles|Amajoro asanzwe
+New nights|Nouvelles nuits|Amajoro mashya
+New total|Nouveau total|Igiteranyo gishya
+Advance received|Avance reçue|Amafaranga yakiriwe mbere
+If the new dates overlap another reservation, the change will be rejected. If shortening the stay makes the reservation total lower than an advance already received, the excess advance must be refunded first.|Si les nouvelles dates chevauchent une autre réservation, la modification sera refusée. Si le séjour raccourci coûte moins que l'avance reçue, remboursez d'abord l'excédent.|Niba amatariki mashya ahura n'irindi bika, impinduka zirangwa. Niba kugabanya igihe cyo gucumbika bituma ikiguzi kijya munsi y'amafaranga yakiriwe mbere, ayarenze abanza gusubizwa.
+Receive reservation advance|Recevoir une avance de réservation|Akira amafaranga atanzwe mbere ku ibika
+Reservation total|Total de la réservation|Igiteranyo cy'ibika
+Remaining|Restant|Asigaye
+The payment will be submitted for approval and will count as a receipt, not as revenue.|Le paiement sera soumis à approbation et compté comme encaissement, pas comme revenu.|Ubwishyu buroherezwa kwemezwa kandi bubarwe nk'amafaranga yakiriwe, aho kuba amafaranga yacurujwe.
+Submit for approval|Soumettre à approbation|Ohereza kwemezwa
+Overdue checkout|Départ en retard|Gusohoka byakererewe
+Future arrival|Arrivée future|Kuhagera mu gihe kizaza
+Check-in becomes available on|L'enregistrement sera disponible le|Kwinjira bizashoboka ku wa
+Selling currency|Devise de vente|Ifaranga ryo kugurisha
+Purchase currency|Devise d'achat|Ifaranga ryo kugura
+Security|Sécurité|Umutekano
+Forgot password?|Mot de passe oublié ?|Wibagiwe ijambo ry'ibanga?
+Forgot password|Mot de passe oublié|Wibagiwe ijambo ry'ibanga
+Reset password|Réinitialiser le mot de passe|Shyiraho ijambo ry'ibanga rishya
+Change password|Changer le mot de passe|Hindura ijambo ry'ibanga
+Send password recovery|Envoyer les instructions de récupération|Ohereza amabwiriza yo kugarura konti
+Currencies and payment accounts|Devises et comptes de paiement|Amafaranga na konti zo kwishyuriraho
+Enable currencies for prices and transactions. Set their rates below as the value of one unit in the hotel accounting currency.|Activez les devises pour les prix et les opérations. Définissez ci-dessous la valeur d'une unité dans la devise comptable de l'hôtel.|Emeza amafaranga akoreshwa ku biciro no mu bikorwa. Hasi shyiraho agaciro k'ifaranga rimwe mu ifaranga ry'ibaruramari rya hoteli.
+Currency code|Code de devise|Kode y'ifaranga
+Currency name|Nom de la devise|Izina ry'ifaranga
+Add currency|Ajouter une devise|Ongeraho ifaranga
+Account name|Nom du compte|Izina rya konti
+Payment type|Type de paiement|Ubwoko bw'ubwishyu
+Identifier type|Type d'identifiant|Ubwoko bw'ikiranga konti
+Number or merchant code|Numéro ou code marchand|Nimero cyangwa kode y'umucuruzi
+Add payment account|Ajouter un compte de paiement|Ongeraho konti yo kwishyuriraho
+Payment account|Compte de paiement|Konti yo kwishyuriraho
+Use 15–128 characters. Changing your password signs out existing sessions when their access tokens expire.|Utilisez 15 à 128 caractères. Les sessions existantes se termineront à l'expiration de leurs jetons d'accès.|Koresha inyuguti 15–128. Nyuma yo guhindura ijambo ry'ibanga, kwinjira gusanzwe guhagarara igihe impushya zo kwinjira zirangiye.
+Current password|Mot de passe actuel|Ijambo ry'ibanga usanganywe
+New password|Nouveau mot de passe|Ijambo ry'ibanga rishya
+Confirm password|Confirmer le mot de passe|Emeza ijambo ry'ibanga
+Open a valid reset link from your email. If this page was refreshed, reopen the link.|Ouvrez un lien valide reçu par e-mail. Si cette page a été actualisée, rouvrez le lien.|Fungura ihuza ryemewe woherejwe kuri imeyili. Niba wavuguruye uru rupapuro, ongera ufungure ihuza.
+Back to sign in|Retour à la connexion|Subira ku kwinjira
+Please wait…|Veuillez patienter…|Tegereza…
+Send reset instructions|Envoyer les instructions|Ohereza amabwiriza
+Save password|Enregistrer le mot de passe|Bika ijambo ry'ibanga
+Hotel accounting currency|Devise comptable de l'hôtel|Ifaranga ry'ibaruramari rya hoteli
+Select currency|Choisir une devise|Hitamo ifaranga
+Select account|Choisir un compte|Hitamo konti
+No configured account|Aucun compte configuré|Nta konti yashyizweho
+Deactivate|Désactiver|Hagarika
+Activate|Activer|Emeza
+If an account exists for the supplied information, password reset instructions have been sent.|Si un compte correspond aux informations fournies, les instructions de réinitialisation ont été envoyées.|Niba konti ihuye n'amakuru watanze ibaho, amabwiriza yo guhindura ijambo ry'ibanga yoherejwe.
+Password reset. You can now sign in.|Mot de passe réinitialisé. Vous pouvez vous connecter.|Ijambo ry'ibanga ryahinduwe. Ushobora kwinjira.
+Use 15–128 characters and matching passwords.|Utilisez 15 à 128 caractères et des mots de passe identiques.|Koresha inyuguti 15–128 n'amagambo y'ibanga ahuye.
 HotelPro — Hotel Management System|HotelPro — Système de gestion hôtelière|HotelPro — Sisitemu yo gucunga hoteli
 Dashboard|Tableau de bord|Incamake
 Overview|Vue d'ensemble|Incamake rusange

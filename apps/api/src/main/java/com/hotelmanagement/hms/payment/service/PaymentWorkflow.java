@@ -42,6 +42,8 @@ public class PaymentWorkflow {
     private final ExchangeRateService exchangeRates;
     private final JsonMapper json;
     private final AuditService audit;
+    private final PaymentAccountService accounts;
+    private final com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies;
 
     public PaymentWorkflow(
             JdbcTemplate db,
@@ -50,7 +52,7 @@ public class PaymentWorkflow {
             PaymentService payments,
             ExchangeRateService exchangeRates,
             JsonMapper json,
-            AuditService audit) {
+            AuditService audit, PaymentAccountService accounts, com.hotelmanagement.hms.platform.currency.service.HotelCurrencyService currencies) {
 
         this.db = db;
         this.scope = scope;
@@ -58,7 +60,7 @@ public class PaymentWorkflow {
         this.payments = payments;
         this.exchangeRates = exchangeRates;
         this.json = json;
-        this.audit = audit;
+        this.audit = audit; this.accounts=accounts; this.currencies=currencies;
     }
 
     /**
@@ -70,7 +72,8 @@ public class PaymentWorkflow {
     public record Part(
             PaymentMethod method,
             String currency,
-            BigDecimal amount) {
+            BigDecimal amount, UUID paymentAccountId) {
+        public Part(PaymentMethod method, String currency, BigDecimal amount) { this(method,currency,amount,null); }
 
         public Part(
                 PaymentMethod method,
@@ -130,7 +133,8 @@ public class PaymentWorkflow {
             BigDecimal fxRate,
             BigDecimal baseAmount,
             UUID exchangeRateId,
-            OffsetDateTime rateEffectiveFrom) {
+            OffsetDateTime rateEffectiveFrom, PaymentAccountService.Account account) {
+        public QuotedPart(PaymentMethod method,String currency,BigDecimal amount,BigDecimal fxRate,BigDecimal baseAmount,UUID exchangeRateId,OffsetDateTime rateEffectiveFrom) { this(method,currency,amount,fxRate,baseAmount,exchangeRateId,rateEffectiveFrom,null); }
     }
 
     /**
@@ -216,7 +220,7 @@ public class PaymentWorkflow {
                                 new Part(
                                         request.method(),
                                         request.currency(),
-                                        request.amount()
+                                        request.amount(), request.paymentAccountId()
                                 )
                         ),
                         null
@@ -558,7 +562,7 @@ public class PaymentWorkflow {
                 );
             }
 
-            return existing.getFirst();
+            return approvalResponse(existing.getFirst());
         }
 
         List<QuotedPart> quotedParts =
@@ -946,12 +950,15 @@ if (!"RESERVATION_ADVANCE".equals(
                         update payments
                         set collection_scope = ?,
                             payment_purpose = ?,
-                            reservation_id = ?
+                            reservation_id = ?, payment_account_id = ?, payment_account_name = ?, payment_account_identifier = ?
                         where id = ?
                         """,
                         payload.collectionScope(),
                         payload.paymentPurpose(),
                         payload.reservationId(),
+                        part.account()==null?null:part.account().id(),
+                        part.account()==null?null:part.account().name(),
+                        part.account()==null?null:part.account().identifier(),
                         payment.id()
                 );
             }
@@ -1013,8 +1020,29 @@ if (!"RESERVATION_ADVANCE".equals(
     }
 
     /**
-     * Lists payment approvals for the branch.
+     * Copies the stored payload for API output without changing the approval snapshot.
      */
+    private Map<String, Object> approvalResponse(Map<String, Object> row) {
+        var result = new java.util.LinkedHashMap<>(row);
+        if (row.get("payload") != null) {
+            try {
+                var payload = json.reader().with(tools.jackson.databind.DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
+                        .readTree(row.get("payload").toString());
+                for (var part : payload.path("parts")) {
+                    if (part.path("account") instanceof tools.jackson.databind.node.ObjectNode account) {
+                        var identifier = account.remove("identifier");
+                        account.put("maskedIdentifier", PaymentAccountMasking.mask(
+                                identifier == null || identifier.isNull() ? null : identifier.asText()));
+                    }
+                }
+                result.put("payload", json.writeValueAsString(payload));
+            } catch (RuntimeException invalid) {
+                throw new IllegalStateException("Stored payment approval payload is invalid.");
+            }
+        }
+        return result;
+    }
+
     public List<Map<String, Object>> list(
             UUID hotel,
             UUID branch) {
@@ -1051,7 +1079,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 """,
                 hotel,
                 branch
-        );
+        ).stream().map(this::approvalResponse).toList();
     }
 
     /**
@@ -1083,10 +1111,8 @@ if (!"RESERVATION_ADVANCE".equals(
                                     : part.currency()
                 );
 
-        String folioCurrency =
-                normalizeCurrency(
-                        folio.getCurrency()
-                );
+        var account=accounts.resolve(hotel,part.paymentAccountId(),part.method(),currency);
+        String folioCurrency = normalizeCurrency(folio.getCurrency());
 
         /*
          * Base-currency payment.
@@ -1107,7 +1133,7 @@ if (!"RESERVATION_ADVANCE".equals(
                     ),
                     amount,
                     null,
-                    null
+                    null, account
             );
         }
 
@@ -1124,6 +1150,7 @@ if (!"RESERVATION_ADVANCE".equals(
                         null
                 );
 
+        currencies.requireEnabled(hotel,currency);
         if (!folioCurrency.equals(
                 normalizeCurrency(
                         rate.baseCurrencyCode()
@@ -1160,7 +1187,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 fxRate,
                 baseAmount,
                 rate.id(),
-                rate.effectiveFrom()
+                rate.effectiveFrom(), account
         );
     }
 
@@ -1421,7 +1448,7 @@ if (!"RESERVATION_ADVANCE".equals(
                                             part.fxRate(),
                                             part.baseAmount(),
                                             part.exchangeRateId(),
-                                            part.rateEffectiveFrom()
+                                            part.rateEffectiveFrom(), part.account()
                                     );
                                 }
                         )
@@ -1507,6 +1534,7 @@ if (!"RESERVATION_ADVANCE".equals(
                                         : incomingPart.currency()
                     );
 
+            if (!Objects.equals(storedPart.account()==null?null:storedPart.account().id(),incomingPart.paymentAccountId())) return false;
             if (storedPart.method()
                     != incomingPart.method()) {
 

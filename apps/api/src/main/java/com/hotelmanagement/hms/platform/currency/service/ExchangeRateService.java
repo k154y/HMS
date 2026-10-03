@@ -22,12 +22,14 @@ public class ExchangeRateService {
     private static final int EXCHANGE_RATE_SCALE = 8;
     private static final int MONEY_SCALE = 4;
 
+    private final org.springframework.jdbc.core.JdbcTemplate db;
     private final HotelRepository hotelRepository;
     private final HotelExchangeRateRepository exchangeRateRepository;
 
     public ExchangeRateService(
             HotelRepository hotelRepository,
-            HotelExchangeRateRepository exchangeRateRepository) {
+            HotelExchangeRateRepository exchangeRateRepository, org.springframework.jdbc.core.JdbcTemplate db) {
+        this.db=db;
 
         this.hotelRepository = hotelRepository;
         this.exchangeRateRepository = exchangeRateRepository;
@@ -82,6 +84,7 @@ public class ExchangeRateService {
                         now
                 );
 
+        db.update("insert into hotel_currencies(hotel_id,code,name) values(?,?,?) on conflict do nothing",hotelId,foreignCurrency,foreignCurrency);
         HotelExchangeRate savedRate =
                 exchangeRateRepository.saveAndFlush(
                         exchangeRate);

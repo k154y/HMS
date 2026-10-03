@@ -1,4 +1,5 @@
 "use client";
+import {CurrencyField} from "./MoneyFields";
 
 import {
   useCallback,
@@ -446,7 +447,7 @@ export function MasterData({
                   <Field
                     label={field.label}
                   >
-                    {field.options ||
+                    {["purchaseCurrency","sellingCurrency"].includes(field.key) ? <CurrencyField bare label={field.label} optional value={String(values[field.key]??"")} onChange={v=>changeValue(field,v)}/> : field.options ||
                     field.lookup ? (
                       <select
                         name={`master-${field.key}`}
