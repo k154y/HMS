@@ -74,7 +74,7 @@ public class HotelMembershipService {
                         userId,
                         hotelId)) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "The user already has a membership "
                             + "for this hotel.");
         }
@@ -132,7 +132,7 @@ public class HotelMembershipService {
                         hotelId);
 
         if (membership.hasAllBranches()) {
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "This membership already has access "
                             + "to all hotel branches.");
         }
@@ -152,7 +152,7 @@ public class HotelMembershipService {
                         membershipId,
                         branchId)) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "The membership already has access "
                             + "to this branch.");
         }
@@ -189,7 +189,7 @@ public class HotelMembershipService {
                         hotelId);
 
         if (membership.hasAllBranches()) {
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Specific branch access cannot be revoked "
                             + "while the membership has "
                             + "all-branch access.");

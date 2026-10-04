@@ -43,7 +43,7 @@ public class PurchaseOrderService {
  public void receive(UUID h,UUID b,UUID id){
   UUID actor=scope.branch(h,b,PURCHASE_RECEIVE);var o=orders.findByIdAndHotelIdAndBranchId(id,h,b).orElseThrow(ApiException::notFound);
   if(o.getStatus()==PurchaseOrderStatus.RECEIVED)return;
-  if(o.getStatus()!=PurchaseOrderStatus.APPROVED)throw new IllegalStateException("Approve purchase before receiving goods.");
+  if(o.getStatus()!=PurchaseOrderStatus.APPROVED)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Approve purchase before receiving goods.");
   var lines=new ArrayList<>(items.findByPurchaseOrderIdAndHotelIdAndBranchId(id,h,b));lines.sort(Comparator.comparing(PurchaseOrderItem::getProductId));
   for(var i:lines){var p=products.lock(i.getProductId(),h).orElseThrow(ApiException::notFound);var quantity=i.getQuantity().subtract(i.getReceivedQuantity());
    if(quantity.signum()>0){if(p.getStockTracked())inventory.move(h,b,i.getProductId(),quantity.multiply(p.getPurchaseFactor()),MovementKind.RECEIPT,id,actor,"Purchase receipt "+id);i.receive(quantity);}
@@ -59,15 +59,15 @@ public class PurchaseOrderService {
   db.queryForList("select id from purchase_orders where id=? and hotel_id=? and branch_id=? for update",id,h,b);
   var original=Money.positive(r.amount());var amount=original;var o=orders.findByIdAndHotelIdAndBranchId(id,h,b).orElseThrow(ApiException::notFound);
   var previous=db.queryForList("select * from vendor_payments where hotel_id=? and branch_id=? and request_id=?",h,b,r.requestId());
-  if(!previous.isEmpty()){var old=previous.getFirst();if(!id.equals(old.get("purchase_order_id"))||original.compareTo((BigDecimal)(old.get("original_amount")==null?old.get("amount"):old.get("original_amount")))!=0||!r.method().name().equals(old.get("method"))||!Objects.equals(old.get("payment_account_id"),r.paymentAccountId())||!Objects.equals(old.get("original_currency")==null?currencies.base(h):old.get("original_currency"),r.currency()==null?currencies.base(h):r.currency()))throw new IllegalStateException("Payment key reused.");return com.hotelmanagement.hms.payment.service.PaymentAccountMasking.snapshotResponse(old);}
-  if(o.getStatus()!=PurchaseOrderStatus.APPROVED&&o.getStatus()!=PurchaseOrderStatus.RECEIVED)throw new IllegalStateException("Approve purchase before payment.");
+  if(!previous.isEmpty()){var old=previous.getFirst();if(!id.equals(old.get("purchase_order_id"))||original.compareTo((BigDecimal)(old.get("original_amount")==null?old.get("amount"):old.get("original_amount")))!=0||!r.method().name().equals(old.get("method"))||!Objects.equals(old.get("payment_account_id"),r.paymentAccountId())||!Objects.equals(old.get("original_currency")==null?currencies.base(h):old.get("original_currency"),r.currency()==null?currencies.base(h):r.currency()))throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Payment key reused.");return com.hotelmanagement.hms.payment.service.PaymentAccountMasking.snapshotResponse(old);}
+  if(o.getStatus()!=PurchaseOrderStatus.APPROVED&&o.getStatus()!=PurchaseOrderStatus.RECEIVED)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Approve purchase before payment.");
   var quote=currencies.quote(h,r.currency(),original);var account=accounts.resolve(h,r.paymentAccountId(),r.method(),quote.currency());
   String invoiceCurrency=o.getOriginalCurrency()==null?currencies.base(h):o.getOriginalCurrency();
   BigDecimal invoiceRate=o.getFxRate()==null?BigDecimal.ONE:o.getFxRate();
   BigDecimal currentInvoiceRate=quote.currency().equals(invoiceCurrency)?quote.fxRate():currencies.quote(h,invoiceCurrency,BigDecimal.ONE).fxRate();
   amount=quote.baseAmount().divide(currentInvoiceRate,12,RoundingMode.HALF_UP).multiply(invoiceRate).setScale(4,RoundingMode.HALF_UP);
   var paid=db.queryForObject("select coalesce(sum(amount),0) from vendor_payments where purchase_order_id=?",BigDecimal.class,id);
-  if(amount.compareTo(o.getTotal().subtract(paid))>0)throw new IllegalStateException("Payment exceeds purchase balance.");
+  if(amount.compareTo(o.getTotal().subtract(paid))>0)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Payment exceeds purchase balance.");
   UUID payment=UUID.randomUUID();db.update("insert into vendor_payments(id,hotel_id,branch_id,purchase_order_id,amount,method,request_id,actor_id,original_currency,original_amount,fx_rate,actual_base_amount,fx_difference,payment_account_id,payment_account_name,payment_account_identifier) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",payment,h,b,id,amount,r.method().name(),r.requestId(),actor,quote.currency(),original,quote.fxRate(),quote.baseAmount(),quote.baseAmount().subtract(amount),account==null?null:account.id(),account==null?null:account.name(),account==null?null:account.identifier());
   audit.record(h,b,actor,"VENDOR_PAYMENT","PURCHASE_ORDER",id);return Map.of("id",payment,"paid",paid.add(amount),"balance",o.getTotal().subtract(paid).subtract(amount));
  }

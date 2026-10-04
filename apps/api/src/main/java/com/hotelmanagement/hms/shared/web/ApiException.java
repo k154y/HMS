@@ -11,6 +11,6 @@ public class ApiException extends RuntimeException {
     public int status() { return status; }
     public String code() { return code; }
     public static ApiException notFound() {
-        return new ApiException(404, "RESOURCE_NOT_FOUND", "Resource not found in this scope.");
+        return new ApiException(404, "RESOURCE_NOT_FOUND", ApiError.NOT_FOUND_MESSAGE);
     }
 }

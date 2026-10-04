@@ -389,7 +389,7 @@ public class ExpenseController {
             if (!Boolean.TRUE.equals(
                     sameRequest
             )) {
-                throw new IllegalStateException(
+                throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                         "Expense request identifier was already used for different information."
                 );
             }

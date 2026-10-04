@@ -40,3 +40,7 @@ logging:
   level:
     root: INFO
     com.hotelmanagement.hms: INFO
+    # JDBC diagnostics can include rejected account identifiers and SQL values.
+    # API failures are reported through the sanitized, correlated handler instead.
+    org.hibernate.orm.jdbc.error: OFF
+    org.hibernate.engine.jdbc.spi.SqlExceptionHelper: OFF

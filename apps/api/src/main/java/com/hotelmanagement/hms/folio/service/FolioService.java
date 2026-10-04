@@ -49,7 +49,7 @@ public class FolioService {
   var f=lock(hotel,branch,id);
   if(kind==EntryKind.REFUND)f.reopenForRefund();
   if(f.getStatus()==FolioStatus.CLOSED || (f.getStatus()==FolioStatus.CREDIT && kind!=EntryKind.PAYMENT && kind!=EntryKind.REFUND))
-   throw new IllegalStateException("Folio does not accept this entry.");
+   throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Folio does not accept this entry.");
   if(amount==null || Money.amount(amount).signum()==0 || source==null || memo==null || memo.isBlank() || memo.length()>1000) throw new IllegalArgumentException("Invalid entry.");
   var e=entries.saveAndFlush(FolioEntry.create(hotel,branch,id,Money.amount(amount),kind,source,memo,actor));
   if(f.getStatus()==FolioStatus.CREDIT){
@@ -60,14 +60,14 @@ public class FolioService {
  public FolioEntryResponse reverse(UUID hotel,UUID branch,UUID id,UUID entry,String reason) {
   UUID actor=scope.branch(hotel,branch,FOLIO_MANAGE);lock(hotel,branch,id);
   var original=entries.findByIdAndHotelIdAndBranchId(entry,hotel,branch).filter(e->e.getFolioId().equals(id)).orElseThrow(ApiException::notFound);
-  if(original.getKind()!=EntryKind.CHARGE) throw new IllegalStateException("Use the originating module to reverse this entry.");
+  if(original.getKind()!=EntryKind.CHARGE) throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Use the originating module to reverse this entry.");
   return FolioEntryResponse.from(post(hotel,branch,id,original.getAmount().negate(),EntryKind.REVERSAL,entry,reason,actor));
  }
  public void transfer(UUID hotel,UUID branch,UUID from,UUID to,BigDecimal amount,String reason,UUID requestId) {
   UUID actor=scope.branch(hotel,branch,FOLIO_TRANSFER);if(from.equals(to))throw new IllegalArgumentException("Same folio.");
   // Stable lock order prevents opposite transfers deadlocking.
   if(from.compareTo(to)<0) { lock(hotel,branch,from);lock(hotel,branch,to); } else { lock(hotel,branch,to);lock(hotel,branch,from); }
-  amount=Money.positive(amount);if(balance(hotel,branch,from).compareTo(amount)<0)throw new IllegalStateException("Transfer exceeds outstanding balance.");
+  amount=Money.positive(amount);if(balance(hotel,branch,from).compareTo(amount)<0)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Transfer exceeds outstanding balance.");
   post(hotel,branch,from,amount.negate(),EntryKind.TRANSFER_OUT,requestId,reason,actor);
   post(hotel,branch,to,amount,EntryKind.TRANSFER_IN,requestId,reason,actor);
  }

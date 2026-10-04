@@ -6,20 +6,15 @@ on:
       - yfeature
       - devs
       - main
-    paths:
-      - "apps/api/**"
-      - "deployment/docker/backend.Dockerfile"
-      - ".dockerignore"
-      - ".github/workflows/backend-image.yml"
-      - "deployment/production/**"
-      - "deployment/staging/**"
-
   pull_request:
     branches:
       - devs
       - main
     paths:
       - "apps/api/**"
+      - "apps/web/**"
+      - "scripts/test-*.py"
+      - "scripts/test-web-errors.cjs"
       - "deployment/docker/backend.Dockerfile"
       - ".dockerignore"
       - ".github/workflows/backend-image.yml"
@@ -38,7 +33,7 @@ env:
 
 concurrency:
   group: hms-backend-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 
 jobs:
@@ -178,6 +173,11 @@ jobs:
       # Tests
       # ----------------------------------------------------
 
+      - name: Verify deployment safety offline
+        run: |
+          python3 -m pip install PyYAML==6.0.2
+          python3 scripts/test-production-deployment.py
+
       - name: Run Maven tests
         run: |
           mvn \
@@ -213,6 +213,7 @@ jobs:
 
     needs:
       - test
+      - web
 
 
     steps:
@@ -268,3 +269,70 @@ jobs:
 
           cache-from: type=gha
           cache-to: type=gha,mode=max
+  web:
+    name: Verify frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+        working-directory: apps/web
+      - run: node scripts/test-web-errors.cjs
+      - run: node scripts/check-translations.cjs
+      - run: npm run build
+        working-directory: apps/web
+
+  deploy-production:
+    name: Deploy immutable backend to production
+    needs: [test, image]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    permissions:
+      contents: read
+    concurrency:
+      group: hms-production-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Checkout exact release
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.sha }}
+      - name: Deploy and verify API
+        shell: bash
+        env:
+          HMS_PROD_HOST: ${{ secrets.HMS_PROD_HOST }}
+          HMS_PROD_USER: ${{ secrets.HMS_PROD_USER }}
+          HMS_PROD_PORT: ${{ secrets.HMS_PROD_PORT }}
+          HMS_PROD_SSH_PRIVATE_KEY: ${{ secrets.HMS_PROD_SSH_PRIVATE_KEY }}
+          HMS_PROD_KNOWN_HOSTS: ${{ secrets.HMS_PROD_KNOWN_HOSTS }}
+          HMS_PROD_HEALTH_URL: ${{ vars.HMS_PROD_HEALTH_URL }}
+          RELEASE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          umask 077
+          [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$HMS_PROD_HOST" =~ ^[a-zA-Z0-9][a-zA-Z0-9.-]*$ ]]
+          [[ "$HMS_PROD_USER" =~ ^[a-z_][a-z0-9_-]*$ ]]
+          port="${HMS_PROD_PORT:-22}"
+          [[ "$port" =~ ^[0-9]{1,5}$ ]] && ((port > 0 && port < 65536))
+          [[ "$HMS_PROD_HEALTH_URL" =~ ^https://[a-zA-Z0-9.-]+(:[0-9]+)?/[a-zA-Z0-9_./-]+$ ]]
+          test -n "$HMS_PROD_SSH_PRIVATE_KEY"
+          test -n "$HMS_PROD_KNOWN_HOSTS"
+          credentials=$(mktemp -d "$RUNNER_TEMP/hms-ssh.XXXXXX")
+          trap 'rm -rf -- "$credentials"' EXIT
+          printf '%s\n' "$HMS_PROD_SSH_PRIVATE_KEY" > "$credentials/key"
+          printf '%s\n' "$HMS_PROD_KNOWN_HOSTS" > "$credentials/known_hosts"
+          chmod 600 "$credentials/key" "$credentials/known_hosts"
+          ssh -T -p "$port" -i "$credentials/key" \
+            -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            -o "UserKnownHostsFile=$credentials/known_hosts" -o ConnectTimeout=15 \
+            -o ServerAliveInterval=15 -o ServerAliveCountMax=3 \
+            "$HMS_PROD_USER@$HMS_PROD_HOST" \
+            "bash -s -- '$RELEASE_SHA' '$HMS_PROD_HEALTH_URL'" < deployment/production/deploy.sh

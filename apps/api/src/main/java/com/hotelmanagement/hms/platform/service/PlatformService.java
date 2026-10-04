@@ -52,7 +52,7 @@ public class PlatformService {
                 normalizeCode(request.code());
 
         if (hotelRepository.existsByCode(code)) {
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "A hotel with code '"
                             + code
                             + "' already exists.");

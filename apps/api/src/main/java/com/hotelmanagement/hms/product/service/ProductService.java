@@ -23,7 +23,7 @@ public class ProductService {
  public ProductResponse update(UUID hotel,UUID id,ProductRequest r){
   UUID actor=scope.hotel(hotel,PRODUCT_MANAGE);var product=repository.lock(id,hotel).orElseThrow(ApiException::notFound);
   boolean unitsChanged=!product.getPurchaseUnit().equals(r.purchaseUnit())||!product.getSellingUnit().equals(r.sellingUnit())||!product.getStockUnit().equals(r.stockUnit())||product.getPurchaseFactor().compareTo(r.purchaseFactor())!=0||product.getSellingFactor().compareTo(r.sellingFactor())!=0||product.getStockTracked()!=r.stockTracked();
-  if(unitsChanged&&Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from stock_movements where product_id=?) or exists(select 1 from order_items where product_id=?) or exists(select 1 from purchase_order_items where product_id=?)",Boolean.class,id,id,id)))throw new IllegalStateException("Units cannot change after stock or sales history exists.");
+  if(unitsChanged&&Boolean.TRUE.equals(db.queryForObject("select exists(select 1 from stock_movements where product_id=?) or exists(select 1 from order_items where product_id=?) or exists(select 1 from purchase_order_items where product_id=?)",Boolean.class,id,id,id)))throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Units cannot change after stock or sales history exists.");
   product.currencies(currencies.requireEnabled(hotel,r.purchaseCurrency()==null?product.getPurchaseCurrency():r.purchaseCurrency()),currencies.requireEnabled(hotel,r.sellingCurrency()==null?product.getSellingCurrency():r.sellingCurrency()));
   product.edit(r);audit.record(hotel,null,actor,"PRODUCT_UPDATED","PRODUCT",id);return response(product);
  }

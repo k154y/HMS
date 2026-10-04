@@ -14,7 +14,7 @@ public class ReservationRoom {
          LocalDate newCheckOut) {
 
   if (!active) {
-   throw new IllegalStateException(
+   throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
        "Inactive room allocation cannot be rescheduled."
    );
   }

@@ -74,8 +74,7 @@ public class RestAccessDeniedHandler
 
         body.put(
                 "message",
-                "You are not permitted to perform "
-                        + "this operation."
+                com.hotelmanagement.hms.shared.web.ApiError.AUTHORIZATION_MESSAGE
         );
 
         body.put(

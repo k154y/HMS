@@ -10,6 +10,7 @@ export type ApiFieldError = {
 };
 
 type ApiErrorPayload = {
+  requestId?: string;
   code?: string;
   message?: string;
   error?: string;
@@ -18,6 +19,8 @@ type ApiErrorPayload = {
 
 export class HmsApiError extends Error {
   readonly status: number;
+  readonly requestId?: string;
+  readonly safeMessage: string;
   readonly code?: string;
   readonly fieldErrors: ApiFieldError[];
 
@@ -26,8 +29,11 @@ export class HmsApiError extends Error {
     message: string,
     code?: string,
     fieldErrors: ApiFieldError[] = [],
+    requestId?: string,
   ) {
-    super(message);
+    super([message, ...fieldErrors.map(item => `${item.field}: ${item.message}`)].join(" "));
+    this.safeMessage = message;
+    this.requestId = requestId;
     this.name = "HmsApiError";
     this.status = status;
     this.code = code;
@@ -63,24 +69,18 @@ export async function api<T>(
   method = "GET",
   body?: unknown,
 ): Promise<T> {
-  const response = await fetch(`/api/${path}`, {
+  const requestId = crypto.randomUUID();
+  let response: Response;
+  try { response = await fetch(`/api/${path}`, {
     method,
     headers: {
       "Content-Type": "application/json",
+      "X-Request-ID": requestId,
     },
     body: body === undefined ? undefined : JSON.stringify(body),
     cache: "no-store",
   });
-
-  if (response.status === 401) {
-    window.location.replace("/login?reason=expired");
-
-    throw new HmsApiError(
-      401,
-      "Session expired. Please sign in again.",
-      "SESSION_EXPIRED",
-    );
-  }
+  } catch { throw new HmsApiError(0, "The system could not be reached. Check your connection and try again.", "NETWORK_ERROR", [], requestId); }
 
   if (response.status === 204) {
     return undefined as T;
@@ -100,14 +100,18 @@ export async function api<T>(
         ? (data as ApiErrorPayload)
         : {};
 
-    throw new HmsApiError(
-      response.status,
-      payload.message ??
-        payload.error ??
-        `Request failed (${response.status})`,
-      payload.code,
-      validFieldErrors(payload.fieldErrors),
-    );
+    const reference = payload.requestId ?? response.headers.get("X-Request-ID") ?? requestId;
+    const statusMessage: Record<number,string> = {
+      401: "Your session has expired or is no longer valid. Please sign in again.",
+      403: "You don't have permission to perform this action.",
+      404: "The requested record could not be found or is no longer available.",
+    };
+    const message = response.status >= 500
+      ? `We couldn't complete this action because of a system problem. Please contact the system administrator and provide reference ID: ${reference}.`
+      : statusMessage[response.status] ?? payload.message ?? payload.error ?? "Please check the information you entered and try again.";
+    if (response.status === 401 && typeof window !== "undefined") window.location.replace("/login?reason=expired");
+    throw new HmsApiError(response.status, message, payload.code,
+      response.status >= 500 ? [] : validFieldErrors(payload.fieldErrors), reference);
   }
 
   return data as T;
