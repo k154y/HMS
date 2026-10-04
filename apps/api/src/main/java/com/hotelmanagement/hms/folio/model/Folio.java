@@ -22,7 +22,7 @@ public class Folio extends com.hotelmanagement.hms.shared.model.BranchEntity {
     public UUID getCustomerId() { return customerId; }
     public String getCurrency() { return currency; }
     public FolioStatus getStatus() { return status; }
- public void close() { if(status!=FolioStatus.OPEN) throw new IllegalStateException("Folio is not open."); status=FolioStatus.CLOSED; }
- public void credit() { if(status!=FolioStatus.OPEN) throw new IllegalStateException("Folio is not open.");status=FolioStatus.CREDIT; }
+ public void close() { if(status!=FolioStatus.OPEN) throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Folio is not open."); status=FolioStatus.CLOSED; }
+ public void credit() { if(status!=FolioStatus.OPEN) throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Folio is not open.");status=FolioStatus.CREDIT; }
  public void reopenForRefund(){if(status==FolioStatus.CLOSED)status=FolioStatus.OPEN;}
 }

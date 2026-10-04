@@ -78,8 +78,7 @@ public class RestAuthenticationEntryPoint
 
         body.put(
                 "message",
-                "Authentication is required or "
-                        + "the access token is invalid."
+                com.hotelmanagement.hms.shared.web.ApiError.AUTHENTICATION_MESSAGE
         );
 
         body.put(

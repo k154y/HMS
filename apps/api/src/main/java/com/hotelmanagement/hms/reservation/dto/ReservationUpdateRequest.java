@@ -5,6 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record ReservationUpdateRequest(
-        @NotNull LocalDate checkIn,
-        @NotNull LocalDate checkOut) {
+        @NotNull(message="Check-in date is required.") LocalDate checkIn,
+        @NotNull(message="Check-out date is required.") LocalDate checkOut) {
 }

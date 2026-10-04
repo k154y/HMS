@@ -266,7 +266,7 @@ public class ReservationService {
                 throw new ApiException(
                         409,
                         "ROOM_UNAVAILABLE",
-                        "Room is not operationally available."
+                        "This room is no longer available for the selected dates."
                 );
             }
 
@@ -439,9 +439,7 @@ public class ReservationService {
                         checkIn
                 )) {
 
-            throw new IllegalArgumentException(
-                    "Check-out must be after check-in."
-            );
+            throw new com.hotelmanagement.hms.shared.web.ApiException(400, "INVALID_STAY_DATE_RANGE", "Check-out must be after check-in.");
         }
 
 
@@ -536,9 +534,7 @@ public class ReservationService {
         if (timezone == null
                 || timezone.isBlank()) {
 
-            throw new IllegalStateException(
-                    "Hotel timezone is missing."
-            );
+            throw new ApiException(500, "INTERNAL_ERROR", "Reservation configuration requires investigation.");
         }
 
         LocalDate today =
@@ -660,9 +656,7 @@ public class ReservationService {
 
         if (numberOfNights <= 0) {
 
-            throw new IllegalStateException(
-                    "Reservation has invalid stay dates."
-            );
+            throw new ApiException(500, "INTERNAL_ERROR", "Reservation configuration requires investigation.");
         }
 
 
@@ -803,9 +797,7 @@ public class ReservationService {
         if (currency == null
                 || currency.isBlank()) {
 
-            throw new IllegalStateException(
-                    "Reservation folio currency is missing."
-            );
+            throw new ApiException(500, "INTERNAL_ERROR", "Reservation configuration requires investigation.");
         }
 
 
@@ -842,9 +834,7 @@ public class ReservationService {
                         request.checkIn()
                 )) {
 
-            throw new IllegalArgumentException(
-                    "Check-out must be after check-in."
-            );
+            throw new com.hotelmanagement.hms.shared.web.ApiException(400, "INVALID_STAY_DATE_RANGE", "Check-out must be after check-in.");
         }
 
         var reservation =
@@ -874,9 +864,7 @@ public class ReservationService {
         if (timezone == null
                 || timezone.isBlank()) {
 
-            throw new IllegalStateException(
-                    "Hotel timezone is missing."
-            );
+            throw new ApiException(500, "INTERNAL_ERROR", "Reservation configuration requires investigation.");
         }
 
         LocalDate today =

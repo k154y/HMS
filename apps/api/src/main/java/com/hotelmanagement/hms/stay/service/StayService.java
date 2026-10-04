@@ -351,7 +351,7 @@ public class StayService {
         if (reservation.getStatus()
                 != ReservationStatus.CHECKED_IN) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Reservation is not checked in."
             );
         }

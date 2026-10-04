@@ -430,7 +430,7 @@ public class OrderService {
         if (order.getStatus()
                 != OrderStatus.DRAFT) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Only drafts may be sent."
             );
         }
@@ -558,7 +558,7 @@ public class OrderService {
         if (order.getStatus()
                 == OrderStatus.VOIDED) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Already voided."
             );
         }
@@ -669,7 +669,7 @@ public class OrderService {
                     ORDER_VIEW
             );
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Update individual preparation items."
             );
         }
@@ -783,7 +783,7 @@ public class OrderService {
                 && order.getStatus()
                 != OrderStatus.PREPARING) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Order cannot be prepared."
             );
         }
@@ -846,7 +846,7 @@ public class OrderService {
                                 == OrderStatus.READY
         )) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Invalid preparation transition."
             );
         }

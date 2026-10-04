@@ -202,14 +202,14 @@ public class ExchangeRateService {
                                 lookupTime
                         )
                         .orElseThrow(() ->
-                                new IllegalStateException(
+                                new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                                         "No exchange rate is configured "
                                                 + "for currency "
                                                 + currencyCode
                                                 + " at the requested time."));
 
         if (!rate.isEnabled()) {
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Currency "
                             + currencyCode
                             + " is not enabled.");

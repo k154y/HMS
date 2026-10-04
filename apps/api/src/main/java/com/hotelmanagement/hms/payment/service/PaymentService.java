@@ -270,7 +270,7 @@ public PaymentResponse postApproved(
                             .compareTo(baseAmount) == 0;
 
             if (!samePayment) {
-                throw new IllegalStateException(
+                throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                         "Payment key reused for different payment details."
                 );
             }
@@ -306,9 +306,7 @@ if (!reservationAdvance
                 outstandingBalance
         ) > 0) {
 
-    throw new IllegalStateException(
-            "Payment exceeds folio balance."
-    );
+    throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("PAYMENT_EXCEEDS_BALANCE", "This payment exceeds the outstanding balance.");
 }
 
         Payment payment =

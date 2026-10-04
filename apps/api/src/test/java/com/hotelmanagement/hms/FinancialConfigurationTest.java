@@ -35,6 +35,8 @@ class FinancialConfigurationTest {
  @Autowired com.hotelmanagement.hms.payment.web.PaymentController paymentController;
  @Autowired com.hotelmanagement.hms.payment.web.PaymentAccountController accountController;
  @Autowired com.hotelmanagement.hms.report.web.ReportController reports;
+ @Autowired org.flywaydb.core.Flyway flyway;
+ @Test void flywayValidatesAppliedMigrations(){flyway.validate();}
  @Autowired OwnerOnboardingService onboarding;@Autowired HotelAdministrationService hotels;
  @Autowired HotelCurrencyService currencies;@Autowired PaymentAccountService accounts;
  @Autowired com.hotelmanagement.hms.nonresident.service.NonResidentBillService bills;
@@ -64,7 +66,7 @@ class FinancialConfigurationTest {
   var b=tenant();assertThrows(com.hotelmanagement.hms.shared.web.ApiException.class,()->accounts.resolve(b.hotel(),account.id(),PaymentMethod.BANK_TRANSFER,"USD"));
   assertThrows(org.springframework.security.access.AccessDeniedException.class,()->accounts.save(a.hotel(),account.id(),account));
   as(a);accounts.save(a.hotel(),account.id(),new Account(account.id(),account.name(),account.method(),account.currency(),account.identifierType(),account.identifier(),false));
-  assertThrows(IllegalArgumentException.class,()->accounts.resolve(a.hotel(),account.id(),account.method(),account.currency()));
+  assertEquals("PAYMENT_ACCOUNT_INACTIVE",assertThrows(com.hotelmanagement.hms.shared.web.ApiException.class,()->accounts.resolve(a.hotel(),account.id(),account.method(),account.currency())).code());
   assertThrows(IllegalArgumentException.class,()->accounts.save(a.hotel(),null,new Account(null,"MTN",PaymentMethod.MOBILE_MONEY,"RWF","ACCOUNT_NUMBER","123",true)));
   assertNotNull(accounts.save(a.hotel(),null,new Account(null,"MTN",PaymentMethod.MOBILE_MONEY,"RWF","MERCHANT_CODE","00123",true)));
   assertThrows(IllegalArgumentException.class,()->currencies.save(a.hotel(),"RWF","Rwandan franc",false));

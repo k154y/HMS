@@ -52,7 +52,7 @@ public class BranchService {
                 hotelId,
                 code)) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Branch code '" + code
                             + "' already exists for this hotel.");
         }

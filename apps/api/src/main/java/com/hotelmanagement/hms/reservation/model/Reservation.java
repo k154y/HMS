@@ -123,7 +123,7 @@ public class Reservation
         if (status
                 != ReservationStatus.CONFIRMED) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Reservation is not confirmed."
             );
         }
@@ -142,7 +142,7 @@ public class Reservation
         if (status
                 != ReservationStatus.CHECKED_IN) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Reservation is not checked in."
             );
         }
@@ -156,7 +156,7 @@ public class Reservation
         if (status
                 != ReservationStatus.CONFIRMED) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Only confirmed reservations can become no-show."
             );
         }
@@ -196,7 +196,7 @@ public class Reservation
                 || status
                 == ReservationStatus.CHECKED_OUT) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Stay cannot be cancelled."
             );
         }

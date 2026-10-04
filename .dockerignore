@@ -48,3 +48,10 @@ tmp
 temp
 *.tmp
 *.swp
+# Never include private scratch sources, backups, or generated preview builds
+.local
+.prod-repair-src
+**/.env
+**/.env.*
+**/tmp
+**/.next*
