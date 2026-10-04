@@ -557,7 +557,7 @@ public class PaymentWorkflow {
                     reservationId
             )) {
 
-                throw new IllegalStateException(
+                throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                         "Request key reused for different payment details."
                 );
             }
@@ -626,9 +626,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 folioBalance
         ) > 0) {
 
-    throw new IllegalStateException(
-            "Payment exceeds folio balance."
-    );
+    throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("PAYMENT_EXCEEDS_BALANCE", "This payment exceeds the outstanding balance.");
 }
 
         checkCollection(
@@ -758,7 +756,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 .get("status")
                 .equals("PENDING")) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Request already decided."
             );
         }
@@ -792,7 +790,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 && (reason == null
                 || reason.isBlank())) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Owner approval of their own payment requires a reason."
             );
         }
@@ -866,7 +864,7 @@ if (!"RESERVATION_ADVANCE".equals(
                     payload.folioCurrency()
             )) {
 
-                throw new IllegalStateException(
+                throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                         "Folio currency changed after the payment request was created."
                 );
             }
@@ -912,9 +910,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 currentFolioBalance
         ) > 0) {
 
-    throw new IllegalStateException(
-            "Payment exceeds the current folio balance."
-    );
+    throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("PAYMENT_EXCEEDS_BALANCE", "This payment exceeds the outstanding balance.");
 }
 
             int index = 0;
@@ -1725,7 +1721,7 @@ if (!"RESERVATION_ADVANCE".equals(
             if (reservationTotal == null
                     || reservationTotal.signum() <= 0) {
 
-                throw new IllegalStateException(
+                throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                         "Reservation has no payable accommodation amount."
                 );
             }
@@ -1784,7 +1780,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 "FOOD"
         ).contains(collection)) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Invalid payment collection scope."
             );
         }
@@ -1839,7 +1835,7 @@ if (!"RESERVATION_ADVANCE".equals(
                 outstanding
         ) > 0) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Payment exceeds the selected charge balance."
             );
         }

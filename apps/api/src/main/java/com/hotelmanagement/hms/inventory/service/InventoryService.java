@@ -23,7 +23,7 @@ public class InventoryService {
   quantity=Money.amount(quantity);if(quantity.signum()==0 || reason==null || reason.isBlank() || reason.length()>1000)throw new IllegalArgumentException("Invalid stock movement.");
   var existing=movements.findByHotelIdAndBranchIdAndProductIdAndKindAndSourceId(hotel,branch,product,kind,source);
   if(existing.isPresent()){
-   if(existing.get().getQuantity().compareTo(quantity)!=0 || !existing.get().getReason().equals(reason))throw new IllegalStateException("Idempotency key reused with different data.");
+   if(existing.get().getQuantity().compareTo(quantity)!=0 || !existing.get().getReason().equals(reason))throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Idempotency key reused with different data.");
    return existing.get();
   }
   if(movements.balance(hotel,branch,product).add(quantity).signum()<0)throw new ApiException(409,"INSUFFICIENT_STOCK","Stock cannot become negative.");
@@ -45,7 +45,7 @@ public class InventoryService {
  }
  public MovementResponse reverse(UUID hotel,UUID branch,UUID id,String reason){
   UUID actor=scope.branch(hotel,branch,INVENTORY_ADJUST);var m=movements.findByIdAndHotelIdAndBranchId(id,hotel,branch).orElseThrow(ApiException::notFound);
-  if(m.getKind()!=MovementKind.ADJUSTMENT && m.getKind()!=MovementKind.OPENING && m.getKind()!=MovementKind.WASTE)throw new IllegalStateException("Reverse through originating operation.");
+  if(m.getKind()!=MovementKind.ADJUSTMENT && m.getKind()!=MovementKind.OPENING && m.getKind()!=MovementKind.WASTE)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Reverse through originating operation.");
   return MovementResponse.from(move(hotel,branch,m.getProductId(),m.getQuantity().negate(),MovementKind.REVERSAL,id,actor,reason));
  }
  public record StockResponse(UUID productId,BigDecimal quantity,String unit,BigDecimal reorderLevel,boolean lowStock){}

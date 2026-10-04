@@ -75,7 +75,7 @@ public class RoleAuthorizationService {
                         role.getId(),
                         permission.getId())) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "The role already has permission "
                             + permission.getCode() + ".");
         }
@@ -151,13 +151,13 @@ public class RoleAuthorizationService {
         if (membership.getStatus()
                 == HotelMembershipStatus.REVOKED) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "Roles cannot be assigned to a revoked "
                             + "hotel membership.");
         }
 
         if (!role.isActive()) {
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "An inactive role cannot be assigned.");
         }
 
@@ -166,7 +166,7 @@ public class RoleAuthorizationService {
                         membershipId,
                         roleId)) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "The membership already has this role.");
         }
 

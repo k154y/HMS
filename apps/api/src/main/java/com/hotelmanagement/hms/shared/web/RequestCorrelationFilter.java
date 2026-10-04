@@ -15,6 +15,14 @@ import java.util.UUID;
 public class RequestCorrelationFilter extends OncePerRequestFilter {
     public static final String ATTRIBUTE = "hms.requestId";
 
+    public static String reference(HttpServletRequest request) {
+        Object current = request.getAttribute(ATTRIBUTE);
+        if (current instanceof String value && value.matches("[A-Za-z0-9._-]{1,64}")) return value;
+        String id = UUID.randomUUID().toString();
+        request.setAttribute(ATTRIBUTE, id);
+        return id;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {

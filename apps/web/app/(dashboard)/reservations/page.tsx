@@ -1,4 +1,5 @@
 "use client";
+import {ReservationDetails} from "@/components/operations/ReservationDetails";
 import {PaymentAccountField} from "@/components/operations/MoneyFields";
 
 import {
@@ -125,6 +126,7 @@ const nightsBetween = (
 
 export default function Reservations() {
   const [paymentAccountId,setPaymentAccountId]=useState("");
+  const [detailId,setDetailId]=useState<string|null>(null);
 
   const { t } =
     useLocale();
@@ -1175,13 +1177,11 @@ export default function Reservations() {
                             )
                             : (
 
-                              <span>
-                                {t(
-                                  reservation
-                                    ? "Reserved"
-                                    : "Unavailable",
-                                )}
-                              </span>
+                              reservation ? <button type="button"
+                                className="rounded px-2 py-1 font-semibold underline decoration-rose-400 underline-offset-4 hover:bg-rose-100 focus-visible:outline-2 focus-visible:outline-blue-600"
+                                aria-label={`${t("View reservation")} ${reservation.reference}, ${t("Room")} ${room.code}, ${day}`}
+                                onClick={()=>setDetailId(reservation.id)}>{t("Reserved")}</button>
+                                : <span>{t("Unavailable")}</span>
 
                             )}
 
@@ -2249,6 +2249,7 @@ export default function Reservations() {
 
         )}
 
+      {detailId&&<ReservationDetails key={detailId} id={detailId} names={names} rooms={rooms} onClose={()=>setDetailId(null)}/>}
     </Panel>
   );
 }

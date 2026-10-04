@@ -764,9 +764,9 @@ class PaymentFxWorkflowTest {
                 UUID.randomUUID()
         );
 
-        IllegalStateException error =
+        com.hotelmanagement.hms.shared.web.BusinessRuleException error =
                 assertThrows(
-                        IllegalStateException.class,
+                        com.hotelmanagement.hms.shared.web.BusinessRuleException.class,
                         () ->
                                 paymentWorkflow.request(
                                         tenant.hotel(),
@@ -789,10 +789,11 @@ class PaymentFxWorkflowTest {
                 );
 
         assertEquals(
-                "Payment exceeds folio balance.",
+                "This payment exceeds the outstanding balance.",
                 error.getMessage()
         );
 
+        assertEquals("PAYMENT_EXCEEDS_BALANCE",error.code());
         Integer approvals =
                 jdbc.queryForObject(
                         """

@@ -57,7 +57,7 @@ public class UserAccountService {
                 .existsByNormalizedEmail(
                         normalizedEmail)) {
 
-            throw new IllegalStateException(
+            throw new com.hotelmanagement.hms.shared.web.BusinessRuleException(
                     "A user account with this email "
                             + "already exists.");
         }

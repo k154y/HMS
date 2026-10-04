@@ -33,5 +33,5 @@ public class Stay extends com.hotelmanagement.hms.shared.model.BranchEntity {
     public Instant getCheckedOutAt() { return checkedOutAt; }
     public UUID getCheckedInBy() { return checkedInBy; }
     public UUID getCheckedOutBy() { return checkedOutBy; }
- public void checkOut(UUID actor) { if(checkedOutAt!=null)throw new IllegalStateException("Stay is already closed.");checkedOutAt=Instant.now();checkedOutBy=actor; }
+ public void checkOut(UUID actor) { if(checkedOutAt!=null)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Stay is already closed.");checkedOutAt=Instant.now();checkedOutBy=actor; }
 }

@@ -22,7 +22,7 @@ public class CreditService {
   UUID actor=scope.branch(h,b,CREDIT_MANAGE);customer(h,q.customerId());var amount=Money.positive(q.amount());
   if(q.sourceId()==null)throw new IllegalArgumentException("Request ID required.");
   var old=db.queryForList("select amount from credit_ledger where hotel_id=? and branch_id=? and customer_id=? and kind='CHARGE' and source_id=?",h,b,q.customerId(),q.sourceId());
-  if(!old.isEmpty()){if(amount.compareTo((BigDecimal)old.getFirst().get("amount"))!=0)throw new IllegalStateException("Request key reused.");return balance(h,b,q.customerId());}
+  if(!old.isEmpty()){if(amount.compareTo((BigDecimal)old.getFirst().get("amount"))!=0)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Request key reused.");return balance(h,b,q.customerId());}
   var f=folios.open(h,b,q.customerId(),actor);folios.post(h,b,f.getId(),amount,EntryKind.CHARGE,q.sourceId(),q.description(),actor);f.credit();
   db.update("insert into credit_ledger(id,hotel_id,branch_id,customer_id,kind,amount,source_id,description,actor_id) values(?,?,?,?,'CHARGE',?,?,?,?)",UUID.randomUUID(),h,b,q.customerId(),amount,q.sourceId(),q.description(),actor);
   audit.record(h,b,actor,"CREDIT_CHARGED","FOLIO",f.getId());return balance(h,b,q.customerId());
@@ -30,7 +30,7 @@ public class CreditService {
  public void approveFolio(UUID h,UUID b,UUID id){
   UUID actor=scope.branch(h,b,CREDIT_APPROVE);var f=folios.lock(h,b,id);
   if(f.getStatus()==FolioStatus.CREDIT)return;
-  var amount=folios.balance(h,b,id);if(amount.signum()<=0)throw new IllegalStateException("No outstanding balance.");f.credit();
+  var amount=folios.balance(h,b,id);if(amount.signum()<=0)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("No outstanding balance.");f.credit();
   db.update("insert into credit_ledger(id,hotel_id,branch_id,customer_id,kind,amount,source_id,description,actor_id) values(?,?,?,?,'CHARGE',?,?,?,?)",UUID.randomUUID(),h,b,f.getCustomerId(),amount,id,"Folio credit "+id,actor);
   audit.record(h,b,actor,"CREDIT_APPROVED","FOLIO",id);
  }
@@ -39,7 +39,7 @@ public class CreditService {
   if(q.sourceId()==null)throw new IllegalArgumentException("Request ID required.");
   var accounts=db.queryForList("select f.id,coalesce(sum(e.amount),0) balance from folios f left join folio_entries e on e.folio_id=f.id where f.hotel_id=? and f.branch_id=? and f.customer_id=? and f.status='CREDIT' group by f.id order by f.id",h,b,q.customerId());
   var total=accounts.stream().map(r->(BigDecimal)r.get("balance")).reduce(BigDecimal.ZERO,BigDecimal::add);
-  if(remaining.compareTo(total)>0)throw new IllegalStateException("Payment exceeds credit balance.");
+  if(remaining.compareTo(total)>0)throw new com.hotelmanagement.hms.shared.web.BusinessRuleException("Payment exceeds credit balance.");
   for(var row:accounts){BigDecimal amount=remaining.min((BigDecimal)row.get("balance"));if(amount.signum()<=0)continue;UUID id=(UUID)row.get("id");UUID key=UUID.nameUUIDFromBytes((q.sourceId()+":"+id).getBytes(java.nio.charset.StandardCharsets.UTF_8));payments.request(h,b,new PaymentWorkflow.Request(id,key,List.of(new PaymentWorkflow.Part(PaymentMethod.CASH,amount))));remaining=remaining.subtract(amount);}
   return balance(h,b,q.customerId());
  }

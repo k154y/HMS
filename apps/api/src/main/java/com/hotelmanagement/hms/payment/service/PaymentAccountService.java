@@ -63,7 +63,8 @@ public class PaymentAccountService {
         if(id==null)return null; // Existing clients and historical approvals remain valid.
         var result=db.query("select * from payment_accounts where id=? and hotel_id=? for share",this::row,id,hotel);
         if(result.isEmpty())throw ApiException.notFound();var account=result.getFirst();
-        if(!account.active()||account.method()!=method||!account.currency().equals(currency))throw new IllegalArgumentException("Select an active account matching the payment type and currency.");
+        if(!account.active())throw new ApiException(409,"PAYMENT_ACCOUNT_INACTIVE","This account is inactive. Choose another payment account.");
+        if(account.method()!=method||!account.currency().equals(currency))throw new IllegalArgumentException("Select an active account matching the payment type and currency.");
         return account;
     }
 }

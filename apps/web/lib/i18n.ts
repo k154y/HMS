@@ -1,6 +1,11 @@
 export const locales=["en","fr","rw"] as const;
 export type Locale=(typeof locales)[number];
 const rows=`
+Reservation details|Détails de la réservation|Ibisobanuro by'ibika
+Open folio|Ouvrir le folio|Fungura inyandiko y'ubwishyu
+Loading reservation details...|Chargement de la réservation...|Ibisobanuro by'ibika birimo gutegurwa...
+View reservation|Voir la réservation|Reba ibika
+Unable to load reservation details.|Impossible de charger les détails de la réservation.|Ibisobanuro by'ibika ntibyabonetse.
 Account cash movements|Mouvements de trésorerie par compte|Amafaranga yinjiye n'asohotse kuri konti
 Save name|Enregistrer le nom|Bika izina
 Net movement in accounting currency|Mouvement net en devise comptable|Amafaranga yinjiye ukuyemo ayasohotse mu ifaranga ry'ibaruramari

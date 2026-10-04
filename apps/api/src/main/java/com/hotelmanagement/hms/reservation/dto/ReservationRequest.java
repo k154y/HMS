@@ -1,6 +1,6 @@
 package com.hotelmanagement.hms.reservation.dto;
 import jakarta.validation.constraints.*; import java.time.*; import java.util.*; import java.math.BigDecimal;
-public record ReservationRequest(@NotNull UUID bookingCustomerId,@NotNull LocalDate checkIn,@NotNull LocalDate checkOut,@Min(1) int adults,@Min(0) int children,
+public record ReservationRequest(@NotNull(message="Customer is required.") UUID bookingCustomerId,@NotNull(message="Check-in date is required.") LocalDate checkIn,@NotNull(message="Check-out date is required.") LocalDate checkOut,@Min(1) int adults,@Min(0) int children,
  @NotEmpty @Size(max=20) List<@NotNull RoomBooking> rooms,@Size(max=2000) String notes) {
  public ReservationRequest(UUID customerId, LocalDate checkIn, LocalDate checkOut, List<RoomBooking> rooms, String notes) {
   this(customerId, checkIn, checkOut, rooms.stream().mapToInt(RoomBooking::adults).sum(), rooms.stream().mapToInt(RoomBooking::children).sum(), rooms, notes);

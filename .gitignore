@@ -90,3 +90,5 @@ deployment/backup/.env
 deployment/backup/*.sql
 deployment/backup/*.sql.gz
 deployment/backup/*.dump
+# Local incident-repair scratch sources (never release)
+.prod-repair-src/
