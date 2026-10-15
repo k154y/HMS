@@ -1,5 +1,2 @@
-import { redirect } from "next/navigation";
-
-export default function RootPage() {
-  redirect("/dashboard");
-}
+import PlatformLanding from "@/components/PlatformLanding";
+export default function RootPage(){return <PlatformLanding/>;}

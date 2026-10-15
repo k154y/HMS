@@ -15,6 +15,9 @@ public class CurrentUserController {
   Map<String,Object> user=new LinkedHashMap<>(jdbc.queryForMap("select id,email,full_name as name,preferred_language as language from users where id=?",actor));
   boolean admin=Boolean.TRUE.equals(jdbc.queryForObject("select exists(select 1 from platform_administrators where user_id=?)",Boolean.class,actor));
   user.put("role",admin?"SUPER_ADMIN":null);
+  user.put("mustChangePassword",Boolean.TRUE.equals(jdbc.queryForObject(
+   "SELECT must_change_password FROM users WHERE id=?",Boolean.class,actor)));
+
   var memberships=jdbc.queryForList("""
    select m.id as membership_id,m.hotel_id,h.display_name,h.status,h.trial_ends_at,
    (select b.id from branches b where b.hotel_id=m.hotel_id and b.is_active=true
@@ -23,6 +26,22 @@ public class CurrentUserController {
    where m.user_id=? and m.status='ACTIVE' order by m.created_at
    """,actor);
   user.put("memberships",memberships);
+  user.put("commerceBusinesses", jdbc.queryForList("""
+      SELECT b.id, b.name, m.role
+      FROM commerce_memberships m
+      JOIN commerce_businesses b ON b.id = m.business_id
+      WHERE m.user_id = ?
+        AND m.status = 'ACTIVE'
+        AND b.status = 'ACTIVE'
+        AND EXISTS (
+          SELECT 1 FROM commerce_entitlements e
+          WHERE e.business_id = b.id
+            AND e.module = 'CORE'
+            AND e.enabled = TRUE
+        )
+      ORDER BY b.created_at, b.id
+      """, actor));
+
   if(!admin && !memberships.isEmpty()){
    var m=memberships.getFirst();
    var roles=jdbc.queryForList("select r.code from membership_roles mr join roles r on r.id=mr.role_id where mr.membership_id=? and r.active=true order by case r.code when 'OWNER' then 0 when 'MANAGER' then 1 else 2 end,r.code",String.class,m.get("membership_id"));

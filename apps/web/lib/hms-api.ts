@@ -1,3 +1,4 @@
+import {loginDestination} from "./navigation";
 export type Page<T> = {
   content: T[];
   totalElements: number;
@@ -109,7 +110,7 @@ export async function api<T>(
     const message = response.status >= 500
       ? `We couldn't complete this action because of a system problem. Please contact the system administrator and provide reference ID: ${reference}.`
       : statusMessage[response.status] ?? payload.message ?? payload.error ?? "Please check the information you entered and try again.";
-    if (response.status === 401 && typeof window !== "undefined") window.location.replace("/login?reason=expired");
+    if (response.status === 401 && typeof window !== "undefined") window.location.replace(loginDestination(window.location.pathname==="/security"?new URLSearchParams(window.location.search).get("next"):window.location.pathname,true));
     throw new HmsApiError(response.status, message, payload.code,
       response.status >= 500 ? [] : validFieldErrors(payload.fieldErrors), reference);
   }

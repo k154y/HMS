@@ -210,7 +210,7 @@ echo "Waiting for Spring Boot backend to become ready..."
 
 BACKEND_HEALTH_URL="http://127.0.0.1:${BACKEND_PORT}/actuator/health"
 
-for attempt in $(seq 1 240); do
+for attempt in $(seq 1 "${HMS_BACKEND_STARTUP_TIMEOUT:-600}"); do
 
     if curl \
         --silent \
@@ -237,10 +237,10 @@ for attempt in $(seq 1 240); do
         exit 1
     fi
 
-    if [ "$attempt" -eq 240 ]; then
+    if [ "$attempt" -eq "${HMS_BACKEND_STARTUP_TIMEOUT:-600}" ]; then
 
         echo ""
-        echo "ERROR: Backend did not become ready within 240 seconds."
+        echo "ERROR: Backend did not become ready within ${HMS_BACKEND_STARTUP_TIMEOUT:-600} seconds."
         echo ""
         echo "Last backend log lines:"
         echo ""

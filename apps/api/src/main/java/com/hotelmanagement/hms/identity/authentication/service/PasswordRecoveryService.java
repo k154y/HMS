@@ -105,6 +105,7 @@ public class PasswordRecoveryService {
         int consumed=db.update("update password_reset_tokens set used_at=? where token_hash=? and used_at is null and expires_at>?",now,hash,now);
         if (consumed != 1) return failed(user.getId());
         user.changePassword(encoder.encode(password),now); users.flush();
+        db.update("UPDATE users SET must_change_password=FALSE WHERE id=?",user.getId());
         db.update("update password_reset_tokens set used_at=? where user_id=? and used_at is null",now,user.getId());
         sessions.revokeAllForUser(user.getId());
         audit.record(null,null,user.getId(),"PASSWORD_RESET_COMPLETED","USER",user.getId());

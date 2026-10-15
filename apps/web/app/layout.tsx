@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HotelPro — Hotel Management System",
-  description: "Hotel operations, reservations, sales and financial management",
+  title: "Kivu Business Platform — Business Management Platform",
+  description: "Workspaces for hospitality, inventory and business management",
 };
 
 export default function RootLayout({

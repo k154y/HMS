@@ -563,6 +563,10 @@ export default function PlatformPanel() {
     <main className="min-h-screen bg-slate-50 p-6 text-slate-900 md:p-12">
 
       <div className="mx-auto max-w-5xl">
+        <a href="/platform/organizations" className="mb-4 inline-block rounded-lg bg-blue-700 px-4 py-2 font-semibold text-white">
+          {t("Manage KBP organizations (Hotel / Commerce)")}
+        </a>
+
 
         <select
           aria-label={t("Language")}
@@ -594,7 +598,7 @@ export default function PlatformPanel() {
 
           <div>
             <p className="font-semibold text-blue-700">
-              HotelPro ·{" "}
+              {"KBP · "}
               {t(
                 "Platform administration"
               )}
@@ -612,7 +616,7 @@ export default function PlatformPanel() {
             onClick={() =>
               signOut({
                 callbackUrl:
-                  "/login",
+                  "/admin/login",
               })
             }
             className="rounded-lg border px-4 py-2"

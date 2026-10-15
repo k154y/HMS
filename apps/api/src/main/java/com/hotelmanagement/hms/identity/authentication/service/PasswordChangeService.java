@@ -34,9 +34,12 @@ public class PasswordChangeService {
         if (user.getStatus() != UserStatus.ACTIVE || !encoder.matches(request.currentPassword(), user.getPasswordHash()))
             throw new BadCredentialsException("Authentication failed.");
         policy.validateNewPassword(request.newPassword());
+        if (encoder.matches(request.newPassword(), user.getPasswordHash()))
+            throw new IllegalArgumentException("New password must differ from the current password.");
         if (request.confirmPassword() != null && !request.newPassword().equals(request.confirmPassword()))
             throw new IllegalArgumentException("Passwords do not match.");
         user.changePassword(encoder.encode(request.newPassword()), OffsetDateTime.now(ZoneOffset.UTC));
+        db.update("UPDATE users SET must_change_password=FALSE WHERE id=?",userId);
         sessions.revokeAllForUser(userId);
         db.update("update password_reset_tokens set used_at=current_timestamp where user_id=? and used_at is null",userId);
         events.publishEvent(new com.hotelmanagement.hms.identity.authentication.password.PasswordRecoveryNotifier.Delivery(user.getEmail(),null));

@@ -50,7 +50,7 @@ dev-logs:
 
 
 backend-run:
-	mvn -f $(API_DIR)/pom.xml spring-boot:run
+	mvn -f $(API_DIR)/pom.xml -Dmaven.test.skip=true spring-boot:run
 
 
 backend-build:
