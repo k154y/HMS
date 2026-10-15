@@ -15,8 +15,16 @@ if ($LASTEXITCODE -ne 0) { throw 'Existing Maven/Java 21 image is required.' }
 docker volume inspect $MavenCacheVolume --format '{{.Name}}'
 if ($LASTEXITCODE -ne 0) { throw 'Existing Maven dependency cache is required.' }
 try {
-    docker compose -p $project -f $compose up -d --pull never --wait --wait-timeout 60
-    if ($LASTEXITCODE -ne 0) { throw 'Disposable test services failed to start.' }
+    docker compose -p $project -f $compose up -d --pull never --wait --wait-timeout 300
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "===== DISPOSABLE TEST CONTAINER STATUS ====="
+        docker compose -p $project -f $compose ps -a
+
+        Write-Host "===== RABBITMQ STARTUP LOGS ====="
+        docker compose -p $project -f $compose logs --no-color --tail 150 test-rabbitmq
+
+        throw 'Disposable test services failed to start.'
+    }
     $postgres = "$project-test-postgres-1"
     $inspection = docker inspect $postgres | ConvertFrom-Json
     if ($LASTEXITCODE -ne 0 -or -not $inspection[0].HostConfig.Tmpfs.PSObject.Properties['/var/lib/postgresql/data']) {
@@ -51,14 +59,14 @@ exit "$result"
             -v "${MavenCacheVolume}:/root/.m2" -v "${repo}:/workspace" `
             -e HMS_TEST_DB_URL=jdbc:postgresql://test-postgres:5432/hms_test `
             -e HMS_TEST_DB_USER=hms_test -e HMS_TEST_DB_PASSWORD=hms_test_only `
-            -e HMS_TEST_REDIS_HOST=test-redis -e "HMS_TEST_SELECTION=$Tests" `
+            -e HMS_TEST_REDIS_HOST=test-redis -e HMS_RABBITMQ_HOST=test-rabbitmq -e HMS_RABBITMQ_PORT=5672 -e HMS_RABBITMQ_USERNAME=hms_test -e HMS_RABBITMQ_PASSWORD=hms_test_only -e "HMS_TEST_SELECTION=$Tests" `
             $image sh -c $buildScript
     } else {
         docker run --rm --pull never --network "$project`_default" `
         -v "${MavenCacheVolume}:/root/.m2" -v "${repo}:/workspace" -w /workspace/apps/api `
         -e HMS_TEST_DB_URL=jdbc:postgresql://test-postgres:5432/hms_test `
         -e HMS_TEST_DB_USER=hms_test -e HMS_TEST_DB_PASSWORD=hms_test_only `
-        -e HMS_TEST_REDIS_HOST=test-redis $image mvn -o "-Dtest=$Tests" test
+        -e HMS_TEST_REDIS_HOST=test-redis -e HMS_RABBITMQ_HOST=test-rabbitmq -e HMS_RABBITMQ_PORT=5672 -e HMS_RABBITMQ_USERNAME=hms_test -e HMS_RABBITMQ_PASSWORD=hms_test_only $image mvn -o "-Dtest=$Tests" test
     }
     $testExit = $LASTEXITCODE
     if ($testExit -ne 0) { throw "Maven tests failed (exit $testExit). See apps/api/target/surefire-reports." }

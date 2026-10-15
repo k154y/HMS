@@ -68,6 +68,23 @@ public class GlobalApiExceptionHandler {
         return response(request, 409, "STATE_CONFLICT",
                 "This action conflicts with the current record. Refresh the page and review your changes before trying again.");
     }
+    @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)
+    protected ResponseEntity<ApiError> responseStatus(
+            org.springframework.web.server.ResponseStatusException exception,
+            HttpServletRequest request) {
+
+        int status = exception.getStatusCode().value();
+
+        return response(
+                request,
+                status,
+                status == 403 ? "ACCESS_DENIED" : "REQUEST_REJECTED",
+                status == 403
+                        ? ApiError.AUTHORIZATION_MESSAGE
+                        : "The request could not be completed."
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<ApiError> unexpected(Exception exception, HttpServletRequest request) {
         String id = RequestCorrelationFilter.reference(request);
