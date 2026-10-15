@@ -1,0 +1,33 @@
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
+import {authRedirect} from "@/lib/navigation";
+const apiBase=process.env.HMS_API_URL??"http://localhost:8081/api/v1";
+// Requests from one rendered page may refresh concurrently. Share the rotating token result.
+function validProfile(profile:Record<string,unknown>){return typeof profile.id==="string" && typeof profile.email==="string"}
+// Identity is shared; workspace access is enforced by each product, never by JWT existence.
+function currentProfile(p:Record<string,unknown>){return {...p,role:p.role??null,hotelId:p.hotelId??null,branchId:p.branchId??null,roles:p.roles??[],permissions:p.permissions??[],mustChangePassword:p.mustChangePassword===true}}
+const refreshing=new Map<string,Promise<Record<string,unknown>>>();
+async function refresh(refreshToken:string){
+ const existing=refreshing.get(refreshToken);if(existing)return existing;
+ const pending=(async()=>{const response=await fetch(`${apiBase}/auth/refresh`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({refreshToken}),signal:AbortSignal.timeout(15000)});if(!response.ok)throw new Error("Refresh failed");const tokens=await response.json();const profile=await fetch(`${apiBase}/auth/me`,{headers:{Authorization:`Bearer ${tokens.accessToken}`},cache:"no-store"});if(!profile.ok)throw new Error("Profile unavailable");const data=await profile.json();if(!validProfile(data))throw new Error("Invalid user profile");return {...currentProfile(data),...tokens} as Record<string,unknown>})();
+ refreshing.set(refreshToken,pending);pending.finally(()=>setTimeout(()=>refreshing.delete(refreshToken),10000)).catch(()=>{});return pending;
+}
+export const {handlers,signIn,signOut,auth}=NextAuth({
+session:{
+  strategy:"jwt",
+  maxAge:30*24*60*60,
+},pages:{signIn:"/login"},
+ providers:[Credentials({name:"Spring API",credentials:{email:{},password:{}},async authorize(credentials){
+  const response=await fetch(`${apiBase}/auth/login`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:credentials?.email,password:credentials?.password}),signal:AbortSignal.timeout(15000)});
+  if(!response.ok)return null;const tokens=await response.json();
+  const responseProfile=await fetch(`${apiBase}/auth/me`,{headers:{Authorization:`Bearer ${tokens.accessToken}`},cache:"no-store"});if(!responseProfile.ok)return null;
+  const profile=await responseProfile.json();if(!validProfile(profile))return null;return {...currentProfile(profile),...tokens};
+ }})],
+ events:{async signOut(message){if("token" in message && message.token){const token=message.token;if(typeof token.accessToken==="string"&&typeof token.refreshToken==="string"){try{await fetch(`${apiBase}/auth/logout`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token.accessToken}`},body:JSON.stringify({refreshToken:token.refreshToken}),signal:AbortSignal.timeout(10000)});}catch{/* Local sign-out must still complete when the API is unavailable. */}}}}},
+ callbacks:{
+  async redirect({url,baseUrl}){return authRedirect(url,baseUrl)},
+  async jwt({token,user}){if(user){Object.assign(token,user);return token}if(Date.now()<Date.parse(String(token.accessTokenExpiresAt))-30000)return token;if(typeof token.refreshToken!=="string")return token;try{return {...token,...await refresh(token.refreshToken)}}catch{return {...token,accessToken:undefined,refreshToken:undefined}}},
+  async session({session,token}){const {refreshToken,accessTokenExpiresAt,accessToken,...profile}=token;Object.assign(session.user,profile);session.accessToken=typeof accessToken==="string"?accessToken:undefined;return session}
+ }
+});
+

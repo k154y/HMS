@@ -1,6 +1,132 @@
 export const locales=["en","fr","rw"] as const;
 export type Locale=(typeof locales)[number];
 const rows=`
+Parent category (optional)|Catégorie parente (facultative)|Icyiciro gikuru (si ngombwa)
+Business settings|Paramètres de l’entreprise|Igenamiterere ry’ikigo
+Decimal places|Décimales|Imibare nyuma y’akitso
+Effective date|Date d’effet|Itariki bitangiriraho
+Source|Source|Inkomoko
+Allowed branches|Succursales autorisées|Amashami yemerewe
+Configuration saved.|Configuration enregistrée.|Igenamiterere ryabitswe.
+The base accounting currency is fixed after provisioning.|La devise comptable de base est fixe après la création.|Ifaranga ry’ibanze ntirihindurwa nyuma yo kwandikisha ikigo.
+Enter the base-currency value of one transaction-currency unit. Existing rate records cannot be changed.|Saisissez la valeur en devise de base d’une unité de la devise de transaction. Les taux enregistrés sont immuables.|Andika agaciro k’ifaranga rimwe mu ifaranga ry’ibanze. Ibipimo byabitswe ntibihindurwa.
+The change conflicts with existing records. Review the current configuration.|La modification est incompatible avec des données existantes. Vérifiez la configuration.|Impinduka zibangamiye amakuru asanzwe. Suzuma igenamiterere.
+Stock movement ledger|Registre des mouvements de stock|Igitabo cy’imigendekere y’ibicuruzwa
+Operation|Opération|Igikorwa
+Stock adjustment|Ajustement de stock|Gukosora ibarura
+Stock transfer|Transfert de stock|Kwimura ibicuruzwa
+Destination location|Emplacement de destination|Ububiko byoherezwamo
+Retry same request|Réessayer la même demande|Ongera ugerageze icyifuzo kimwe
+Retry preserves the original request. Check the ledger before starting another operation.|La nouvelle tentative conserve la demande initiale. Vérifiez le registre avant une autre opération.|Kongera kugerageza bigumana icyifuzo cya mbere. Banza urebe igitabo mbere y’ikindi gikorwa.
+Stock operation rejected. Check available quantity and the request details.|Opération refusée. Vérifiez la quantité disponible et la demande.|Igikorwa nticyemewe. Reba umubare uhari n’amakuru y’icyifuzo.
+Unable to complete the stock operation. Retry the same request.|Impossible de terminer l’opération. Réessayez la même demande.|Igikorwa nticyarangiye. Ongera ugerageze icyifuzo kimwe.
+Stock operation recorded.|Mouvement de stock enregistré.|Igikorwa cy’ububiko cyanditswe.
+Audit history|Historique d’audit|Amateka y’igenzura
+Currencies|Devises|Amafaranga
+Contact|Coordonnées|Aho kubariza
+VIEWER|Lecteur|Ureba amakuru gusa
+Organization and owner created. Give the temporary password securely to the owner. They must change it at first login.|Organisation et propriétaire créés. Transmettez le mot de passe temporaire de manière sécurisée. Il doit être changé à la première connexion.|Ikigo na nyiracyo byanditswe. Muhe ijambo ry’ibanga ry’agateganyo mu buryo bwizewe. Agomba kurihindura akinjira bwa mbere.
+Kivu Business Platform — Business Management Platform|Plateforme commerciale Kivu — Gestion des affaires|Urubuga rw’Ubucuruzi rwa Kivu — Imicungire y’ubucuruzi
+Manage KBP organizations (Hotel / Commerce)|Gérer les organisations KBP (Hôtel / Commerce)|Cunga ibigo bya KBP (Hoteli / Ubucuruzi)
+
+Kivu Business Platform · KBP Administration|Plateforme commerciale Kivu · Administration KBP|Urubuga rw’Ubucuruzi rwa Kivu · Ubuyobozi bwa KBP
+Organizations and owners|Organisations et propriétaires|Ibigo na ba nyirabyo
+Platform administration only. No access to operational customer records.|Administration uniquement. Aucune consultation des données opérationnelles des clients.|Ubuyobozi bw’urubuga gusa. Nta kureba amakuru y’ibikorwa by’abakiriya.
+Hotel administration|Administration des hôtels|Ubuyobozi bw’amahoteri
+Create organization and owner|Créer une organisation et son propriétaire|Andikisha ikigo na nyiracyo
+Choose one product. Owners receive access only to their assigned organization.|Choisissez un produit. Chaque propriétaire accède uniquement à son organisation.|Hitamo porogaramu imwe. Nyir’ikigo abona amakuru y’ikigo cye gusa.
+Product|Produit|Porogaramu
+Organization name|Nom de l'organisation|Izina ry’ikigo
+Hotel code|Code de l'hôtel|Kode ya hoteli
+Owner's full name|Nom complet du propriétaire|Amazina ya nyir’ikigo
+Owner email|E-mail du propriétaire|Imeyili ya nyir’ikigo
+Temporary password (15–128 characters)|Mot de passe temporaire (15 à 128 caractères)|Ijambo ry’ibanga ry’agateganyo (inyuguti 15–128)
+Base currency|Devise de base|Ifaranga rikoreshwa
+Preferred language|Langue préférée|Ururimi rwatoranyijwe
+Provide the temporary password privately. Never send passwords in an unencrypted group chat.|Transmettez le mot de passe temporaire en privé, jamais dans un groupe non sécurisé.|Tanga ijambo ry’ibanga ry’agateganyo mu ibanga, nturishyire mu itsinda ridakingiwe.
+Creating…|Création…|Birimo gukorwa…
+Create owner and organization|Créer le propriétaire et l'organisation|Andikisha nyir’ikigo n’ikigo
+Registered organizations|Organisations enregistrées|Ibigo byanditswe
+Name|Nom|Izina
+Status|Statut|Imiterere
+No organizations found.|Aucune organisation trouvée.|Nta bigo byabonetse.
+
+Kivu Business Platform (KBP)|Plateforme commerciale Kivu (KBP)|Urubuga rw’Ubucuruzi rwa Kivu (KBP)
+Built around your business|Conçu pour votre activité|Byagenewe ubucuruzi bwawe
+One platform. Smarter business management.|Une plateforme. Une gestion plus efficace.|Urubuga rumwe. Imicungire inoze y'ubucuruzi.
+Connected workspaces for hotels, retailers, wholesalers and distributors. Choose the tools that fit your business.|Des espaces connectés pour les hôtels, détaillants, grossistes et distributeurs. Choisissez les outils adaptés à votre activité.|Ahantu ho gukorera ku mahoteri, abacuruza ku giti, abarangura n'abakwirakwiza ibicuruzwa. Hitamo ibikoresho bijyanye n'ubucuruzi bwawe.
+For hospitality|Pour l'hôtellerie|Ku mahoteri
+Hotel Management System|Système de gestion hôtelière|Sisitemu yo gucunga hoteli
+Keep your front desk, guest services and daily operations connected.|Reliez votre réception, vos services aux clients et vos opérations quotidiennes.|Huza aho bakirira abantu, serivisi z'abashyitsi n'imirimo ya buri munsi.
+Reservations and rooms|Réservations et chambres|Ibika n'ibyumba
+Guest management|Gestion des clients|Gucunga abashyitsi
+Restaurant and bar|Restaurant et bar|Resitora n'akabari
+Purchasing and stock|Achats et stocks|Kugura n'ububiko
+Payments and reporting|Paiements et rapports|Ubwishyu na raporo
+Access Hotel Management|Accéder à la gestion hôtelière|Fungura imicungire ya hoteli
+For trade and distribution|Pour le commerce et la distribution|Ku bucuruzi no gukwirakwiza ibicuruzwa
+Inventory, Sales & Distribution|Stocks, ventes et distribution|Ububiko, igurisha no gukwirakwiza ibicuruzwa
+Build your business catalogue and organize stock across branches and warehouses.|Créez votre catalogue et organisez les stocks de vos succursales et entrepôts.|Tegura urutonde rw'ibicuruzwa n'ububiko mu mashami no mu bigega.
+Businesses, branches and stock locations|Entreprises, succursales et emplacements de stock|Ibigo, amashami n'ahabikwa ibicuruzwa
+Categories, products and units|Catégories, produits et unités|Ibyiciro, ibicuruzwa n'ibipimo
+Opening stock and stock balances|Stock initial et soldes de stock|Ibicuruzwa by'ibanze n'ibisigaye mu bubiko
+Coming next|À venir|Ibizakurikiraho
+Retail and wholesale sales, invoicing, distribution and accounting.|Ventes au détail et en gros, facturation, distribution et comptabilité.|Kugurisha ku giti no ku bwinshi, inyemezabuguzi, gukwirakwiza ibicuruzwa n'ibaruramari.
+Access Inventory & Sales|Accéder aux stocks et ventes|Fungura ububiko n'igurisha
+One account. Access is managed separately for each workspace.|Un seul compte. Les accès sont gérés séparément pour chaque espace.|Konti imwe. Uburenganzira bucungwa ukwabwo kuri buri hantu ho gukorera.
+Product navigation|Navigation des produits|Guhitamo serivisi
+Hotel Management|Gestion hôtelière|Imicungire ya hoteli
+Inventory & Sales|Stocks et ventes|Ububiko n'igurisha
+Workspace navigation|Navigation des espaces|Guhitamo aho ukorera
+Choose workspace|Choisir un espace|Hitamo aho ukorera
+Workspace access|Accès à l'espace|Uburenganzira bwo gukorera
+Back to platform|Retour à la plateforme|Subira ku rubuga
+Sign in to your business platform|Connectez-vous à votre plateforme de gestion|Injira ku rubuga rw'ubucuruzi bwawe
+Platform administration|Administration de la plateforme|Ubuyobozi bw'urubuga
+Your session has expired. Please sign in again.|Votre session a expiré. Veuillez vous reconnecter.|Igihe cyo gukoresha konti cyarangiye. Ongera winjire.
+Commerce is currently disabled. Contact your administrator for availability.|Le module commercial est désactivé. Contactez votre administrateur pour connaître sa disponibilité.|Serivisi y'ubucuruzi irafunze. Baza umuyobozi igihe izabonekera.
+No commerce business is assigned to your account. Ask your administrator for access.|Aucune entreprise commerciale n'est affectée à votre compte. Demandez un accès à votre administrateur.|Nta kigo cy'ubucuruzi cyahawe konti yawe. Saba umuyobozi uburenganzira.
+You do not have access to this workspace. Contact your administrator.|Vous n'avez pas accès à cet espace. Contactez votre administrateur.|Ntiwemerewe gukorera hano. Baza umuyobozi.
+This workspace is temporarily unavailable. Please try again shortly.|Cet espace est temporairement indisponible. Veuillez réessayer bientôt.|Aha ho gukorera ntihaboneka ubu. Ongera ugerageze mu kanya.
+No active hotel workspace is assigned to your account. Ask your administrator for access.|Aucun espace hôtelier actif n'est affecté à votre compte. Demandez un accès à votre administrateur.|Nta hoteli ifunguye yahawe konti yawe. Saba umuyobozi uburenganzira.
+Commerce navigation|Navigation commerciale|Guhitamo serivisi z'ubucuruzi
+WAREHOUSE|Entrepôt|Ikigega
+SHOP_FLOOR|Espace de vente|Ahacururizwa
+STOREROOM|Réserve|Ububiko
+RETURNS|Retours|Ibyasubijwe
+DAMAGED|Stock endommagé|Ibyangiritse
+
+Commerce workspace|Espace commercial|Ubucuruzi
+Business|Entreprise|Ikigo
+Branch|Succursale|Ishami
+Stock location|Emplacement du stock|Ububiko
+Refresh|Actualiser|Ongera usubiremo
+Overview|Aperçu|Incamake
+Branches|Succursales|Amashami
+Stock locations|Emplacements|Ububiko
+Categories|Catégories|Ibyiciro
+Products|Produits|Ibicuruzwa
+Stock|Stock|Ibigega
+No records yet|Aucune donnée|Nta makuru arahari
+Commerce is unavailable or you don't have access. Ask your administrator to enable it.|Le module commercial est indisponible ou vous n'y avez pas accès.|Ubucuruzi ntiburafungurwa cyangwa ntubwemerewe.
+Create|Créer|Ongeraho
+Name|Nom|Izina
+Currency|Devise|Ifaranga
+SKU|Référence|Kode
+Base unit|Unité de base|Igipimo
+Purchase cost|Coût d'achat|Igiciro cyo kugura
+Retail price|Prix de détail|Igiciro cyo kugurisha
+Wholesale price|Prix de gros|Igiciro cya byinshi
+Barcode (optional)|Code-barres (facultatif)|Barcode (si ngombwa)
+Location type|Type d'emplacement|Ubwoko bw'ububiko
+Save|Enregistrer|Bika
+Cancel|Annuler|Hagarika
+Loading...|Chargement...|Birimo gufunguka...
+Create a branch first|Créez d'abord une succursale|Banza wongere ishami
+Create a stock location first|Créez d'abord un emplacement|Banza wongere ububiko
+Select|Sélectionner|Hitamo
+Unable to load data|Chargement impossible|Ntibyashobotse
+Sales, profit, invoices and inventory valuation will appear when their backend modules are implemented.|Les ventes, bénéfices, factures et valorisations des stocks apparaîtront lorsque les modules correspondants seront disponibles.|Ibyagurishijwe, inyungu, inyemezabuguzi n’agaciro k’ububiko bizagaragara igihe izo serivisi zizaba zakozwe.
 Reservation details|Détails de la réservation|Ibisobanuro by'ibika
 Open folio|Ouvrir le folio|Fungura inyandiko y'ubwishyu
 Loading reservation details...|Chargement de la réservation...|Ibisobanuro by'ibika birimo gutegurwa...
@@ -92,7 +218,7 @@ Activate|Activer|Emeza
 If an account exists for the supplied information, password reset instructions have been sent.|Si un compte correspond aux informations fournies, les instructions de réinitialisation ont été envoyées.|Niba konti ihuye n'amakuru watanze ibaho, amabwiriza yo guhindura ijambo ry'ibanga yoherejwe.
 Password reset. You can now sign in.|Mot de passe réinitialisé. Vous pouvez vous connecter.|Ijambo ry'ibanga ryahinduwe. Ushobora kwinjira.
 Use 15–128 characters and matching passwords.|Utilisez 15 à 128 caractères et des mots de passe identiques.|Koresha inyuguti 15–128 n'amagambo y'ibanga ahuye.
-HotelPro — Hotel Management System|HotelPro — Système de gestion hôtelière|HotelPro — Sisitemu yo gucunga hoteli
+KBP Hotel — Hotel Management System|KBP Hotel — Système de gestion hôtelière|KBP Hotel — Sisitemu yo gucunga hoteli
 Dashboard|Tableau de bord|Incamake
 Overview|Vue d'ensemble|Incamake rusange
 Rooms & Guests|Chambres et clients|Ibyumba n'abashyitsi
@@ -672,9 +798,134 @@ OTHER|Autre|Ibindi
 All|Tous|Byose
 Tax|Taxe|Umusoro
 Choose a checked-in guest folio or open a non-resident bill.|Choisissez le folio d'un client enregistré ou ouvrez une facture pour un client non-résident.|Hitamo konti y'umukiriya ucumbitse cyangwa ufungure fagitire y'umukiriya udacumbitse.
+Sales and purchasing|Ventes et achats|Kugurisha no kugura
+Open Sales and purchasing for invoices, receiving, payments and financial reports. Your administrator must enable the required modules.|Ouvrez Ventes et achats pour les factures, réceptions, paiements et rapports financiers. Votre administrateur doit activer les modules requis.|Fungura Kugurisha no kugura urebe fagitire, kwakira ibicuruzwa, kwishyura na raporo z'imari. Umuyobozi agomba gufungura ibice bikenewe.
+Point of sale|Point de vente|Aho kugurishiriza
+Purchases|Achats|Ibyaguzwe
+Sales history|Historique des ventes|Amateka y'ibyagurishijwe
+Customers and suppliers|Clients et fournisseurs|Abakiriya n'abatanga ibicuruzwa
+Payment accounts|Comptes de paiement|Konti zo kwishyuriraho
+Cashier shifts|Services des caissiers|Ibihe by'akazi by'abakira amafaranga
+Financial reports|Rapports financiers|Raporo z'imari
+Operating expenses|Charges d'exploitation|Amafaranga akoreshwa mu kazi
+This operation is not available for your role or enabled modules.|Cette opération n'est pas disponible pour votre rôle ou les modules activés.|Iki gikorwa nticyemerewe inshingano zawe cyangwa ibice byafunguwe.
+The transaction conflicts with current stock, credit, shift or request state. Review history before retrying.|La transaction est incompatible avec le stock, le crédit, le service ou la requête. Consultez l'historique avant de réessayer.|Igikorwa ntigihuye n'ububiko, ideni, igihe cy'akazi cyangwa ubusabe. Banza urebe amateka mbere yo kongera kugerageza.
+Unable to complete the transaction. Check the entered amounts and required fields.|Impossible de terminer la transaction. Vérifiez les montants et les champs requis.|Igikorwa nticyarangiye. Reba amafaranga wanditse n'ibisabwa byose.
+A transaction is awaiting confirmation. Retry the same request to avoid duplicate posting.|Une transaction attend confirmation. Réessayez la même requête pour éviter un double enregistrement.|Igikorwa kiracyategereje kwemezwa. Ongera wohereze ubusabe bumwe wirinde kubwandika kabiri.
+Retry transaction|Réessayer la transaction|Ongera ugerageze igikorwa
+Opening inventory approval|Approbation du stock initial|Kwemeza ububiko bw'ibanze
+Review current quantities and purchase costs before approving opening inventory valuation. The base currency is locked after approval.|Vérifiez les quantités et coûts d'achat avant d'approuver la valorisation initiale. La devise de base sera ensuite verrouillée.|Reba ingano n'ibiciro by'ibyaguzwe mbere yo kwemeza agaciro k'ububiko bw'ibanze. Ifaranga ry'ibanze ntirizongera guhindurwa.
+Approve opening inventory valuation|Approuver la valorisation initiale|Emeza agaciro k'ububiko bw'ibanze
+Inventory valuation|Valorisation du stock|Agaciro k'ibicuruzwa mu bubiko
+Select a branch and stock location first.|Sélectionnez d'abord une agence et un emplacement de stock.|Banza uhitemo ishami n'aho ububiko buri.
+Search or scan products|Rechercher ou scanner des produits|Shaka cyangwa sikana ibicuruzwa
+Add product|Ajouter un produit|Ongeramo igicuruzwa
+Price override (optional)|Prix dérogatoire (facultatif)|Igiciro cyihariye (si ngombwa)
+Review invoice|Vérifier la facture|Suzuma fagitire
+Leave payment empty only for approved customer credit or unpaid supplier invoices.|Laissez le paiement vide uniquement pour un crédit client approuvé ou une facture fournisseur impayée.|Ntuzuzuze ubwishyu gusa igihe ideni ry'umukiriya ryemejwe cyangwa fagitire y'utanga ibicuruzwa itarishyurwa.
+Cashier shift|Service du caissier|Igihe cy'akazi cy'uwakira amafaranga
+Post invoice|Comptabiliser la facture|Emeza fagitire mu bitabo
+Credit limit in base currency|Plafond de crédit en devise de base|Ideni ntarengwa mu ifaranga ry'ibanze
+Account number, mobile number or merchant code|Numéro de compte, téléphone ou code marchand|Nimero ya konti, telefone cyangwa kode y'umucuruzi
+Sales receipt|Reçu de vente|Inyemezabwishyu y'ibyagurishijwe
+Purchase invoice|Facture d'achat|Fagitire y'ibyaguzwe
+Outstanding|Solde restant|Asigaye kwishyurwa
+Business receipt. Not an official Rwanda EBM invoice.|Reçu commercial. Ce document n'est pas une facture EBM officielle du Rwanda.|Inyemezabwishyu y'ubucuruzi. Si fagitire ya EBM yemewe mu Rwanda.
+Receipt format|Format du reçu|Imiterere y'inyemezabwishyu
+Print or save PDF|Imprimer ou enregistrer en PDF|Sohora cyangwa ubike PDF
+Returned|Retourné|Ibyasubijwe
+Quantity received|Quantité reçue|Ingano yakiriwe
+Receive goods|Réceptionner les marchandises|Akira ibicuruzwa
+Return quantity|Quantité retournée|Ingano isubizwa
+Return to saleable stock|Réintégrer le stock vendable|Subiza mu bubiko bw'ibishobora kugurishwa
+Record return|Enregistrer le retour|Andika ibisubijwe
+Cash account|Compte de caisse|Konti y'amafaranga mu ntoki
+Opening cash|Fonds de caisse initial|Amafaranga ahari mu gutangira
+Open shift|Ouvrir le service|Tangira igihe cy'akazi
+Expected cash|Encaisse attendue|Amafaranga ateganyijwe
+Variance|Écart|Ikinyuranyo
+Counted cash|Espèces comptées|Amafaranga yabazwe
+Close shift|Clôturer le service|Soza igihe cy'akazi
+Cash deposit or withdrawal|Dépôt ou retrait de caisse|Kwinjiza cyangwa gusohora amafaranga
+Record cash movement|Enregistrer le mouvement de caisse|Andika iyinjira cyangwa isohoka ry'amafaranga
+Approve shift|Approuver le service|Emeza igihe cy'akazi
+Record expense|Enregistrer la charge|Andika amafaranga yakoreshejwe
+Generate report|Générer le rapport|Kora raporo
+Journal amounts use base currency. Inventory shows current balances; journal totals use the selected dates.|Les écritures utilisent la devise de base. Le stock indique les soldes actuels ; le journal couvre les dates choisies.|Amafaranga mu bitabo ni mu ifaranga ry'ibanze. Ububiko bwerekana ibisigaye ubu; ibitabo byerekana amatariki yahiswemo.
+Account balances|Soldes des comptes|Amafaranga asigaye kuri konti
+Sales and purchases|Ventes et achats|Ibyagurishijwe n'ibyaguzwe
+Collections|Encaissements|Amafaranga yakiriwe
+Commerce modules|Modules Commerce|Ibice by'ubucuruzi
+Core and inventory remain enabled. Retail requires accounting.|Le socle et le stock restent activés. La vente au détail nécessite la comptabilité.|Ibice by'ibanze n'ububiko biguma bifunguye. Kugurisha ku giti bisaba ibaruramari.
+Manage modules|Gérer les modules|Genzura ibice bya sisitemu
+Unable to save module access.|Impossible d'enregistrer les accès aux modules.|Uburenganzira bw'ibice ntibwabitswe.
+Module access updated. Tenant permissions remain unchanged.|Accès aux modules mis à jour. Les permissions de l'organisation sont inchangées.|Uburenganzira bw'ibice bwavuguruwe. Uburenganzira bw'ikigo ntibwahindutse.
+Edit product and pricing|Modifier le produit et les prix|Hindura igicuruzwa n'ibiciro
+Unable to update product. Check permissions, prices and required fields.|Impossible de modifier le produit. Vérifiez les permissions, les prix et les champs requis.|Igicuruzwa nticyahinduwe. Reba uburenganzira, ibiciro n'ibisabwa.
+Minimum selling price|Prix de vente minimum|Igiciro cyo hasi cyo kugurisha
+Tax rate (%)|Taux de taxe (%)|Igipimo cy'umusoro (%)
+Low stock threshold|Seuil de stock faible|Ingano nto ntarengwa mu bubiko
+Tax inclusive|Taxe incluse|Umusoro urimo
+Recoverable purchase tax|Taxe d'achat récupérable|Umusoro w'ibyaguzwe ushobora gusubizwa
+Branch selling price|Prix de vente de l'agence|Igiciro cyo kugurisha cy'ishami
+Save branch price|Enregistrer le prix de l'agence|Bika igiciro cy'ishami
+Base units per package|Unités de base par emballage|Ibipimo by'ibanze muri buri paki
+Add unit|Ajouter une unité|Ongeramo igipimo
+Supplier|Fournisseur|Utanga ibicuruzwa
+Unit|Unité|Igipimo
+Unit price|Prix unitaire|Igiciro cya kimwe
+Due date|Date d'échéance|Itariki ntarengwa yo kwishyura
+Add payment|Ajouter un paiement|Ongeramo ubwishyu
+Received|Reçu|Ibyakiriwe
+Approved|Approuvé|Byemejwe
+Gross profit|Bénéfice brut|Inyungu mbisi
+Customer and supplier balances|Soldes clients et fournisseurs|Amafaranga asigaye ku bakiriya n'abatanga ibicuruzwa
+Product sales before returns|Ventes par produit avant retours|Ibyagurishijwe kuri buri gicuruzwa mbere y'ibisubijwe
+Returns|Retours|Ibisubijwe
+Edit customer or supplier|Modifier le client ou fournisseur|Hindura umukiriya cyangwa utanga ibicuruzwa
+CUSTOMER|Client|Umukiriya
+SUPPLIER|Fournisseur|Utanga ibicuruzwa
+branch id|Identifiant de l'agence|Ikiranga ishami
+branch|Agence|Ishami
+account|Compte|Konti
+debit|Débit|Debi
+credit|Crédit|Kredi
+balance|Solde|Asigaye
+location|Emplacement|Ahantu
+sku|Référence produit|Kode y'igicuruzwa
+name|Nom|Izina
+quantity|Quantité|Ingano
+inventory value|Valeur du stock|Agaciro k'ububiko
+low stock quantity|Seuil de stock|Ingano ntarengwa mu bubiko
+low stock|Stock faible|Ububiko buke
+created by|Créé par|Byanditswe na
+party name|Client ou fournisseur|Umukiriya cyangwa utanga ibicuruzwa
+currency|Devise|Ifaranga
+kind|Type|Ubwoko
+documents|Documents|Inyandiko
+total|Total|Igiteranyo
+base total|Total en devise de base|Igiteranyo mu ifaranga ry'ibanze
+method|Méthode|Uburyo
+refund|Remboursement|Gusubiza amafaranga
+amount|Montant|Amafaranga
+base amount|Montant en devise de base|Amafaranga mu ifaranga ry'ibanze
+document number|Numéro de document|Nimero y'inyandiko
+due date|Échéance|Itariki ntarengwa
+outstanding|Solde restant|Asigaye kwishyurwa
+description|Description|Ibisobanuro
+category name|Catégorie|Icyiciro
+revenue|Chiffre d'affaires|Amafaranga y'ibyagurishijwe
+cost|Coût|Ikiguzi
+gross profit|Bénéfice brut|Inyungu mbisi
+margin percent|Marge (%)|Igipimo cy'inyungu (%)
+document amount|Montant du document|Amafaranga y'inyandiko
+base net|Net en devise de base|Amafaranga adafite umusoro mu ifaranga ry'ibanze
+base tax|Taxe en devise de base|Umusoro mu ifaranga ry'ibanze
+reason|Motif|Impamvu
+created at|Date de création|Itariki byandikiwe
 `;
 export const messages:Record<Locale,Record<string,string>>={en:{},fr:{},rw:{}};
-for(const line of rows.trim().split("\n")){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}
+for(const line of rows.trim().split("\n").filter(line=>line.trim())){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}
 for(const [old,key] of Object.entries({reservations:"Reservations",availability:"Check availability",adults:"Adults",children:"Children",preview:"Preview order",confirm:"Approve"}))for(const locale of locales)messages[locale][old]=messages[locale][key];
 
 

@@ -38,7 +38,8 @@ public class SecurityConfiguration {
             ApiSecurityProperties apiProperties,
             org.springframework.data.redis.core.StringRedisTemplate redis,
             tools.jackson.databind.json.JsonMapper mapper,
-            com.hotelmanagement.hms.identity.repository.UserRepository users)
+            com.hotelmanagement.hms.identity.repository.UserRepository users,
+            org.springframework.jdbc.core.JdbcTemplate jdbc)
             throws Exception {
 
         http
@@ -112,8 +113,7 @@ public class SecurityConfiguration {
                                                 "/api/v1/auth/login",
                                                 "/api/v1/auth/refresh",
                                                 "/api/v1/auth/forgot-password",
-                                                "/api/v1/auth/reset-password",
-                                                "/api/v1/onboarding/signup"
+                                                "/api/v1/auth/reset-password"
                                         )
                                         .permitAll()
 
@@ -150,6 +150,8 @@ public class SecurityConfiguration {
                                         )
                 );
 
+        http.addFilterAfter(new TemporaryPasswordGate(jdbc),
+                org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter.class);
         return http.build();
     }
 }
