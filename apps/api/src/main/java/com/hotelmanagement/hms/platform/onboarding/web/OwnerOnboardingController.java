@@ -19,11 +19,11 @@ public class OwnerOnboardingController {
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public OnboardingResponse signup(@Valid @RequestBody OwnerSignupRequest request) {
-        return service.signup(request);
+        throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN, "Only KBP administration may create owners.");
     }
     @PostMapping("/hotels")
     @ResponseStatus(HttpStatus.CREATED)
     public OnboardingResponse createHotel(@Valid @RequestBody CreateHotelRequest request) {
-        return service.createForExistingOwner(user.requireCurrentUserId(), request);
+        throw new org.springframework.web.server.ResponseStatusException(HttpStatus.FORBIDDEN, "Only KBP administration may create organizations.");
     }
 }

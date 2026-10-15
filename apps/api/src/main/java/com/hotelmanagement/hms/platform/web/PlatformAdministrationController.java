@@ -35,6 +35,7 @@ public class PlatformAdministrationController {
  public Map<String,Object> create(@Valid @RequestBody OwnerSignupRequest request) {
   UUID actor=requireAdmin();
   var result=onboarding.signup(request);
+  jdbc.update("UPDATE users SET must_change_password=TRUE WHERE id=?",result.ownerUserId());
   var branch=hotels.createBranch(result.ownerUserId(),result.hotel().id(),new CreateBranchRequest("MAIN","Main branch",null,null,null,null));
   jdbc.update("insert into platform_audit_events(id,actor_id,hotel_id,action) values(?,?,?,?)",UUID.randomUUID(),actor,result.hotel().id(),"HOTEL_OWNER_CREATED");
   return Map.of("ownerUserId",result.ownerUserId(),"hotel",result.hotel(),"branch",branch);

@@ -30,3 +30,8 @@ spring:
 logging:
   level:
     com.hotelmanagement.hms: DEBUG
+
+hms:
+  commerce:
+    enabled: true
+    self-registration-enabled: false

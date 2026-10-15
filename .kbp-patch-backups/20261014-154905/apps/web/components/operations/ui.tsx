@@ -1,0 +1,7 @@
+"use client";
+import {useLocale} from "@/components/LocaleProvider";
+export const inputStyle="w-full border border-slate-200 rounded-xl bg-white px-3.5 py-2.5 text-slate-900 shadow-sm outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50 disabled:bg-slate-50 disabled:text-slate-400";
+export const buttonStyle="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-100 disabled:opacity-50 disabled:cursor-not-allowed";
+export function Field({label,children}:{label:string;children:React.ReactNode}){const {t}=useLocale();return <label className="block space-y-1.5 text-sm font-medium text-slate-600"><span>{t(label)}</span>{children}</label>}
+export function Panel({title,children,error}:{title:string;children:React.ReactNode;error?:string}){const {t}=useLocale();return <section className="space-y-6"><header className="border-b border-slate-200/70 pb-5"><p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-blue-600">HotelPro</p><h1 className="text-3xl font-semibold tracking-tight text-slate-900">{t(title)}</h1></header>{error&&<p role="alert" className="rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">{t(error)}</p>}{children}</section>}
+export function Empty(){const {t}=useLocale();return <p className="p-10 text-center text-sm text-slate-400">{t("No records found")}</p>}

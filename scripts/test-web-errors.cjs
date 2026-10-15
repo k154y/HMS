@@ -6,7 +6,7 @@ const Module=require('node:module');
 const ts=require('../apps/web/node_modules/typescript');
 const filename=path.resolve(__dirname,'../apps/web/lib/hms-api.ts');
 const compiled=ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
-const loaded=new Module(filename,module);loaded.filename=filename;loaded.paths=module.paths;loaded._compile(compiled,filename);
+const loaded=new Module(filename,module);loaded.filename=filename;loaded.paths=module.paths;const originalRequire=loaded.require.bind(loaded);loaded.require=name=>{if(name!=="./navigation")return originalRequire(name);const navFile=path.resolve(__dirname,"../apps/web/lib/navigation.ts");const nav=new Module(navFile,module);nav._compile(ts.transpileModule(fs.readFileSync(navFile,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS}}).outputText,navFile);return nav.exports;};loaded._compile(compiled,filename);
 const {api,HmsApiError}=loaded.exports;
 
 test('validation preserves code, fields and reference in existing page error messages',async t=>{
@@ -23,11 +23,11 @@ test('business conflicts retain their actionable message',async t=>{
 });
 test('401 follows the existing sign-in redirect while preserving metadata',async t=>{
   let destination;
-  const old=globalThis.window;globalThis.window={location:{replace:value=>{destination=value;}}};
+  const old=globalThis.window;globalThis.window={location:{pathname:"/reservations/new",replace:value=>{destination=value;}}};
   t.after(()=>{globalThis.window=old;});
   t.mock.method(globalThis,'fetch',async()=>Response.json({code:'UNAUTHORIZED',requestId:'auth-ref'},{status:401}));
   await assert.rejects(api('reservations'),error=>error.status===401&&error.requestId==='auth-ref');
-  assert.equal(destination,'/login?reason=expired');
+  assert.equal(destination,'/hms/login?next=%2Freservations%2Fnew&reason=expired');
 });
 test('request correlation and successful payloads remain intact',async t=>{
   let options;

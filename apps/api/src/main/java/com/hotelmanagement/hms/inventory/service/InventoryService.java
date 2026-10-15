@@ -15,7 +15,8 @@ import java.math.BigDecimal;
 @Service @Transactional
 public class InventoryService {
  private final StockMovementRepository movements;private final ProductRepository products;private final OperationScope scope;private final AuditService audit;
- public InventoryService(StockMovementRepository movements,ProductRepository products,OperationScope scope,AuditService audit){this.movements=movements;this.products=products;this.scope=scope;this.audit=audit;}
+ private final org.springframework.jdbc.core.JdbcTemplate db;
+ public InventoryService(StockMovementRepository movements,ProductRepository products,OperationScope scope,AuditService audit,org.springframework.jdbc.core.JdbcTemplate db){this.movements=movements;this.products=products;this.scope=scope;this.audit=audit;this.db=db;}
  // Product locks serialize all movements for that product, including transfers, receipts and sales.
  @Transactional(propagation=Propagation.MANDATORY) public StockMovement move(UUID hotel,UUID branch,UUID product,BigDecimal quantity,MovementKind kind,UUID source,UUID actor,String reason){
   var p=products.lock(product,hotel).orElseThrow(ApiException::notFound);
@@ -40,6 +41,33 @@ public class InventoryService {
   UUID actor=scope.branch(hotel,sourceBranch,INVENTORY_TRANSFER);scope.branch(hotel,targetBranch,INVENTORY_TRANSFER);
   if(sourceBranch.equals(targetBranch))throw new IllegalArgumentException("Same branch.");
   quantity=Money.positive(quantity);
+  if(request==null || reason==null || reason.isBlank() || reason.length()>1000)throw new IllegalArgumentException("Invalid transfer command.");
+  // Retain the movement lock order. The tenant-wide unique parent also serializes
+  // conflicting retries that name a different product (and therefore a different lock).
+  products.lock(product,hotel).orElseThrow(ApiException::notFound);
+  int inserted=db.update("""
+      insert into inventory_transfer_commands(hotel_id,request_id,source_branch_id,destination_branch_id,product_id,quantity,reason,actor_id)
+      values(?,?,?,?,?,?,?,?) on conflict(hotel_id,request_id) do nothing
+      """,hotel,request,sourceBranch,targetBranch,product,quantity,reason,actor);
+  var command=db.queryForMap("select * from inventory_transfer_commands where hotel_id=? and request_id=?",hotel,request);
+  if(!sourceBranch.equals(command.get("source_branch_id")) || !targetBranch.equals(command.get("destination_branch_id"))
+      || !product.equals(command.get("product_id")) || quantity.compareTo((BigDecimal)command.get("quantity"))!=0
+      || !reason.equals(command.get("reason")))throw new BusinessRuleException("Transfer request key reused with different data.");
+  if(inserted==0)return;
+
+  // Adopt only an unambiguous historical pair. Never add a missing leg or
+  // reinterpret a command already replayed against multiple destinations/products.
+  var legacy=db.queryForList("select branch_id,product_id,quantity,kind,reason from stock_movements where hotel_id=? and source_id=? and kind in ('TRANSFER_IN','TRANSFER_OUT')",hotel,request);
+  if(!legacy.isEmpty()){
+   BigDecimal expectedQuantity=quantity;
+   boolean matches=legacy.size()==2 && legacy.stream().allMatch(row ->
+       product.equals(row.get("product_id")) && reason.equals(row.get("reason"))
+       && ("TRANSFER_OUT".equals(row.get("kind"))
+           ? sourceBranch.equals(row.get("branch_id")) && expectedQuantity.negate().compareTo((BigDecimal)row.get("quantity"))==0
+           : targetBranch.equals(row.get("branch_id")) && expectedQuantity.compareTo((BigDecimal)row.get("quantity"))==0));
+   if(!matches)throw new BusinessRuleException("LEGACY_TRANSFER_CONFLICT","Historical transfer does not match this command; review its movements.");
+   return;
+  }
   move(hotel,sourceBranch,product,quantity.negate(),MovementKind.TRANSFER_OUT,request,actor,reason);
   move(hotel,targetBranch,product,quantity,MovementKind.TRANSFER_IN,request,actor,reason);
  }

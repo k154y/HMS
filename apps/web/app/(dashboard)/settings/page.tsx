@@ -422,7 +422,7 @@ const canManageRates =
 
       {loaded && (
         <div className="space-y-8">
-          <PasswordForm mode="change"/>
+          <PasswordForm mode="change" application="HMS"/>
           <FinanceSettings/>
 
           <form
