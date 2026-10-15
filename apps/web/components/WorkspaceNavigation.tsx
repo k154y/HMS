@@ -1,7 +1,6 @@
 "use client";
 import {usePathname} from "next/navigation";
 import {applicationForPath,loginRoute} from "@/lib/navigation";
-import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useLocale } from "@/components/LocaleProvider";
 
@@ -11,6 +10,7 @@ export function LanguageSelect() {
 }
 export default function WorkspaceNavigation({controls=false}:{controls?:boolean}) {
   const {t}=useLocale();const pathname=usePathname();
+  if(!controls) return null;
   return <nav aria-label={t("Workspace navigation")} className="flex flex-wrap items-center gap-3 text-sm">
     
     {controls&&<><LanguageSelect/><button onClick={()=>signOut({callbackUrl:loginRoute(applicationForPath(pathname))})} className="text-red-700">{t("Sign out")}</button></>}
