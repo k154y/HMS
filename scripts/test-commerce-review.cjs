@@ -7,7 +7,7 @@ const ts=require('../apps/web/node_modules/typescript');
 function load(file,overrides={}){
  const filename=path.resolve(__dirname,'../apps/web/components/commerce',file);
  const mod=new Module(filename,module);mod.filename=filename;mod.paths=Module._nodeModulePaths(path.dirname(filename));
- const original=mod.require.bind(mod);mod.require=name=>name in overrides?overrides[name]:original(name);
+ const original=mod.require.bind(mod);mod.require=name=>name in overrides?overrides[name]:name==='@/components/LocaleProvider'?{useLocale:()=>({t:key=>key})}:original(name);
  mod._compile(ts.transpileModule(fs.readFileSync(filename,'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText,filename);return mod.exports;
 }
 const {catalogPrice,changeItem,quantityIssue}=load('trading-pricing.ts');
