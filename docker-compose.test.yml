@@ -14,3 +14,18 @@ services:
   test-redis:
     image: redis:7-alpine
     command: ["redis-server", "--save", "", "--appendonly", "no"]
+
+  test-rabbitmq:
+    image: rabbitmq:4.3.5-alpine
+    user: "100:101"
+    environment:
+      RABBITMQ_DEFAULT_USER: hms_test
+      RABBITMQ_DEFAULT_PASS: hms_test_only
+    tmpfs:
+      - /var/lib/rabbitmq:uid=100,gid=101,mode=0700
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 30s
+      retries: 20
+      start_period: 15s
