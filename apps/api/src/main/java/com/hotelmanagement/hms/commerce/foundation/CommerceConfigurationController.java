@@ -18,6 +18,9 @@ public class CommerceConfigurationController {
     public record Branch(@NotBlank String name,String contact,@NotNull Boolean active) {}
     public record Location(@NotBlank String name,@NotNull Boolean active) {}
     public record CurrencyInput(@NotBlank String currency,@NotNull Boolean active) {}
+    public record BaseCurrencyInput(@NotBlank String currency) {}
+    @GetMapping("/base-currency") public Map<String,Object> baseCurrency(@PathVariable UUID business){return service.baseCurrencySettings(current.requireCurrentUserId(),business);}
+    @PostMapping("/base-currency") public Map<String,Object> baseCurrency(@PathVariable UUID business,@Valid @RequestBody BaseCurrencyInput p){return service.setBaseCurrency(current.requireCurrentUserId(),business,p.currency());}
     public record Rate(@NotBlank String currency,@NotNull BigDecimal rate,@NotNull OffsetDateTime effectiveAt,@NotBlank String source) {}
     public record Quote(@NotBlank String currency,@NotNull BigDecimal amount,@NotNull OffsetDateTime at) {}
     public record Employee(@NotBlank @Email String email,@NotBlank String name,@NotBlank String temporaryPassword,@NotEmpty List<@NotBlank String> roles,@NotEmpty List<UUID> branches) {

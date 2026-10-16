@@ -1,0 +1,20 @@
+"use client";
+import {useEffect,useState} from "react";
+import {useLocale} from "@/components/LocaleProvider";
+export type PricingSettings={currency:string;baseCurrency:string;rateToBase:number|string;decimals:number};
+export type PricingCatalog={settings:PricingSettings;products:Record<string,unknown>[]};
+type Preview=PricingCatalog&{previousCurrency:string};
+export default function DefaultCurrencySettings({businessId,refreshKey=""}:{businessId:string;refreshKey?:string}){
+ const {t}=useLocale();const [currencies,setCurrencies]=useState<{currency:string;active:boolean}[]>([]);const [current,setCurrent]=useState<PricingSettings|null>(null),[code,setCode]=useState(""),[preview,setPreview]=useState<Preview|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState("");
+ async function api(path:string,body?:unknown){const r=await fetch(`/api/commerce/businesses/${businessId}/pricing${path}`,{cache:"no-store",method:body?"POST":"GET",headers:body?{"Content-Type":"application/json"}:{},body:body?JSON.stringify(body):undefined});if(!r.ok)throw new Error("Enable the currency and add its current exchange rate first. Refresh if the rate or default changed.");return r.json();}
+ useEffect(()=>{let active=true;Promise.all([api(""),fetch(`/api/commerce/businesses/${businessId}/currencies`,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error();return r.json()})]).then(([v,c]:[PricingCatalog,{currency:string;active:boolean}[]])=>{if(active){setCurrent(v.settings);setCode(v.settings.currency);setCurrencies(c)}}).catch(()=>{if(active)setError("Unable to load data")});return()=>{active=false}},[businessId,refreshKey]);
+ async function act(confirm:boolean){setBusy(true);setError("");try{if(confirm&&preview){const v=await api("/default",{currency:preview.settings.currency,previousCurrency:preview.previousCurrency,rateToBase:preview.settings.rateToBase});setCurrent(v);setPreview(null);setError("Configuration saved.")}else setPreview(await api("/preview",{currency:code.trim().toUpperCase()}))}catch(e){setPreview(null);setError(e instanceof Error?e.message:"Unable to load data")}finally{setBusy(false)}}
+ return <section className="space-y-3 rounded border p-4"><h2 className="font-semibold">{t("Default transaction currency")}</h2>
+ <p className="text-sm">{t("New transactions and editable catalog prices use this currency. Past records and the accounting base currency stay unchanged.")}</p>
+ <form onSubmit={e=>{e.preventDefault();void act(false)}} className="flex flex-wrap items-end gap-3"><label>{t("Currency")}<select className="block rounded border p-2" value={code} onChange={e=>{setCode(e.target.value);setPreview(null)}} required disabled={busy||!current}>{currencies.filter(c=>c.active).map(c=><option key={c.currency} value={c.currency}>{c.currency}</option>)}</select></label><button className="rounded bg-emerald-700 px-4 py-2 text-white disabled:opacity-50" disabled={busy||!current||code===current.currency}>{t("Preview converted prices")}</button></form>
+ {error&&<p role="status">{t(error)}</p>}
+ {preview&&<div className="space-y-3"><p>{t("Exchange rate")}: 1 {preview.settings.currency} = {String(preview.settings.rateToBase)} {preview.settings.baseCurrency}</p>
+ <div className="max-h-72 overflow-auto"><table className="w-full text-left text-sm"><thead><tr><th>{t("Product")}</th><th>{t("Purchase cost")}</th><th>{t("Retail price")}</th><th>{t("Wholesale price")}</th></tr></thead><tbody>{preview.products.map(p=><tr key={String(p.id)}><td>{String(p.name)}</td>{["purchase_cost","retail_price","wholesale_price"].map(k=><td key={k}>{p[k]==null?"—":String(p[k])} {preview.settings.currency}</td>)}</tr>)}</tbody></table></div>
+ <p className="text-sm">{t("Review the conversion, then edit individual product prices if needed.")}</p><button disabled={busy} className="rounded bg-emerald-700 px-4 py-2 text-white" onClick={()=>void act(true)}>{t("Confirm currency change")}</button><button disabled={busy} className="ml-3" onClick={()=>setPreview(null)}>{t("Cancel")}</button></div>}
+ </section>;
+}
