@@ -82,6 +82,34 @@ public class CommerceConfigurationService {
         catch(IllegalArgumentException|NullPointerException e){throw invalid("Invalid ISO currency.");}
     }
     private String base(UUID business) {return db.queryForObject("SELECT base_currency FROM commerce_businesses WHERE id=?",String.class,business);}
+    private boolean baseCurrencyLocked(UUID business) {
+        return Boolean.TRUE.equals(db.queryForObject("""
+            SELECT EXISTS(SELECT 1 FROM commerce_products WHERE business_id=?)
+            OR EXISTS(SELECT 1 FROM commerce_exchange_rates WHERE business_id=?)
+            OR EXISTS(SELECT 1 FROM commerce_parties WHERE business_id=?)
+            OR EXISTS(SELECT 1 FROM commerce_payment_accounts WHERE business_id=?)
+            OR EXISTS(SELECT 1 FROM commerce_accounting_state WHERE business_id=?)
+            OR EXISTS(SELECT 1 FROM commerce_financial_commands WHERE business_id=?)
+            """,Boolean.class,business,business,business,business,business,business));
+    }
+    @Transactional(readOnly=true)
+    public Map<String,Object> baseCurrencySettings(UUID actor,UUID business) {
+        access.owner(actor,business);
+        return Map.of("currency",base(business),"locked",baseCurrencyLocked(business));
+    }
+    public Map<String,Object> setBaseCurrency(UUID actor,UUID business,String code) {
+        access.owner(actor,business);lock(business);access.owner(actor,business);
+        code=text(code,3).toUpperCase(Locale.ROOT);
+        int precision=currency(code).getDefaultFractionDigits();
+        String previous=base(business);
+        if(!previous.equals(code)) {
+            if(baseCurrencyLocked(business)) throw new ApiException(409,"BASE_CURRENCY_LOCKED","Base currency is locked because business records already exist.");
+            db.update("UPDATE commerce_businesses SET base_currency=? WHERE id=?",code,business);
+            db.update("INSERT INTO commerce_currencies(business_id,currency,decimal_places,active) VALUES(?,?,?,true) ON CONFLICT(business_id,currency) DO UPDATE SET active=true",business,code,precision);
+            audit(actor,business,"BASE_CURRENCY_CHANGED",business,previous+" -> "+code);
+        }
+        return baseCurrencySettings(actor,business);
+    }
     @Transactional(readOnly=true)
     public List<Map<String,Object>> currencies(UUID actor,UUID business) {
         access.require(actor,business,"CORE",false);
@@ -94,6 +122,7 @@ public class CommerceConfigurationService {
     public void configureCurrency(UUID actor,UUID business,String code,boolean active) {
         access.owner(actor,business);lock(business);int precision=currency(code).getDefaultFractionDigits();
         if(code.equals(base(business))&&!active) throw invalid("The base accounting currency cannot be disabled.");
+        if(!active&&code.equals(db.queryForObject("SELECT default_transaction_currency FROM commerce_businesses WHERE id=?",String.class,business))) throw invalid("The default transaction currency cannot be disabled.");
         db.update("INSERT INTO commerce_currencies(business_id,currency,decimal_places,active) VALUES(?,?,?,?) ON CONFLICT(business_id,currency) DO UPDATE SET active=EXCLUDED.active",business,code,precision,active);
         audit(actor,business,"CURRENCY_CONFIGURED",null,code+", active="+active);
     }

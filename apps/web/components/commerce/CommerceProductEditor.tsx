@@ -4,9 +4,10 @@ import {useEffect,useState,FormEvent} from "react";
 import {useLocale} from "@/components/LocaleProvider";
 import {loginDestination} from "@/lib/navigation";
 
+import {PricingSettings} from "./DefaultCurrencySettings";
 type Row=Record<string,unknown>;
 type Unit={unit_name:string;units_per_package:string;purchase_package_price?:string|null;retail_package_price?:string|null;wholesale_package_price?:string|null};
-type Props={businessId:string;branchId:string;products:Row[];categories:{id:string;name:string}[];initialProductId?:string;onCancel:()=>void;onSaved:()=>Promise<void>};
+type Props={pricing:PricingSettings;businessId:string;branchId:string;products:Row[];categories:{id:string;name:string}[];initialProductId?:string;onCancel:()=>void;onSaved:()=>Promise<void>};
 const field="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-100";
 const stockChoices=[
  ["piece","Piece"],["bottle","Bottle"],["kg","Kilogram (kg)"],["gram","Gram (g)"],
@@ -27,7 +28,7 @@ const section="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5"
 const money=(v:number)=>Number.isFinite(v)?v.toLocaleString(undefined,{maximumFractionDigits:4}):"—";
 const decimal=(v:unknown)=>String(v??"");
 function validAmount(value:string){return value.trim()!==""&&Number.isFinite(Number(value))&&Number(value)>=0;}
-export default function CommerceProductEditor({businessId,branchId,products,categories,initialProductId="",onCancel,onSaved}:Props){
+export default function CommerceProductEditor({pricing,businessId,branchId,products,categories,initialProductId="",onCancel,onSaved}:Props){
  const {t}=useLocale();
  const [id,setId]=useState(initialProductId);const [busy,setBusy]=useState(false),[error,setError]=useState(""),[notice,setNotice]=useState("");
  const [base,setBase]=useState("piece"),[units,setUnits]=useState<Unit[]>([]),[editingUnit,setEditingUnit]=useState("");
@@ -46,7 +47,7 @@ export default function CommerceProductEditor({businessId,branchId,products,cate
   setPurchase(decimal(product?.purchase_cost??""));setMinPrice(decimal(product?.minimum_price??0));setTax(decimal(product?.tax_rate??0));setAlert(decimal(product?.low_stock_quantity??0));
   setBranchPrice("");setEffective("");setAdditionalUnits([]);
   if(!id)return;
-  fetch(`/api/commerce/businesses/${businessId}/products/${id}/units`,{cache:"no-store"}).then(async r=>{
+  fetch(`/api/commerce/businesses/${businessId}/pricing/products/${id}/units`,{cache:"no-store"}).then(async r=>{
    if(!r.ok)throw new Error("Unable to load product units");return r.json() as Promise<Unit[]>;
   }).then(data=>{if(!active)return;setUnits(data);const first=data.find(x=>x.unit_name!==String(product?.base_unit));if(first){setEditingUnit(first.unit_name);setPackageName(first.unit_name);setCustomPackage(!isPackageChoice(first.unit_name.toLowerCase()));setFactor(first.units_per_package);setPurchase(decimal(first.purchase_package_price??""));setWholesale(decimal(first.wholesale_package_price??""));}}).catch(e=>{if(active)setError((e as Error).message)});
   return()=>{active=false};
@@ -89,8 +90,8 @@ export default function CommerceProductEditor({businessId,branchId,products,cate
    purchasePackagePrice:u.purchase||null,wholesalePackagePrice:u.wholesale||null,retailPackagePrice:u.retail||null}))];
   const config={product:detail,packageSettings:packages,
    branchPrice:branchPrice?{branchId,price:branchPrice,effectiveAt:new Date(effective).toISOString()}:null};
-  const path=isNew?`/api/commerce/businesses/${businessId}/products/full`:`/api/commerce/businesses/${businessId}/products/${id}/configuration`;
-  const payload=isNew?{sku:read("sku"),baseUnit:stockUnit,...config}:config;
+  const path=isNew?`/api/commerce/businesses/${businessId}/pricing/products`:`/api/commerce/businesses/${businessId}/pricing/products/${id}`;
+  const payload={currency:pricing.currency,rateToBase:pricing.rateToBase,input:{sku:read("sku"),baseUnit:stockUnit,...config}};
   setBusy(true);setError("");setNotice("");try{
    const response=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
    if(response.status===401){window.location.replace(loginDestination("/commerce",true));return;}
@@ -101,6 +102,7 @@ export default function CommerceProductEditor({businessId,branchId,products,cate
  return <section className="space-y-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-sm sm:p-6">
   <header className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-200 pb-4"><div className="space-y-1"><h2 className="text-xl font-semibold text-slate-900">{isNew?t("Create product"):t("Edit product")}</h2><p className="text-sm text-slate-600">{t("Enter your normal purchase and selling prices once. KBP converts quantities and prices automatically.")}</p></div>
    <button type="button" disabled={busy} onClick={onCancel} className="rounded-lg border bg-white px-4 py-2 text-sm">{t("Cancel")}</button></header>
+  <p>{t("Currency")}: {pricing.currency}</p>
   {error&&<p role="alert" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">{error}</p>}{notice&&<p role="status" className="rounded-lg bg-emerald-50 p-3 text-sm text-emerald-900">{notice}</p>}
   <form key={id||"new"} onSubmit={save} className="space-y-4"><fieldset disabled={busy} className="space-y-4">
    <div className={section+" space-y-4"}><div><h3 className="font-semibold text-slate-900">{t("1. Product information")}</h3><p className="mt-1 text-xs text-slate-500">{t("Choose how this product is counted in stock. You can purchase it in larger packages.")}</p></div><div className="grid gap-3 md:grid-cols-3">

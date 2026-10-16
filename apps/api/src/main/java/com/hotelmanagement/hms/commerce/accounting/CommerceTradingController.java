@@ -27,6 +27,7 @@ public class CommerceTradingController {
     @PostMapping("/documents/{document}/print") public Object print(@PathVariable UUID business,@PathVariable UUID document,@jakarta.validation.Valid @RequestBody Request p){return wire(trading.print(actor(),business,document,p.requestId()));}
     @GetMapping("/payment-accounts") public Object accounts(@PathVariable UUID business){return wire(trading.accounts(actor(),business));}
     @PostMapping("/payment-accounts") public Object account(@PathVariable UUID business,@jakarta.validation.Valid @RequestBody CommerceTradingService.Account p){return wire(trading.account(actor(),business,p));}
+    @PostMapping("/payment-accounts/{account}/update") public Object updateAccount(@PathVariable UUID business,@PathVariable UUID account,@jakarta.validation.Valid @RequestBody CommerceTradingService.AccountUpdate p){return wire(trading.updateAccount(actor(),business,account,p));}
     @PostMapping("/documents") public Object invoice(@PathVariable UUID business,@jakarta.validation.Valid @RequestBody CommerceTradingService.Invoice p){return wire(trading.invoice(actor(),business,p));}
     @PostMapping("/documents/preview") public Object preview(@PathVariable UUID business,@jakarta.validation.Valid @RequestBody CommerceTradingService.Invoice p){return wire(trading.preview(actor(),business,p));}
     @GetMapping("/documents/{document}") public Object detail(@PathVariable UUID business,@PathVariable UUID document){return wire(trading.detail(actor(),business,document));}

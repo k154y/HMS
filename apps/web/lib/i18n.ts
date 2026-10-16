@@ -1081,9 +1081,29 @@ Cumulative recorded balance through|Solde cumulé enregistré jusqu'au|Amafarang
 for the selected branch scope. Includes receipts, supplier payments, refunds and expenses. Unrecorded opening funds and cash drawer floats are excluded. Each account is shown in its own currency.|pour la portée des succursales sélectionnées. Comprend les recettes, paiements fournisseurs, remboursements et dépenses. Les fonds d'ouverture et fonds de caisse non enregistrés sont exclus. Chaque compte est affiché dans sa devise.|ku mashami yatoranyijwe. Harimo amafaranga yakiriwe, ayishyuwe abatanga ibicuruzwa, ayasubijwe n'ibyakoreshejwe. Amafaranga yo gutangira atanditswe ntabarwamo. Buri konti igaragazwa mu ifaranga ryayo.
 Inactive account|Compte inactif|Konti idakora
 No payment accounts found.|Aucun compte de paiement trouvé.|Nta konti yo kwishyuriraho yabonetse.
+Save base currency|Enregistrer la devise de base|Bika ifaranga shingiro
+Base currency is locked because business records already exist.|La devise de base est verrouillée car des données commerciales existent déjà.|Ifaranga shingiro ntirishobora guhindurwa kuko amakuru y'ubucuruzi yamaze kwandikwa.
+Choose your accounting and default transaction currency before adding products, exchange rates or financial records.|Choisissez votre devise comptable et par défaut avant d'ajouter des produits, des taux de change ou des données financières.|Hitamo ifaranga shingiro mbere yo kwandika ibicuruzwa, ibipimo by'ivunjisha cyangwa amakuru y'imari.
+`;
+const currencyRows=`
+Edit payment account|Modifier le compte de paiement|Hindura konti yo kwishyuriraho
+Create payment account|Créer un compte de paiement|Kora konti yo kwishyuriraho
+Payment method and currency are locked after account activity. Create another account to use a different method or currency.|Le mode de paiement et la devise sont verrouillés après utilisation du compte. Créez un autre compte pour un mode ou une devise différent.|Uburyo bwo kwishyura n'ifaranga ntibihinduka iyo konti yakoreshejwe. Kora indi konti kugira ngo ukoreshe ubundi buryo cyangwa irindi faranga.
+
+Reactivate|Réactiver|Ongera ukore
+Your open cash shift uses another currency. Use advanced payment entry with the amount in the account currency, or open a matching cash shift.|Votre session de caisse utilise une autre devise. Utilisez le paiement avancé avec le montant dans la devise du compte, ou ouvrez une session correspondante.|Kashi yafunguwe ikoresha irindi faranga. Koresha uburyo burambuye bwo kwishyura wandike amafaranga mu ifaranga rya konti, cyangwa ufungure kashi ihuje ifaranga.
+Uncheck Active to deactivate. Payment history is retained. For a different currency or method, create another account.|Décochez Actif pour désactiver. L'historique est conservé. Pour une autre devise ou méthode, créez un autre compte.|Kuraho Akora kugira ngo uhagarike konti. Amateka yo kwishyura aragumaho. Ku rindi faranga cyangwa ubundi buryo, kora indi konti.
+
+Accounting base currency|Devise comptable de base|Ifaranga shingiro ry’ibaruramari
+Default transaction currency|Devise par défaut des transactions|Ifaranga risanzwe rikoreshwa mu bucuruzi
+New transactions and editable catalog prices use this currency. Past records and the accounting base currency stay unchanged.|Les nouvelles transactions et les prix modifiables utilisent cette devise. Les anciennes opérations et la devise comptable restent inchangées.|Ibikorwa bishya n'ibiciro bishobora guhindurwa bikoresha iri faranga. Amakuru ya kera n'ifaranga shingiro ntibihinduka.
+Preview converted prices|Aperçu des prix convertis|Reba ibiciro byavunjwe
+Review the conversion, then edit individual product prices if needed.|Vérifiez la conversion, puis ajustez les prix des produits si nécessaire.|Suzuma ivunjisha, hanyuma uhindure ibiciro by'ibicuruzwa niba bikenewe.
+Confirm currency change|Confirmer le changement de devise|Emeza ihindurwa ry'ifaranga
+Enable the currency and add its current exchange rate first. Refresh if the rate or default changed.|Activez la devise et ajoutez son taux de change actuel. Actualisez si le taux ou la devise par défaut a changé.|Banza wemeze ifaranga kandi ushyireho igipimo cy'ivunjisha. Ongera ufungure niba igipimo cyangwa ifaranga byahindutse.
 `;
 export const messages:Record<Locale,Record<string,string>>={en:{},fr:{},rw:{}};
-for(const line of rows.trim().split("\n").filter(line=>line.trim())){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}
+for(const line of (rows+currencyRows).trim().split("\n").filter(line=>line.trim())){const [en,fr,rw]=line.split("|");messages.en[en]=en;messages.fr[en]=fr;messages.rw[en]=rw;}
 for(const [old,key] of Object.entries({reservations:"Reservations",availability:"Check availability",adults:"Adults",children:"Children",preview:"Preview order",confirm:"Approve"}))for(const locale of locales)messages[locale][old]=messages[locale][key];
 
 

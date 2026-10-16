@@ -2,19 +2,36 @@
 import {FormEvent,useEffect,useState} from "react";
 import {useLocale} from "@/components/LocaleProvider";
 import {loginDestination} from "@/lib/navigation";
+import DefaultCurrencySettings from "./DefaultCurrencySettings";
 
 type Row=Record<string,unknown>;
-export default function CommerceConfiguration({businessId,baseCurrency}:{businessId:string;baseCurrency:string}) {
+export default function CommerceConfiguration({businessId,baseCurrency,onBaseCurrencyChange}:{businessId:string;baseCurrency:string;onBaseCurrencyChange:(currency:string)=>void}) {
  const {t}=useLocale();
  const [tab,setTab]=useState("currencies");
  const [rows,setRows]=useState<Row[]>([]),[branches,setBranches]=useState<Row[]>([]);
  const [message,setMessage]=useState(""),[busy,setBusy]=useState(false),[editing,setEditing]=useState<Row|null>(null);
  const [assigned,setAssigned]=useState<string[]>([]);
  const [selectedRoles,setSelectedRoles]=useState<string[]>(["CASHIER"]);
+ const [baseSettings,setBaseSettings]=useState<{currency:string;locked:boolean}|null>(null);
+ const [selectedBase,setSelectedBase]=useState(baseCurrency);
+ useEffect(()=>{let cancelled=false;setBaseSettings(null);
+  api("base-currency").then(value=>{if(!cancelled){setBaseSettings(value);setSelectedBase(value.currency)}}).catch(()=>{if(!cancelled)setMessage("Unable to load data")});
+  return()=>{cancelled=true};
+ },[businessId]);
+ async function saveBaseCurrency(e:FormEvent<HTMLFormElement>) {
+  e.preventDefault();setBusy(true);setMessage("");
+  try {
+   const value=await api("base-currency",{currency:selectedBase.trim().toUpperCase()});
+   setBaseSettings(value);setSelectedBase(value.currency);onBaseCurrencyChange(value.currency);
+   setRows(await api(tab));setMessage("Configuration saved.");
+  }catch(e){setMessage(e instanceof Error?e.message:"Unable to load data");
+   try{setBaseSettings(await api("base-currency"))}catch{/* Keep editing disabled if the request cannot be verified. */setBaseSettings(null)}
+  }finally{setBusy(false)}
+ }
  async function api(path:string,data?:unknown) {
   const res=await fetch(`/api/commerce/businesses/${businessId}/${path}`,{method:data===undefined?"GET":"POST",cache:"no-store",headers:data===undefined?{}:{"Content-Type":"application/json"},body:data===undefined?undefined:JSON.stringify(data)});
   if(res.status===401) window.location.replace(loginDestination("/commerce",true));
-  if(!res.ok) throw new Error(res.status===409?"The change conflicts with existing records. Review the current configuration.":res.status===400?"Please check the information you entered and try again.":"You don't have permission to perform this action.");
+  if(!res.ok) throw new Error(res.status===409?(path==="base-currency"?"Base currency is locked because business records already exist.":"The change conflicts with existing records. Review the current configuration."):res.status===400?"Please check the information you entered and try again.":"You don't have permission to perform this action.");
   return res.json();
  }
  useEffect(()=>{let cancelled=false;setRows([]);setEditing(null);setMessage("");setAssigned([]);setSelectedRoles(["CASHIER"]);
@@ -31,7 +48,7 @@ export default function CommerceConfiguration({businessId,baseCurrency}:{busines
     data=editing?{roles:selectedRoles,active:fd.get("active")==="on",branches:assigned}:{email:value("email"),name:value("name"),temporaryPassword:value("password"),roles:selectedRoles,branches:assigned};
     if(editing) path+=`/${editing.user_id}/update`;
    }
-   await api(path,data);form.reset();setEditing(null);setAssigned([]);setSelectedRoles(["CASHIER"]);setRows(await api(tab));setMessage("Configuration saved.");
+   await api(path,data);form.reset();setEditing(null);setAssigned([]);setSelectedRoles(["CASHIER"]);setRows(await api(tab));setBaseSettings(await api("base-currency"));setMessage("Configuration saved.");
   }catch(e){setMessage(e instanceof Error?e.message:"Unable to load data")}finally{setBusy(false)}
  }
  const field="mt-1 block w-full rounded border border-slate-300 bg-white p-2";
@@ -39,8 +56,14 @@ export default function CommerceConfiguration({businessId,baseCurrency}:{busines
  const columns=tab==="currencies"?["currency","decimal_places","active"]:tab==="exchange-rates"?["currency","rate_to_base","effective_at","source"]:tab==="employees"?["full_name","email","roles","status"]:["action","detail","created_at"];
  const labels:Record<string,string>={currency:t("Currency"),decimal_places:t("Decimal places"),active:t("Active"),rate_to_base:t("Exchange rate"),effective_at:t("Effective date"),source:t("Source"),full_name:t("Name"),email:t("Email"),role:t("Role"),roles:t("Roles"),status:t("Status"),action:t("Action"),detail:t("Details"),created_at:t("Date")};
  return <section className="space-y-4 rounded-xl border bg-white p-5">
+  <DefaultCurrencySettings businessId={businessId} refreshKey={tab+message}/>
   <nav className="flex flex-wrap gap-2">{tabs.map(x=><button type="button" disabled={busy} key={x.id} onClick={()=>setTab(x.id)} className={`rounded px-3 py-2 ${tab===x.id?"bg-emerald-700 text-white":"bg-slate-100"}`}>{x.label}</button>)}</nav>
-  <p className="text-sm text-slate-600">{t("Base currency")}: {baseCurrency}. {t("The base accounting currency is fixed after provisioning.")}</p>
+  <form onSubmit={saveBaseCurrency} className="space-y-3 rounded border p-4">
+   <label className="block font-medium">{t("Accounting base currency")}<input aria-label={t("Accounting base currency")} className={field} value={selectedBase} onChange={e=>setSelectedBase(e.target.value.toUpperCase())} required pattern="[A-Za-z]{3}" maxLength={3} list="commerce-base-currencies" disabled={busy||!baseSettings||baseSettings.locked}/></label>
+   <datalist id="commerce-base-currencies">{["RWF","USD","EUR","GBP","KES","UGX","TZS","BIF","CDF"].map(code=><option key={code} value={code}/>)}</datalist>
+   <p className="text-sm text-slate-600">{t(baseSettings?.locked?"Base currency is locked because business records already exist.":"Choose your accounting and default transaction currency before adding products, exchange rates or financial records.")}</p>
+   {!baseSettings?.locked&&<button disabled={busy||!baseSettings||selectedBase===baseSettings.currency} className="rounded bg-emerald-700 px-4 py-2 text-white disabled:opacity-50">{t("Save base currency")}</button>}
+  </form>
   {message&&<p role="status" className="rounded bg-amber-50 p-3">{t(message)}</p>}
   {tab!=="configuration-audit"&&<form key={`${tab}-${editing?.user_id??"new"}`} onSubmit={submit} className="grid gap-3 rounded border p-4 md:grid-cols-2">
    {(tab==="currencies"||tab==="exchange-rates")&&<label>{t("Currency")}<input className={field} name="currency" required pattern="[A-Za-z]{3}" maxLength={3} placeholder="USD"/></label>}
