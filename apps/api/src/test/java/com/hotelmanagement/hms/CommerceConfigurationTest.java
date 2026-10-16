@@ -31,6 +31,44 @@ class CommerceConfigurationTest {
     @Autowired PlatformTransactionManager transactions;
     record Tenant(UUID actor,UUID business,UUID branch,UUID location,UUID product) {}
     UUID user(){return users.createAccount(UUID.randomUUID()+"@example.test","commerce isolated passphrase","Employee",null,"en").getId();}
+    UUID emptyBusiness(UUID owner){
+        UUID business=UUID.randomUUID();
+        db.update("INSERT INTO commerce_businesses(id,name,base_currency) VALUES(?,'Currency setup','RWF')",business);
+        db.update("INSERT INTO commerce_memberships(business_id,user_id,role) VALUES(?,?,'OWNER')",business,owner);
+        db.update("INSERT INTO commerce_entitlements(business_id,module,enabled) VALUES(?,'CORE',true)",business);
+        return business;
+    }
+    @Test void ownerCanChooseBaseBeforeUseAndRetryWithoutDuplicateAudit(){
+        UUID actor=user(),business=emptyBusiness(actor);
+        assertEquals(false,config.baseCurrencySettings(actor,business).get("locked"));
+        assertThrows(ApiException.class,()->config.setBaseCurrency(actor,business,"BAD"));
+        config.configureCurrency(actor,business,"USD",false);
+        assertEquals("USD",config.setBaseCurrency(actor,business," usd ").get("currency"));
+        config.setBaseCurrency(actor,business,"USD");
+        assertEquals(true,db.queryForObject("SELECT active FROM commerce_currencies WHERE business_id=? AND currency='USD'",Boolean.class,business));
+        assertEquals(1,db.queryForObject("SELECT count(*) FROM commerce_configuration_audit WHERE business_id=? AND action='BASE_CURRENCY_CHANGED'",Integer.class,business));
+        var quote=config.quote(actor,business,"USD",new BigDecimal("1.23"),java.time.OffsetDateTime.now());
+        assertEquals("USD",quote.baseCurrency());amount("1",quote.rateToBase());amount("1.23",quote.baseAmount());
+    }
+    @Test void baseCurrencyRejectsOtherTenantsAndStaff(){
+        var t=tenant();UUID other=user(),business=emptyBusiness(t.actor);
+        assertThrows(ApiException.class,()->config.baseCurrencySettings(other,business));
+        assertThrows(ApiException.class,()->config.setBaseCurrency(other,business,"USD"));
+        db.update("INSERT INTO commerce_memberships(business_id,user_id,role) VALUES(?,?,'MANAGER')",business,other);
+        assertThrows(ApiException.class,()->config.setBaseCurrency(other,business,"USD"));
+        assertEquals("RWF",config.baseCurrencySettings(t.actor,business).get("currency"));
+    }
+    @Test void existingProductsAndExchangeRatesLockBaseCurrency(){
+        var t=tenant();
+        assertEquals(true,config.baseCurrencySettings(t.actor,t.business).get("locked"));
+        assertThrows(ApiException.class,()->config.setBaseCurrency(t.actor,t.business,"USD"));
+        assertEquals("RWF",config.setBaseCurrency(t.actor,t.business,"RWF").get("currency"));
+        UUID business=emptyBusiness(t.actor);
+        config.configureCurrency(t.actor,business,"USD",true);
+        config.rate(t.actor,business,"USD",new BigDecimal("1400"),java.time.OffsetDateTime.now(),"Test rate");
+        assertThrows(ApiException.class,()->config.setBaseCurrency(t.actor,business,"USD"));
+        assertEquals("RWF",config.baseCurrencySettings(t.actor,business).get("currency"));
+    }
     Tenant tenant(){
         UUID actor=user(),business=UUID.randomUUID();
         db.update("INSERT INTO commerce_businesses(id,name,base_currency) VALUES(?,'Commerce test','RWF')",business);

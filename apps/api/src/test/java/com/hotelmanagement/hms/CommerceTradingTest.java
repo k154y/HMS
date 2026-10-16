@@ -28,6 +28,60 @@ class CommerceTradingTest {
     @Autowired CommerceStockService stock;@Autowired PlatformTransactionManager transactions;
     @Autowired com.hotelmanagement.hms.platform.service.KbpProvisioningService provisioning;
     @Autowired CommerceTradingController controller;
+    @Test void ownerCanEditAndDeactivateAccountsWithoutChangingCurrencyOrHistory(){
+        var t=tenant();UUID command=key();
+        var update=new CommerceTradingService.AccountUpdate(command,"Renamed bank","Account 123",false);
+        trading.updateAccount(t.actor,t.business,t.bank,update);trading.updateAccount(t.actor,t.business,t.bank,update);
+        var account=db.queryForMap("SELECT name,reference,active,currency FROM commerce_payment_accounts WHERE id=?",t.bank);
+        assertEquals("Renamed bank",account.get("name"));assertEquals(false,account.get("active"));assertEquals("RWF",account.get("currency"));
+        assertThrows(ApiException.class,()->trading.updateAccount(user(),t.business,t.bank,new CommerceTradingService.AccountUpdate(key(),"Wrong",null,true)));
+        trading.updateAccount(t.actor,t.business,t.bank,new CommerceTradingService.AccountUpdate(key(),"Renamed bank","Account 123",true));
+        assertEquals(true,db.queryForObject("SELECT active FROM commerce_payment_accounts WHERE id=?",Boolean.class,t.bank));
+    }
+    @Test void accountMethodAndCurrencyCanChangeOnlyBeforeActivity(){
+        var t=tenant();
+        config.configureCurrency(t.actor,t.business,"USD",true);
+        config.rate(t.actor,t.business,"USD",n("2"),OffsetDateTime.now().minusSeconds(1),"Test rate");
+        var update=new CommerceTradingService.AccountUpdate(key(),"Mobile USD","123",true,"MOBILE_MONEY","USD");
+        trading.updateAccount(t.actor,t.business,t.bank,update);
+        trading.updateAccount(t.actor,t.business,t.bank,update);
+        var account=db.queryForMap("SELECT method,currency FROM commerce_payment_accounts WHERE id=?",t.bank);
+        assertEquals("MOBILE_MONEY",account.get("method"));assertEquals("USD",account.get("currency"));
+        UUID doc=post(t,"SALE","1");
+        trading.settle(t.actor,t.business,new CommerceTradingService.Settlement(key(),doc,new CommerceTradingService.Tender(t.bank,n("10"),null,null),false));
+        assertEquals(true,trading.accounts(t.actor,t.business).stream().filter(a->a.get("id").equals(t.bank)).findFirst().orElseThrow().get("used"));
+        assertThrows(ApiException.class,()->trading.updateAccount(t.actor,t.business,t.bank,new CommerceTradingService.AccountUpdate(key(),"Bank","123",true,"BANK","USD")));
+        assertThrows(ApiException.class,()->trading.updateAccount(t.actor,t.business,t.bank,new CommerceTradingService.AccountUpdate(key(),"Mobile RWF","123",true,"MOBILE_MONEY","RWF")));
+        trading.updateAccount(t.actor,t.business,t.bank,new CommerceTradingService.AccountUpdate(key(),"Renamed mobile","456",true,"MOBILE_MONEY","USD"));
+        assertEquals("USD",db.queryForObject("SELECT currency FROM commerce_payment_accounts WHERE id=?",String.class,t.bank));
+    }
+    @Autowired CommercePricingService pricing;
+    @Test void defaultCurrencyConvertsEditablePricesWithoutRevaluingHistory(){
+        var t=tenant();UUID old=(UUID)trading.invoice(t.actor,t.business,invoice(t,"SALE","1",key())).get("id");
+        var original=db.queryForMap("SELECT currency,total,base_total FROM commerce_documents WHERE id=?",old);
+        var stockBefore=db.queryForMap("SELECT quantity,inventory_value FROM commerce_stock_balances WHERE business_id=? AND product_id=?",t.business,t.product);
+        config.configureCurrency(t.actor,t.business,"USD",true);
+        config.rate(t.actor,t.business,"USD",n("2"),OffsetDateTime.now().minusSeconds(1),"Test conversion");
+        var preview=pricing.preview(t.actor,t.business,"USD");assertEquals("RWF",preview.get("previousCurrency"));
+        pricing.choose(t.actor,t.business,"USD","RWF",n("2"));pricing.choose(t.actor,t.business,"USD","RWF",n("2"));
+        assertEquals("USD",pricing.settings(t.actor,t.business).currency());
+        assertEquals("RWF",ledger.base(t.business));
+        assertEquals(original,db.queryForMap("SELECT currency,total,base_total FROM commerce_documents WHERE id=?",old));
+        assertEquals(stockBefore,db.queryForMap("SELECT quantity,inventory_value FROM commerce_stock_balances WHERE business_id=? AND product_id=?",t.business,t.product));
+        amount("20",db.queryForObject("SELECT retail_price FROM commerce_products WHERE id=?",BigDecimal.class,t.product));
+        var update=new CommerceCatalogService.ProductUpdate("Product",null,null,null,n("5"),n("12"),null,n("0"),n("0"),false,true,n("0"),true);
+        pricing.save(t.actor,t.business,t.product,"USD",n("2"),new CommerceCatalogController.NewProduct("SKU","unit",update,null,null));
+        amount("24",db.queryForObject("SELECT retail_price FROM commerce_products WHERE id=?",BigDecimal.class,t.product));
+        var sale=new CommerceTradingService.Invoice(key(),"SALE",t.location,t.customer,"USD",null,null,false,List.of(new CommerceTradingService.Line(t.product,"unit",n("1"),null,null,null)),List.of());
+        UUID fresh=(UUID)trading.invoice(t.actor,t.business,sale).get("id");
+        amount("12",db.queryForObject("SELECT total FROM commerce_documents WHERE id=?",BigDecimal.class,fresh));
+        amount("24",db.queryForObject("SELECT base_total FROM commerce_documents WHERE id=?",BigDecimal.class,fresh));
+        assertThrows(ApiException.class,()->config.configureCurrency(t.actor,t.business,"USD",false));
+        assertThrows(ApiException.class,()->pricing.choose(user(),t.business,"RWF","USD",n("1")));
+        config.rate(t.actor,t.business,"USD",n("3"),OffsetDateTime.now(),"New rate");
+        assertThrows(ApiException.class,()->pricing.save(t.actor,t.business,t.product,"USD",n("2"),new CommerceCatalogController.NewProduct("SKU","unit",update,null,null)));
+        assertThrows(ApiException.class,()->pricing.choose(t.actor,t.business,"USD","USD",n("2")));
+    }
     void as(UUID actor){org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(new org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken(org.springframework.security.oauth2.jwt.Jwt.withTokenValue("test").header("alg","HS256").subject(actor.toString()).build(),List.of()));}
     @AfterEach void clear(){org.springframework.security.core.context.SecurityContextHolder.clearContext();}
     record Tenant(UUID actor,UUID business,UUID branch,UUID location,UUID product,UUID customer,UUID supplier,UUID bank) {}

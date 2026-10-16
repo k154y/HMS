@@ -48,6 +48,31 @@ public class CommerceTradingService {
     public record Return(@NotNull UUID requestId,@NotNull UUID documentId,@NotNull UUID lineId,@NotNull BigDecimal quantity,boolean saleable,@NotBlank String reason) {}
     public record Party(@NotNull UUID requestId,@NotBlank String kind,@NotBlank String name,String contact,@NotNull BigDecimal creditLimit) {}
     public record Account(@NotNull UUID requestId,@NotBlank String name,@NotBlank String method,@NotBlank String currency,String reference) {}
+    public record AccountUpdate(@NotNull UUID requestId,@NotBlank String name,String reference,@NotNull Boolean active,String method,String currency) {
+        public AccountUpdate(UUID requestId,String name,String reference,Boolean active){this(requestId,name,reference,active,null,null);}
+    }
+    private static final String ACCOUNT_USED = """
+        (EXISTS(SELECT 1 FROM commerce_payments p WHERE p.business_id=a.business_id AND p.payment_account_id=a.id)
+        OR EXISTS(SELECT 1 FROM commerce_shifts s WHERE s.business_id=a.business_id AND s.payment_account_id=a.id)
+        OR EXISTS(SELECT 1 FROM commerce_expenses e WHERE e.business_id=a.business_id AND e.payment_account_id=a.id)
+        OR EXISTS(SELECT 1 FROM commerce_journal_lines j WHERE j.business_id=a.business_id AND j.payment_account_id=a.id))
+        """;
+    public Map<String,Object> updateAccount(UUID actor,UUID business,UUID account,AccountUpdate p){
+        write(actor,business,"OWNER");text(p.name(),200,true);text(p.reference(),200,false);
+        var current=one("SELECT a.*, "+ACCOUNT_USED+" AS used FROM commerce_payment_accounts a WHERE a.business_id=? AND a.id=?",business,account);
+        var cmd=ledger.command(actor,business,p.requestId(),"PAYMENT_ACCOUNT_UPDATE",Map.of("account",account,"update",p));if(cmd.replayed())return result(cmd);
+        String method=p.method()==null?(String)current.get("method"):p.method();
+        String currency=p.currency()==null?(String)current.get("currency"):p.currency();
+        if(!Set.of("CASH","BANK","MOBILE_MONEY","CARD").contains(method))throw invalid("Invalid payment method.");
+        boolean denominationChanged=!method.equals(current.get("method"))||!currency.equals(current.get("currency"));
+        if(denominationChanged&&Boolean.TRUE.equals(current.get("used")))
+            throw new ApiException(409,"ACCOUNT_HAS_HISTORY","Payment method and currency cannot change after account activity. Create another account.");
+        if(!currency.equals(current.get("currency")))currencies.quote(actor,business,currency,BigDecimal.ZERO,OffsetDateTime.now());
+        if(!p.active()&&Boolean.TRUE.equals(db.queryForObject("SELECT EXISTS(SELECT 1 FROM commerce_shifts WHERE business_id=? AND payment_account_id=? AND closed_at IS NULL)",Boolean.class,business,account)))
+            throw new ApiException(409,"ACCOUNT_SHIFT_OPEN","Close the cashier shift before deactivating this account.");
+        db.update("UPDATE commerce_payment_accounts SET name=?,reference=?,active=?,method=?,currency=? WHERE business_id=? AND id=?",p.name().strip(),p.reference(),p.active(),method,currency,business,account);
+        return result(cmd);
+    }
     public record PartyUpdate(@NotNull UUID requestId,@NotBlank String name,String contact,@NotNull BigDecimal creditLimit,boolean active) {}
     private record Priced(Line input,Map<String,Object> product,String unit,BigDecimal quantity,BigDecimal standard,BigDecimal price,BigDecimal discount,BigDecimal net,BigDecimal tax,BigDecimal baseNet,BigDecimal baseTax) {}
     private String role(UUID actor,UUID business,String... allowed){return access.permittedRole(actor,business,"ACCOUNTING",allowed);}
@@ -89,7 +114,7 @@ public class CommerceTradingService {
         currencies.quote(actor,business,p.currency(),BigDecimal.ZERO,OffsetDateTime.now());
         db.update("INSERT INTO commerce_payment_accounts(id,business_id,name,method,currency,reference) VALUES(?,?,?,?,?,?)",cmd.id(),business,p.name().strip(),p.method(),p.currency(),p.reference());return result(cmd);
     }
-    public List<Map<String,Object>> accounts(UUID actor,UUID business){role(actor,business,"OWNER","MANAGER","ACCOUNTANT","CASHIER","VIEWER");return db.queryForList("SELECT id,name,method,currency,reference,active FROM commerce_payment_accounts WHERE business_id=? ORDER BY name",business);}
+    public List<Map<String,Object>> accounts(UUID actor,UUID business){role(actor,business,"OWNER","MANAGER","ACCOUNTANT","CASHIER","VIEWER");return db.queryForList("SELECT a.id,a.name,a.method,a.currency,a.reference,a.active, "+ACCOUNT_USED+" AS used FROM commerce_payment_accounts a WHERE a.business_id=? ORDER BY a.name",business);}
     private Map<String,Object> document(UUID actor,UUID business,UUID document,boolean active){
         var row=one("SELECT * FROM commerce_documents WHERE business_id=? AND id=?",business,document);
         access.location(actor,business,id(row,"location_id"),"ACCOUNTING",active);
