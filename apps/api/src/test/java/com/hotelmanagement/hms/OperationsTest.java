@@ -39,6 +39,46 @@ class OperationsTest {
   var b=tenant();assertThrows(org.springframework.security.access.AccessDeniedException.class,()->reservations.get(a.hotel(),a.branch(),first.id()));
   assertThrows(com.hotelmanagement.hms.shared.web.ApiException.class,()->reservations.get(b.hotel(),b.branch(),first.id()));
  }
+ @Test void customNightlyRateSurvivesReschedulingAndPriceChangesAtCheckIn() {
+  var a=tenant();var c=customer(a);var room=room(a,"RATE");var date=java.time.LocalDate.now();
+  var request=new com.hotelmanagement.hms.reservation.dto.ReservationRequest(c.id(),date,date.plusDays(2),
+    List.of(new com.hotelmanagement.hms.reservation.dto.ReservationRequest.RoomBooking(room.id(),1,0,new BigDecimal("9000"),List.of())),null);
+  var reservation=reservations.create(a.hotel(),a.branch(),request);
+  rooms.rate(a.hotel(),a.branch(),room.roomTypeId(),new BigDecimal("12000"));
+  jdbc.update("update rooms set nightly_rate=13000 where id=?",room.id());
+  reservations.update(a.hotel(),a.branch(),reservation.id(),new com.hotelmanagement.hms.reservation.dto.ReservationUpdateRequest(date,date.plusDays(3)));
+  assertEquals(0,new BigDecimal("27000").compareTo(reservations.paymentSummary(a.hotel(),a.branch(),reservation.id()).reservationTotal()));
+  stays.checkIn(a.hotel(),a.branch(),reservation.id());
+  assertEquals(0,new BigDecimal("27000").compareTo(folios.get(a.hotel(),a.branch(),reservation.folioId()).balance()));
+ }
+ @Test void legacyRoomAvailabilityAndReservationUseTypeFallbackAndSnapshotIt() {
+  var a=tenant();var c=customer(a);var room=room(a,"LEGACY");var date=java.time.LocalDate.now();
+  jdbc.update("update rooms set nightly_rate=null where id=?",room.id());
+  assertEquals(0,new BigDecimal("10000").compareTo(reservations.available(a.hotel(),a.branch(),date,date.plusDays(2),1,0,0,50).content().getFirst().nightlyRate()));
+  var reservation=reservations.create(a.hotel(),a.branch(),booking(c.id(),room.id(),date,date.plusDays(2)));
+  rooms.rate(a.hotel(),a.branch(),room.roomTypeId(),new BigDecimal("12000"));
+  stays.checkIn(a.hotel(),a.branch(),reservation.id());
+  assertEquals(0,new BigDecimal("20000").compareTo(folios.get(a.hotel(),a.branch(),reservation.folioId()).balance()));
+ }
+ @Test void invalidCustomRatesCannotBeRoundedIntoValidReservations() {
+  var a=tenant();var c=customer(a);var room=room(a,"INVALID");var date=java.time.LocalDate.now();
+  for(String rate:List.of("-1","-0.00001","1.00001","1000000000000000")) {
+   var request=new com.hotelmanagement.hms.reservation.dto.ReservationRequest(c.id(),date,date.plusDays(2),
+    List.of(new com.hotelmanagement.hms.reservation.dto.ReservationRequest.RoomBooking(room.id(),1,0,new BigDecimal(rate),List.of())),null);
+   assertThrows(IllegalArgumentException.class,()->reservations.create(a.hotel(),a.branch(),request));
+  }
+  assertEquals(0,jdbc.queryForObject("select count(*) from reservations where hotel_id=?",Integer.class,a.hotel()));
+ }
+ @Test void customRateCannotBypassRoomBranchOrTenantOwnership() {
+  var a=tenant();var c=customer(a);var room=room(a,"SCOPED");var date=java.time.LocalDate.now();
+  var other=hotels.createBranch(a.actor(),a.hotel(),new CreateBranchRequest("OTHER","Other",null,null,null,null));
+  var request=new com.hotelmanagement.hms.reservation.dto.ReservationRequest(c.id(),date,date.plusDays(2),
+    List.of(new com.hotelmanagement.hms.reservation.dto.ReservationRequest.RoomBooking(room.id(),1,0,new BigDecimal("9000"),List.of())),null);
+  assertThrows(com.hotelmanagement.hms.shared.web.ApiException.class,()->reservations.create(a.hotel(),other.id(),request));
+  var b=tenant();
+  assertThrows(org.springframework.security.access.AccessDeniedException.class,()->reservations.create(a.hotel(),a.branch(),request));
+  assertThrows(com.hotelmanagement.hms.shared.web.ApiException.class,()->reservations.create(b.hotel(),b.branch(),request));
+ }
  @Test void concurrentBookingsCannotOverlap() throws Exception {
   var a=tenant();var c=customer(a);var r=room(a,"201");var date=java.time.LocalDate.now().plusDays(10);
   var request=booking(c.id(),r.id(),date,date.plusDays(2));

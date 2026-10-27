@@ -43,6 +43,21 @@ class ApiErrorContractTest {
         assertTrue(body.path("fieldErrors").toString().contains("Check-in date is required."));
         assertTrue(body.path("fieldErrors").toString().contains("Check-out date is required."));
     }
+    @Test void reservationRateIsOptionalAndNestedInvalidAmountsReturnSafe400() throws Exception {
+        String template="""
+            {"bookingCustomerId":"11111111-1111-1111-1111-111111111111","checkIn":"2027-01-01","checkOut":"2027-01-03",
+             "adults":1,"children":0,"rooms":[{"roomId":"22222222-2222-2222-2222-222222222222","adults":1,"children":0%s}]}
+            """;
+        for(String field:java.util.List.of("",",\"rate\":null",",\"rate\":\"9000.1234\"")) {
+            var response=mvc.perform(post("/validation").contentType("application/json").content(template.formatted(field))).andReturn().getResponse();
+            assertEquals(200,response.getStatus(),response.getContentAsString());
+        }
+        for(String rate:java.util.List.of("-1","-0.00001","1.00001","1000000000000000","not-a-number")) {
+            var response=mvc.perform(post("/validation").contentType("application/json").content(template.formatted(",\"rate\":\""+rate+"\""))).andReturn().getResponse();
+            assertEquals(400,response.getStatus());
+            assertEquals("VALIDATION_FAILED",json.readTree(response.getContentAsString()).path("code").asString());
+        }
+    }
     @Test void statusesAndSafeMessagesAreStable() throws Exception {
         for(var item:java.util.Map.of("business",409,"auth",401,"permission",403,"missing",404,"resource",404,"state",500,"input",400).entrySet()) {
             var response=mvc.perform(get("/error/"+item.getKey())).andReturn().getResponse();
