@@ -1086,6 +1086,24 @@ Base currency is locked because business records already exist.|La devise de bas
 Choose your accounting and default transaction currency before adding products, exchange rates or financial records.|Choisissez votre devise comptable et par défaut avant d'ajouter des produits, des taux de change ou des données financières.|Hitamo ifaranga shingiro mbere yo kwandika ibicuruzwa, ibipimo by'ivunjisha cyangwa amakuru y'imari.
 `;
 const currencyRows=`
+Reservation actions|Actions de réservation|Ibikorwa byo kubika icyumba
+Back to reservations|Retour aux réservations|Subira ku byumba byabitswe
+Stay dates|Dates du séjour|Amatariki yo gucumbika
+Check availability before choosing rooms.|Vérifiez les disponibilités avant de choisir les chambres.|Reba ibyumba bihari mbere yo guhitamo.
+Customer details|Informations du client|Amakuru y'umukiriya
+Choose rooms|Choisir les chambres|Hitamo ibyumba
+Selected rooms|Chambres sélectionnées|Ibyumba byatoranyijwe
+Available rooms will appear after checking your dates.|Les chambres disponibles apparaîtront après vérification des dates.|Ibyumba bihari biragaragara nyuma yo kugenzura amatariki.
+Reservation summary|Résumé de la réservation|Incamake y'icyumba kibitswe
+
+Configured rate|Tarif configuré|Igiciro cyashyizweho
+Hotel currency|Devise de l'hôtel|Ifaranga rya hoteli
+night|nuit|ijoro
+Custom room rate (optional)|Tarif personnalisé de la chambre (facultatif)|Igiciro cyihariye cy'icyumba (si itegeko)
+Leave empty to use the configured rate.|Laissez vide pour utiliser le tarif configuré.|Hasige ubusa kugira ngo ukoreshe igiciro cyashyizweho.
+Enter a nonnegative amount with up to 15 digits and 4 decimal places.|Saisissez un montant positif ou nul avec au maximum 15 chiffres entiers et 4 décimales.|Andika amafaranga atari munsi ya zeru, afite imibare itarenze 15 n'imibare 4 nyuma y'akitso.
+Effective nightly rate|Tarif par nuit appliqué|Igiciro cy'ijoro gikoreshwa
+
 Edit payment account|Modifier le compte de paiement|Hindura konti yo kwishyuriraho
 Create payment account|Créer un compte de paiement|Kora konti yo kwishyuriraho
 Payment method and currency are locked after account activity. Create another account to use a different method or currency.|Le mode de paiement et la devise sont verrouillés après utilisation du compte. Créez un autre compte pour un mode ou une devise différent.|Uburyo bwo kwishyura n'ifaranga ntibihinduka iyo konti yakoreshejwe. Kora indi konti kugira ngo ukoreshe ubundi buryo cyangwa irindi faranga.
