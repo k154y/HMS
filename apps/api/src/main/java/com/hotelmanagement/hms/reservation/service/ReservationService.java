@@ -117,6 +117,13 @@ public class ReservationService {
             }
 
 
+            if (allocation.rate() != null
+                    && (allocation.rate().signum() < 0
+                    || allocation.rate().scale() > 4
+                    || allocation.rate().precision() - allocation.rate().scale() > 15)) {
+                throw new IllegalArgumentException("Invalid nightly rate.");
+            }
+
             adults +=
                     allocation.adults();
 
@@ -457,7 +464,10 @@ public class ReservationService {
                         )
                 )
                 .map(
-                        com.hotelmanagement.hms.room.dto.RoomResponse::from
+                        room -> com.hotelmanagement.hms.room.dto.RoomResponse.from(room,
+                        room.getNightlyRate() != null ? room.getNightlyRate() : roomTypes
+                                .findByIdAndHotelIdAndBranchId(room.getRoomTypeId(), hotel, branch)
+                                .orElseThrow(ApiException::notFound).getDefaultRate())
                 )
         );
     }
