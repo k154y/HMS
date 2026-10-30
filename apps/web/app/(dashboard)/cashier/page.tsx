@@ -225,7 +225,6 @@ function paymentCurrency(
 function paymentPurposeLabel(
   payload: ApprovalPayload,
 ) {
-
   if (
     payload.paymentPurpose
     === "RESERVATION_ADVANCE"
@@ -233,9 +232,22 @@ function paymentPurposeLabel(
     return "Reservation advance";
   }
 
-  return paymentPurposeLabel(payload);
-}
+  if (
+    payload.collectionScope
+    === "ROOM"
+  ) {
+    return "Room charges";
+  }
 
+  if (
+    payload.collectionScope
+    === "FOOD"
+  ) {
+    return "Food and services";
+  }
+
+  return "Payment";
+}
 
 type SessionProfile = {
   id?: string;

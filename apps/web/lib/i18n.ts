@@ -1086,6 +1086,31 @@ Base currency is locked because business records already exist.|La devise de bas
 Choose your accounting and default transaction currency before adding products, exchange rates or financial records.|Choisissez votre devise comptable et par défaut avant d'ajouter des produits, des taux de change ou des données financières.|Hitamo ifaranga shingiro mbere yo kwandika ibicuruzwa, ibipimo by'ivunjisha cyangwa amakuru y'imari.
 `;
 const currencyRows=`
+Review recent guest and company accounts, then open a folio to manage billing.|Consultez les comptes récents des clients et sociétés, puis ouvrez un folio pour gérer la facturation.|Reba konti ziheruka z'abashyitsi n'ibigo, ufungure foliyo kugira ngo ucunge kwishyura.
+Recent folios|Folios récents|Foliyo ziheruka
+Search accounts|Rechercher des comptes|Shakisha konti
+Filter accounts|Filtrer les comptes|Yungurura konti
+Showing recent folios available for this branch. Summaries cover these records only.|Les folios récents disponibles pour cette succursale sont affichés. Les résumés concernent uniquement ces données.|Hagaragara foliyo ziheruka ziboneka muri iri shami. Incamake ireba aya makuru gusa.
+No matching accounts.|Aucun compte correspondant.|Nta konti ihuye n'ibishakishwa.
+Billed to|Facturé à|Uwishyura
+Recent billing history|Historique récent de facturation|Amateka aheruka yo kwishyura
+Folio reference|Référence du folio|Ikiranga foliyo
+Folio views|Vues du folio|Uburyo bwo kureba foliyo
+Search transactions|Rechercher des transactions|Shakisha ibikorwa by'imari
+Transaction type|Type de transaction|Ubwoko bw'igikorwa
+All types|Tous les types|Ubwoko bwose
+Transaction details|Détails de la transaction|Ibisobanuro by'igikorwa
+No matching transactions.|Aucune transaction correspondante.|Nta gikorwa gihuye n'ibishakishwa.
+All accounts|Tous les comptes|Konti zose
+Balance due|Solde dû|Amafaranga asigaye kwishyurwa
+Open folios|Folios ouverts|Foliyo zifunguye
+Credit balance|Solde créditeur|Amafaranga arenga ku yo kwishyura
+Transactions|Transactions|Ibikorwa by'imari
+Related folios|Folios associés|Foliyo bifitanye isano
+Entry reference|Référence de l'écriture|Ikiranga inyandiko
+Source reference|Référence source|Ikiranga inkomoko
+Staff reference|Référence du personnel|Ikiranga umukozi
+
 Reservation actions|Actions de réservation|Ibikorwa byo kubika icyumba
 Back to reservations|Retour aux réservations|Subira ku byumba byabitswe
 Stay dates|Dates du séjour|Amatariki yo gucumbika
